@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "517927192163",
+    "project_id": "inoutapp-cfd28",
+    "storage_bucket": "inoutapp-cfd28.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:517927192163:android:d9ce8bbd3f9b2f6185da56",
+        "android_client_info": {
+          "package_name": "com.example.untitled8"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA0LdxGRzeetaKLs_KK18aiJcAHXO1QHgk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,0 +1,116 @@
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../data/repository/login_repo.dart';
+import 'login_state.dart';
+
+class LoginCubit extends Cubit<LoginState> {
+  final AuthRepository repository;
+
+  LoginCubit({required this.repository}) : super(const LoginState.initial());
+
+  void togglePasswordVisibility() {
+    emit(state.copyWith(isPasswordVisible: !state.isPasswordVisible));
+  }
+
+  Future<void> login({
+    required String email,
+    required String password,
+  }) async {
+    emit(state.copyWith(status: LoginStatus.loading));
+
+    final result = await repository.login(email: email, password: password);
+
+    result.fold(
+      (failure) => emit(state.copyWith(
+        status: LoginStatus.failure,
+        message: failure.message,
+      )),
+      (response) {
+        if (response.token != null && response.user != null) {
+          emit(state.copyWith(
+            status: LoginStatus.success,
+            user: response.user,
+            message: 'تم تسجيل الدخول بنجاح',
+          ));
+        } else {
+          // هذا الجزء يتعامل مع حالة الفشل حيث يعود response ولكنه null token/user
+          emit(state.copyWith(
+            status: LoginStatus.failure,
+            message: response.status == 401 ? 'بيانات الاعتماد غير صحيحة' : 'فشل تسجيل الدخول',
+          ));
+        }
+      },
+    );
+  }
+
+  // Future<void> register({
+  //   required String username,
+  //   required String password,
+  //   required String email,
+  //   required String fullName,
+  //   String role = 'employee',
+  // }) async
+  // {
+  //   emit(state.copyWith(status: LoginStatus.loading));
+  //
+  //   final result = await repository.register(
+  //     username: username,
+  //     password: password,
+  //     email: email,
+  //     fullName: fullName,
+  //     role: role,
+  //   );
+  //
+  //   result.fold(
+  //     (failure) => emit(state.copyWith(
+  //       status: LoginStatus.failure,
+  //       message: failure.message,
+  //     )),
+  //     (response) {
+  //       if (response.token != null && response.user != null) {
+  //         emit(state.copyWith(
+  //           status: LoginStatus.success,
+  //           user: response.user,
+  //           message: 'تم إنشاء الحساب بنجاح',
+  //         ));
+  //       } else {
+  //         emit(state.copyWith(
+  //           status: LoginStatus.failure,
+  //           message: 'فشل إنشاء الحساب',
+  //         ));
+  //       }
+  //     },
+  //   );
+  // }
+
+  Future<void> checkAuthStatus() async {
+    final token = await repository.getToken();
+    if (token == null) {
+      emit(const LoginState.initial());
+      return;
+    }
+
+    emit(state.copyWith(status: LoginStatus.loading));
+    final isLoggedIn = await repository.isLoggedIn();
+
+    if (isLoggedIn) {
+      final user = await repository.getCurrentUser();
+      if (user != null) {
+        emit(state.copyWith(
+          status: LoginStatus.success,
+          user: user,
+          message: 'مرحباً بك مجدداً',
+        ));
+      } else {
+        emit(const LoginState.initial());
+      }
+    } else {
+      await repository.logout();
+      emit(const LoginState.initial());
+    }
+  }
+
+  Future<void> logout() async {
+    await repository.logout();
+    emit(const LoginState.initial());
+  }
+}
