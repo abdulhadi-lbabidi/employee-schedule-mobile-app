@@ -1,0 +1,17 @@
+UI
+ ↓
+LoadDashboardEvent
+ ↓
+AdminDashboardBloc
+ ↓
+GetOnlineEmployeesUseCase
+ ↓
+AdminRepository
+ ↓
+RemoteDataSource (API)
+ ↓
+EmployeeModel
+ ↓
+EmployeeEntity
+ ↓
+Bloc State → UI

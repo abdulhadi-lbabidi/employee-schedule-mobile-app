@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="LaunchTheme" parent="@android:style/Theme.Black.NoTitleBar">
+        <!-- استخدام لون أسود بدلاً من ملف مفقود لإصلاح خطأ الـ Build -->
+        <item name="android:windowBackground">@android:color/black</item>
+    </style>
+    
+    <style name="NormalTheme" parent="@android:style/Theme.Black.NoTitleBar">
+        <item name="android:windowBackground">?android:colorBackground</item>
+    </style>
+</resources>

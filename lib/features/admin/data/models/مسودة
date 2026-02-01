@@ -1,0 +1,46 @@
+GET /admin/employees/status
+{
+  "online": [
+    {
+      "id": "1",
+      "name": "Ahmed Ali",
+      "image": "https://...",
+      "location": "ورشة دمشق",
+      "hourly_rate": 5.5
+    }
+  ],
+  "offline": [
+    {
+      "id": "2",
+      "name": "Khaled Omar",
+      "image": "https://...",
+      "location": "غير متصل",
+      "hourly_rate": 6
+    }
+  ]
+}
+GET /admin/employees
+[
+  {
+    "id": "1",
+    "name": "Ahmed Ali",
+    "image": "https://...",
+    "is_online": true
+  }
+]
+GET /admin/employees/{id}
+{
+  "id": "1",
+  "name": "Ahmed Ali",
+  "image": "https://...",
+  "workshop": "ورشة دمشق",
+  "hourly_rate": 5.5,
+  "daily_hours": {
+    "2026-01-01": 8,
+    "2026-01-02": 7.5
+  }
+}
+PUT /admin/employees/{id}/hourly-rate
+{
+  "hourly_rate": 6.0
+}

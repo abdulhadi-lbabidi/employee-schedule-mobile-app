@@ -1,0 +1,74 @@
+name: untitled8
+description: "A new Flutter project."
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.8.1
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  flutter_animate:
+  smooth_page_indicator:
+  geolocator:
+  latlong2: ^0.9.1
+  vector_math:
+  flutter_bloc:
+  flutter_screenutil:
+  flutter_svg:
+  intl:
+  hive:
+  hive_flutter:
+  http:
+  url_launcher:
+  persistent_bottom_nav_bar_v2:
+  dropdown_button2:
+  dartz:
+  shared_preferences:
+  flutter_launcher_icons:
+  equatable:
+  flutter_riverpod:
+  fl_chart:
+  image_picker:
+  cupertino_icons: ^1.0.8
+  path_provider:
+  collection:
+  dio:
+  json_annotation:
+  connectivity_plus:
+  flutter_secure_storage:
+  flutter_local_notifications:
+  get_it:
+  firebase_core:
+  firebase_messaging:
+  firebase_auth:
+  cloud_firestore:
+  pdf:
+  printing:
+  flutter_map: ^7.0.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  hive_generator:
+  build_runner:
+  json_serializable:
+  flutter_lints:
+
+# 🔹 إعدادات أيقونة التطبيق الجديدة (تم تحديث الاسم لـ logoapp.png)
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/image/log/logoapp.png"
+  min_sdk_android: 21
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/image/
+    - assets/image/gif/
+    - assets/image/log/
+    - assets/icons/
