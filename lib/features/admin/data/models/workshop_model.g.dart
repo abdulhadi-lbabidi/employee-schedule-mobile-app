@@ -25,13 +25,14 @@ class WorkshopModelAdapter extends TypeAdapter<WorkshopModel> {
       radius: fields[5] as num?,
       employeeCount: fields[6] as int?,
       isArchived: fields[7] as bool?,
+      description: fields[8] as String?,
     );
   }
 
   @override
   void write(BinaryWriter writer, WorkshopModel obj) {
     writer
-      ..writeByte(8)
+      ..writeByte(9)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -47,7 +48,9 @@ class WorkshopModelAdapter extends TypeAdapter<WorkshopModel> {
       ..writeByte(6)
       ..write(obj.employeeCount)
       ..writeByte(7)
-      ..write(obj.isArchived);
+      ..write(obj.isArchived)
+      ..writeByte(8)
+      ..write(obj.description);
   }
 
   @override

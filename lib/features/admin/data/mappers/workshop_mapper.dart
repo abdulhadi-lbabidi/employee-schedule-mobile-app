@@ -6,6 +6,8 @@ class WorkshopMapper {
     return WorkshopEntity(
       id: model.id?.toString() ?? '0',
       name: model.name ?? 'Unknown',
+      location: model.location ?? 'Unknown', // 🔹 تم التحديث
+      description: model.description ?? 'No description', // 🔹 تم التحديث
       latitude: model.latitude?.toDouble(),
       longitude: model.longitude?.toDouble(),
       radiusInMeters: model.radius?.toDouble() ?? 200.0,
@@ -16,7 +18,10 @@ class WorkshopMapper {
 
   static List<WorkshopEntity> toEntityList(List<dynamic> list) {
     return list
-        .map((json) => toEntity(WorkshopModel.fromJson(json as Map<String, dynamic>)))
+        .map(
+          (json) =>
+              toEntity(WorkshopModel.fromJson(json as Map<String, dynamic>)),
+        )
         .toList();
   }
 }

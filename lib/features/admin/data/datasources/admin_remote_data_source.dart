@@ -17,6 +17,8 @@ abstract class AdminRemoteDataSource {
   Future<List<WorkshopModel>> getWorkshops();
   Future<void> addWorkshop({
     required String name,
+    required String location,
+    required String description,
     double? latitude,
     double? longitude,
     double radius,

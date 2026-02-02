@@ -7,6 +7,8 @@ class AddWorkshopUseCase {
 
   Future<void> call({
     required String name,
+    required String location,
+    required String description,
     double? latitude,
     double? longitude,
     double radius = 200,
@@ -16,6 +18,8 @@ class AddWorkshopUseCase {
       latitude: latitude,
       longitude: longitude,
       radius: radius,
+      location: location,
+      description: description,
     );
   }
 }

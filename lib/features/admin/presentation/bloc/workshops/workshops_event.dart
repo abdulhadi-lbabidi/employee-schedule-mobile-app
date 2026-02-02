@@ -3,7 +3,10 @@ abstract class WorkshopsEvent {}
 class LoadWorkshopsEvent extends WorkshopsEvent {}
 
 class AddWorkshopEvent extends WorkshopsEvent {
+
   final String name;
+  final String location;
+  final String description;
   final double? latitude;
   final double? longitude;
   final double radius;
@@ -12,7 +15,7 @@ class AddWorkshopEvent extends WorkshopsEvent {
     required this.name,
     this.latitude,
     this.longitude,
-    this.radius = 200,
+    this.radius = 200, required this.location, required this.description,
   });
 }
 

@@ -6,7 +6,7 @@ import '../../domain/entities/workshop_entity.dart';
 
 part 'workshop_model.g.dart';
 
-@HiveType(typeId: 20) // تم تغيير المعرف ليكون فريداً ومنع التداخل
+@HiveType(typeId: 20)
 class WorkshopModel {
   @HiveField(0)
   final int? id;
@@ -24,7 +24,9 @@ class WorkshopModel {
   final int? employeeCount;
   @HiveField(7)
   final bool? isArchived;
-  
+  @HiveField(8)
+  final String? description; // 🔹 حقل الوصف المضاف
+
   WorkshopModel({
     this.id,
     this.name,
@@ -34,6 +36,7 @@ class WorkshopModel {
     this.radius,
     this.employeeCount,
     this.isArchived,
+    this.description, // 🔹
   });
 
   factory WorkshopModel.fromJson(Map<String, dynamic> json) {
@@ -46,6 +49,7 @@ class WorkshopModel {
       radius: json['radius'] as num?,
       employeeCount: json['employee_count'] as int?, 
       isArchived: _safeToBool(json['is_archived']),
+      description: json['description'] as String?, // 🔹
     );
   }
 
@@ -59,13 +63,16 @@ class WorkshopModel {
       'radius': radius,
       'employee_count': employeeCount,
       'is_archived': isArchived,
+      'description': description, // 🔹
     };
   }
 
   static WorkshopEntity toEntity(WorkshopModel model) {
     return WorkshopEntity(
       id: model.id?.toString() ?? '0',
-      name: model.name ?? model.location ?? 'Unknown',
+      name: model.name ?? 'Unknown',
+      location: model.location ?? 'Unknown', // 🔹
+      description: model.description ?? 'No description', // 🔹
       latitude: model.latitude?.toDouble(),
       longitude: model.longitude?.toDouble(),
       radiusInMeters: model.radius?.toDouble() ?? 200.0,
@@ -78,7 +85,8 @@ class WorkshopModel {
     return WorkshopModel(
       id: int.tryParse(entity.id),
       name: entity.name,
-      location: entity.name,
+      location: entity.location, // 🔹
+      description: entity.description, // 🔹
       latitude: entity.latitude,
       longitude: entity.longitude,
       radius: entity.radiusInMeters,

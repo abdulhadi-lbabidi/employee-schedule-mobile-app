@@ -128,16 +128,21 @@ class AdminRepositoryImpl implements AdminRepository {
 
   @override
   Future<void> addWorkshop({
+
     required String name,
+    required String location,
+    required String description,
     double? latitude,
     double? longitude,
     double radius = 200,
-  }) {
+  }) async {
     return remote.addWorkshop(
       name: name,
       latitude: latitude,
       longitude: longitude,
       radius: radius,
+      location: location,
+      description: description,
     );
   }
 

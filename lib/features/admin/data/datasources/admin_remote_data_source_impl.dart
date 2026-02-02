@@ -167,19 +167,28 @@ class AdminRemoteDataSourceImpl implements AdminRemoteDataSource {
 
   @override
   Future<void> addWorkshop({
+
     required String name,
+    required String location,
+    required String description,
     double? latitude,
     double? longitude,
     double radius = 200,
   }) async {
     final response = await dio.postUri(
       apiVariables.addWorkshop(),
+      options: Options(
+        contentType: Headers.formUrlEncodedContentType,
+      ),
       data: {
+        'location': location,
+        'description': description,
         'name': name,
         'latitude': latitude,
         'longitude': longitude,
         'radius': radius,
       },
+
     );
 
     if (response.statusCode! >= 400) {

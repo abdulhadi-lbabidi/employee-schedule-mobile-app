@@ -45,6 +45,8 @@ class WorkshopsBloc extends Bloc<WorkshopsEvent, WorkshopsState> {
   ) async {
     try {
       await addWorkshopUseCase(
+        description: event.description,
+        location: event.location,
         name: event.name,
         latitude: event.latitude,
         longitude: event.longitude,
