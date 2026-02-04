@@ -1,19 +1,20 @@
 import 'package:dio/dio.dart';
+import 'package:injectable/injectable.dart';
 import '../../../../core/unified_api/api_variables.dart';
 
 import '../models/employee model/employee_model.dart';
 import '../models/workshop_model.dart';
 import 'admin_remote_data_source.dart';
 
+@LazySingleton(as: AdminRemoteDataSource)
 class AdminRemoteDataSourceImpl implements AdminRemoteDataSource {
   final Dio dio;
-  final ApiVariables apiVariables = ApiVariables();
 
   AdminRemoteDataSourceImpl(this.dio);
 
   @override
   Future<List<Datum>> getOnlineEmployees() async {
-    final response = await dio.getUri(apiVariables.employees());
+    final response = await dio.getUri(ApiVariables.employees());
 
     final list = response.data['data'] as List;
     return list
@@ -24,7 +25,7 @@ class AdminRemoteDataSourceImpl implements AdminRemoteDataSource {
 
   @override
   Future<List<Datum>> getAllEmployees() async {
-    final response = await dio.getUri(apiVariables.employees());
+    final response = await dio.getUri(ApiVariables.employees());
 
     if (response.statusCode == 200) {
       final list = response.data['data'] as List;
@@ -53,14 +54,14 @@ class AdminRemoteDataSourceImpl implements AdminRemoteDataSource {
 
   @override
   Future<Datum> getEmployeeDetails(String id) async {
-    final response = await dio.getUri(apiVariables.employeeDetails(id));
+    final response = await dio.getUri(ApiVariables.employeeDetails(id));
     return Datum.fromJson(response.data['data']);
   }
 
   @override
   Future<void> updateHourlyRate(String id, double rate) async {
     final response = await dio.putUri(
-      apiVariables.updateHourlyRate(id),
+      ApiVariables.updateHourlyRate(id),
       data: {'hourly_rate': rate},
     );
 
@@ -72,7 +73,7 @@ class AdminRemoteDataSourceImpl implements AdminRemoteDataSource {
   @override
   Future<void> updateOvertimeRate(String id, double rate) async {
     final response = await dio.putUri(
-      apiVariables.employeeUpdate(id),
+      ApiVariables.employeeUpdate(id),
       data: {'overtime_rate': rate},
     );
 
@@ -84,7 +85,7 @@ class AdminRemoteDataSourceImpl implements AdminRemoteDataSource {
   @override
   Future<void> confirmPayment(String id, int weekNumber) async {
     final response = await dio.postUri(
-      apiVariables.employeeUpdate(id),
+      ApiVariables.employeeUpdate(id),
       data: {'week_number': weekNumber},
     );
 
@@ -97,7 +98,7 @@ class AdminRemoteDataSourceImpl implements AdminRemoteDataSource {
   @override
   Future<void> addEmployee(Datum employee) async {
     await dio.postUri(
-      apiVariables.addEmployee(),
+      ApiVariables.addEmployee(),
       data: {
         'name': employee.user?.fullName ?? '',
         'phone_number': employee.user?.phoneNumber ?? '',
@@ -112,7 +113,7 @@ class AdminRemoteDataSourceImpl implements AdminRemoteDataSource {
 
   @override
   Future<void> deleteEmployee(String id) async {
-    final response = await dio.deleteUri(apiVariables.employeeDetails(id));
+    final response = await dio.deleteUri(ApiVariables.employeeDetails(id));
 
     if (response.statusCode! >= 400) {
       throw Exception('Failed to delete employee: ${response.statusCode}');
@@ -122,7 +123,7 @@ class AdminRemoteDataSourceImpl implements AdminRemoteDataSource {
   @override
   Future<void> toggleEmployeeArchive(String id, bool isArchived) async {
     final response = await dio.putUri(
-      apiVariables.archiveEmployee(id),
+      ApiVariables.archiveEmployee(id),
       data: {'is_archived': isArchived},
     );
 
@@ -134,7 +135,7 @@ class AdminRemoteDataSourceImpl implements AdminRemoteDataSource {
   @override
   Future<void> updateEmployee(Datum employee) async {
     await dio.putUri(
-      apiVariables.employeeDetails(employee.id.toString()),
+      ApiVariables.employeeDetails(employee.id.toString()),
       data: {
         'hourly_rate': employee.hourlyRate ?? 0,
         'overtime_rate': employee.overtimeRate ?? 0,
@@ -146,7 +147,7 @@ class AdminRemoteDataSourceImpl implements AdminRemoteDataSource {
 
     @override
   Future<List<WorkshopModel>> getWorkshops() async {
-    final response = await dio.getUri(apiVariables.workshops());
+    final response = await dio.getUri(ApiVariables.workshops());
 
     if (response.statusCode == 200) {
       // ✅ تحقق من شكل البيانات
@@ -173,7 +174,7 @@ class AdminRemoteDataSourceImpl implements AdminRemoteDataSource {
     double radius = 200,
   }) async {
     final response = await dio.postUri(
-      apiVariables.addWorkshop(),
+      ApiVariables.addWorkshop(),
       data: {
         'name': name,
         'latitude': latitude,
@@ -188,8 +189,8 @@ class AdminRemoteDataSourceImpl implements AdminRemoteDataSource {
   }
 
   @override
-  Future<void> deleteWorkshop(String id) async {
-    final response = await dio.deleteUri(apiVariables.workshopDetails(id));
+  Future<void> deleteWorkshop(int id) async {
+    final response = await dio.deleteUri(ApiVariables.workshopDetails(id));
 
     if (response.statusCode! >= 400) {
       throw Exception('Failed to delete workshop: ${response.statusCode}');
@@ -199,7 +200,7 @@ class AdminRemoteDataSourceImpl implements AdminRemoteDataSource {
   @override
   Future<void> toggleWorkshopArchive(String id, bool isArchived) async {
     final response = await dio.putUri(
-      apiVariables.archiveWorkshop(id),
+      ApiVariables.archiveWorkshop(id),
       data: {'is_archived': isArchived},
     );
 

@@ -39,7 +39,7 @@ class FakeAdminRepo implements AdminRepository {
     double radius = 200,
   }) async {}
 
-  @override Future<void> deleteWorkshop(String id) async {}
+  @override Future<void> deleteWorkshop(int id) async {}
   @override Future<void> toggleWorkshopArchive(String id, bool isArchived) async {}
 }
 

@@ -3,9 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-
 import '../../../../core/theme/App theme/bloc/theme_bloc.dart';
-import '../../../Attendance/pages/attrndance_page.dart';
+import '../../../Attendance/presentation/page/attrndance_page.dart';
 import '../../../Notification/presentation/pages/notifications_page.dart';
 import '../../../admin/presentation/bloc/workshops/workshops_bloc.dart';
 import '../../../loan/presentation/pages/employee_loan_page.dart';
@@ -28,7 +27,7 @@ class MainPage extends StatefulWidget {
 class _HomePageState extends State<MainPage> {
   final List<Widget> pages = [
     const HomePage(),
-    const AttendanceHistoryPage(), 
+    const AttendanceHistoryPage(),
     const NotificationsPage(),
     const EmployeeFinancePage(),
     const EmployeeLoanPage(),
@@ -39,11 +38,12 @@ class _HomePageState extends State<MainPage> {
     super.initState();
     context.read<ProfileBloc>().add(LoadProfile());
   }
+
   @override
   Widget build(BuildContext context) {
     // التصحيح: استدعاء fetchWorkshops بدلاً من getWorkshops
     context.read<WorkshopsBloc>().getWorkshopsUseCase();
-   // onPressed: () => context.read<WorkshopsBloc>().add(LoadWorkshopsEvent()),
+    // onPressed: () => context.read<WorkshopsBloc>().add(LoadWorkshopsEvent()),
     final theme = Theme.of(context);
 
     return Scaffold(
@@ -64,12 +64,11 @@ class _HomePageState extends State<MainPage> {
           style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22.sp),
         ),
         actions: [
-
           BlocBuilder<ProfileBloc, ProfileState>(
             builder: (context, state) {
               String? imageUrl;
-              if (state is ProfileLoaded) {
-                imageUrl = state.profile.user?.profileImageUrl;
+              if (state.profile.isSuccess) {
+                imageUrl = state.profile.data!.user?.profileImageUrl;
               }
 
               ImageProvider? imageProvider;
@@ -82,27 +81,39 @@ class _HomePageState extends State<MainPage> {
               }
 
               return GestureDetector(
-                onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const ProfilePage())),
+                onTap:
+                    () => Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const ProfilePage()),
+                    ),
                 child: Container(
                   margin: EdgeInsets.only(left: 10.w),
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    border: Border.all(color: Colors.blueAccent.withOpacity(0.5), width: 1.5.r),
+                    border: Border.all(
+                      color: Colors.blueAccent.withOpacity(0.5),
+                      width: 1.5.r,
+                    ),
                     boxShadow: [
                       BoxShadow(
                         color: Colors.blueAccent.withOpacity(0.21),
                         blurRadius: 7.r,
                         spreadRadius: 1.r,
-                      )
+                      ),
                     ],
                   ),
                   child: CircleAvatar(
                     radius: 14.r,
                     backgroundColor: Colors.white.withOpacity(0.05),
                     backgroundImage: imageProvider,
-                    child: imageProvider == null
-                        ? Icon(Icons.person_rounded, color: Colors.blueAccent, size: 22.sp)
-                        : null,
+                    child:
+                        imageProvider == null
+                            ? Icon(
+                              Icons.person_rounded,
+                              color: Colors.blueAccent,
+                              size: 22.sp,
+                            )
+                            : null,
                   ),
                 ),
               ).animate().fadeIn(duration: 500.ms).scale(delay: 100.ms);
@@ -123,11 +134,17 @@ class _HomePageState extends State<MainPage> {
         builder: (context, currentPageIndex) {
           return Container(
             decoration: BoxDecoration(
-              boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 10.r)],
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.2),
+                  blurRadius: 10.r,
+                ),
+              ],
             ),
             child: BottomNavigationBar(
               currentIndex: currentPageIndex,
-              onTap: (index) => context.read<NavigationnCubit>().navigateTo(index),
+              onTap:
+                  (index) => context.read<NavigationnCubit>().navigateTo(index),
               backgroundColor: theme.cardColor,
               selectedItemColor: theme.primaryColor,
               unselectedItemColor: theme.disabledColor,
@@ -138,12 +155,27 @@ class _HomePageState extends State<MainPage> {
               showSelectedLabels: true,
               showUnselectedLabels: false,
               items: const [
-                BottomNavigationBarItem(icon: Icon(Icons.home_rounded), label: 'الرئيسية'),
-                BottomNavigationBarItem(icon: Icon(Icons.history_rounded), label: 'السجل'),
-                BottomNavigationBarItem(icon: Icon(Icons.notifications_active_rounded), label: 'التنبيهات'),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.home_rounded),
+                  label: 'الرئيسية',
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.history_rounded),
+                  label: 'السجل',
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.notifications_active_rounded),
+                  label: 'التنبيهات',
+                ),
 
-                BottomNavigationBarItem(icon: Icon(Icons.account_balance_wallet_rounded), label: 'المالية'),
-                BottomNavigationBarItem(icon: Icon(Icons.money_rounded), label: 'السلف'),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.account_balance_wallet_rounded),
+                  label: 'المالية',
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.money_rounded),
+                  label: 'السلف',
+                ),
               ],
             ),
           );

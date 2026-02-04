@@ -1,8 +1,9 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-
 import '../../data/repository/login_repo.dart';
 import 'auth_state.dart';
+import 'package:injectable/injectable.dart';
 
+@injectable
 class AuthCubit extends Cubit<AuthState> {
   AuthCubit({required AuthRepository repository}) : super(AuthInitial());
 

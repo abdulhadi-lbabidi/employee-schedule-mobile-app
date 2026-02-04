@@ -205,7 +205,7 @@ class _LoginPageState extends State<LoginPage> {
                                                   );
                                                   return;
                                                 }
-
+                                              print('sendddddd');
                                                 loginCubit.login(
                                                   email: email,
                                                   password: password,

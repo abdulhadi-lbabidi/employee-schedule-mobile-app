@@ -4,9 +4,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:latlong2/latlong.dart' as latlong;
 import 'package:intl/intl.dart';
-import '../../../../core/di/service_locator.dart';
 import '../../../../core/services/pdf_report_service.dart';
-import '../../../Attendance/Repository/AttendanceRepository.dart';
+import '../../../Attendance/presentation/bloc/Cubit_Attendance/attendance_cubit.dart';
 import '../bloc/employees/employees_bloc.dart';
 import '../bloc/employees/employees_event.dart';
 import '../bloc/employees/employees_state.dart';
@@ -161,7 +160,7 @@ class WorkshopDetailsPage extends StatelessWidget {
       backgroundColor: theme.primaryColor,
       flexibleSpace: FlexibleSpaceBar(
         title: Text(
-          workshop.name,
+          workshop.name!,
           style: TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 16.sp,
@@ -390,7 +389,7 @@ class WorkshopDetailsPage extends StatelessWidget {
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
                   onPressed: () {
-                    context.read<WorkshopsBloc>().add(DeleteWorkshopEvent(workshop.id));
+                    context.read<WorkshopsBloc>().add(DeleteWorkshopEvent(workshop.id!));
                     Navigator.pop(d);
                     Navigator.pop(context);
                   },
@@ -420,18 +419,26 @@ class WorkshopDetailsPage extends StatelessWidget {
       ),
     );
   }
-
-  void _exportAttendance(BuildContext context) async { // 🔹 تم إضافة async
-    final repo = sl<AttendanceRepository>();
+  void _exportAttendance(BuildContext context) async {
+    final cubit = context.read<AttendanceCubit>(); // استخدم Cubit مباشرة
     final employees = (context.read<EmployeesBloc>().state as EmployeesLoaded).employees;
-    final workshopId = int.tryParse(workshop.id) ?? 0;
-    final records = await repo.getFilteredRecords(workshopNumber: workshopId); // 🔹 تم إضافة await
+    final workshopId = workshop.id ?? 0;
+
+    // احصل على السجلات من Cubit باستخدام الدالة المدمجة
+    final records = await cubit.getFilteredRecords(workshopNumber: workshopId); // 🔹 Cubit method
 
     if (records.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("لا توجد سجلات حضور لهذه الورشة لتصديرها")));
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("لا توجد سجلات حضور لهذه الورشة لتصديرها"))
+      );
       return;
     }
 
-    PdfReportService.generateAttendanceReport(workshopName: workshop.name, records: records, allEmployees: employees);
+    PdfReportService.generateAttendanceReport(
+        workshopName: workshop.name!,
+        records: records,
+        allEmployees: employees
+    );
   }
+
 }

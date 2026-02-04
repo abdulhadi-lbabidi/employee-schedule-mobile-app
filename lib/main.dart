@@ -1,23 +1,22 @@
+import 'dart:math';
+
+import 'package:bot_toast/bot_toast.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:untitled8/core/services/sync_service.dart';
+import 'package:untitled8/common/helper/src/app_varibles.dart';
 import 'package:untitled8/core/services/notification_service.dart';
 import 'package:untitled8/core/theme/App%20theme/bloc/theme_bloc.dart';
-
-import 'core/di/service_locator.dart';
+import 'core/di/injection.dart';
 import 'core/theme/theme.dart';
 import 'core/utils/app_strings.dart';
-
-import 'features/Attendance/pages/bloc/Cubit_Attendance/attendance_cubit.dart';
+import 'features/Attendance/presentation/bloc/Cubit_Attendance/attendance_cubit.dart';
+import 'features/Attendance/presentation/bloc/attendance_bloc.dart';
 import 'features/Notification/presentation/bloc/notification_bloc.dart';
-import 'features/SplashScreen/presentation/bloc/onboarding_bloc.dart';
 import 'features/SplashScreen/presentation/page/splashScareen.dart';
-import 'features/admin/presentation/pages/AdminHomePage.dart';
 import 'features/auth/presentation/bloc/login_Cubit/login_cubit.dart';
-import 'features/auth/presentation/bloc/login_Cubit/login_state.dart';
 import 'features/home/presentation/bloc/Cubit_Button/button_cubit.dart';
 import 'features/home/presentation/bloc/Cubit_Navigation/navigation_cubit.dart';
 import 'features/home/presentation/bloc/Cubit_dropdown/dropdown_cubit.dart';
@@ -32,11 +31,16 @@ import 'features/admin/presentation/bloc/workshops/workshops_bloc.dart';
 import 'features/loan/presentation/bloc/loan_bloc.dart';
 
 // 🔹 إضافة مفتاح الملاحة العالمي للتحكم في التنقل بدون Context
-final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
+
+  // Hive.registerAdapter(AttendanceRecordAdapter());
+  // sl<SyncService>().init();
+
+  await configureInjection();
+
   try {
     await Firebase.initializeApp();
   } catch (e) {
@@ -44,9 +48,7 @@ void main() async {
   }
 
   await NotificationService().init();
-  await setupServiceLocator();
-  sl<SyncService>().init();
-  
+
   runApp(const MyApp());
 }
 
@@ -62,15 +64,18 @@ class MyApp extends StatelessWidget {
       builder: (context, child) {
         return MultiBlocProvider(
           providers: [
-            BlocProvider(create: (_) => ThemeBloc()..add(GetCurrentThemeEvent())),
-            BlocProvider(create: (_) => sl<LoginCubit>()..checkAuthStatus()),
-            BlocProvider(create: (_) => sl<OnboardingBloc>()),
+            BlocProvider(
+              create: (_) => ThemeBloc()..add(GetCurrentThemeEvent()),
+            ),
+            BlocProvider(create: (_) => sl<LoginCubit>()),
+            BlocProvider(create: (_) => sl<AttendanceBloc>()),
+
             BlocProvider(create: (_) => sl<NavigationnCubit>()),
             BlocProvider(create: (_) => sl<DropdownCubit>()),
             BlocProvider(create: (_) => sl<ButtonCubit>()),
             BlocProvider(create: (_) => sl<ActiveUnactiveCubit>()),
             BlocProvider(create: (_) => sl<ProfileBloc>()),
-            BlocProvider(create: (_) => sl<AttendanceCubit>()),
+            // BlocProvider(create: (_) => sl<AttendanceCubit>()),
             BlocProvider(create: (_) => sl<NotificationBloc>()),
             BlocProvider(create: (_) => sl<AdminDashboardBloc>()),
             BlocProvider(create: (_) => sl<AdminProfileBloc>()),
@@ -88,10 +93,10 @@ class MyApp extends StatelessWidget {
               }
 
               return MaterialApp(
-                navigatorKey: navigatorKey, // 🔹 ربط مفتاح الملاحة هنا
+                navigatorKey: AppVariables.navigatorKey,
                 debugShowCheckedModeBanner: false,
                 title: AppStrings.appTitle,
-                theme: currentTheme, 
+                theme: currentTheme,
                 locale: const Locale('ar', 'AE'),
                 supportedLocales: const [Locale('ar', 'AE')],
                 localizationsDelegates: const [
@@ -99,12 +104,10 @@ class MyApp extends StatelessWidget {
                   GlobalWidgetsLocalizations.delegate,
                   GlobalCupertinoLocalizations.delegate,
                 ],
-                builder: (context, child) {
-                  return Directionality(
-                    textDirection: TextDirection.rtl,
-                    child: child!,
-                  );
-                },
+
+
+                navigatorObservers: [BotToastNavigatorObserver()],
+                builder: BotToastInit(),
                 home: const Splashscareen(),
               );
             },

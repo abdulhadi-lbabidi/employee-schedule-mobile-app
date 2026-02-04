@@ -1,5 +1,6 @@
 import '../repositories/admin_repository.dart';
-
+import 'package:injectable/injectable.dart';
+@lazySingleton
 class ToggleWorkshopArchiveUseCase {
   final AdminRepository repository;
 

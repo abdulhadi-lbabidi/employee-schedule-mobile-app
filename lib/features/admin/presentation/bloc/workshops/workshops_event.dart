@@ -17,7 +17,7 @@ class AddWorkshopEvent extends WorkshopsEvent {
 }
 
 class DeleteWorkshopEvent extends WorkshopsEvent {
-  final String id;
+  final int id;
   DeleteWorkshopEvent(this.id);
 }
 

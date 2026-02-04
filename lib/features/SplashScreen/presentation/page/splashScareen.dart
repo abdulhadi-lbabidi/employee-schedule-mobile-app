@@ -2,14 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:untitled8/common/helper/src/app_varibles.dart';
 import 'package:untitled8/features/auth/presentation/bloc/auth_state.dart';
 
+import '../../../../core/di/injection.dart';
 import '../../../admin/presentation/pages/AdminHomePage.dart';
 import '../../../auth/presentation/bloc/login_Cubit/login_cubit.dart';
 
 import '../../../auth/presentation/bloc/login_Cubit/login_state.dart' show AuthSuccess, LoginStatus, LoginState;
 import '../../../auth/presentation/pages/login_page.dart';
 import '../../../home/presentation/page/main_page.dart';
+import '../bloc/onboarding_bloc.dart';
+import '../bloc/onboarding_event.dart';
+import '../bloc/onboarding_state.dart';
 import 'onBoarding.dart';
 
 class Splashscareen extends StatefulWidget {
@@ -20,35 +25,53 @@ class Splashscareen extends StatefulWidget {
 }
 
 class _SplashscareenState extends State<Splashscareen> {
+ late final OnboardingBloc onboardingBloc;
+
   @override
   void initState() {
+
+    onboardingBloc =  sl<OnboardingBloc>();
+    Future.delayed(const Duration(seconds: 5)).then((value) {
+      onboardingBloc.add(CheckSplashStatus()) ;
+    });
+
+
     super.initState();
-    _handleNavigation();
+
+    // _handleNavigation();
   }
 
-  Future<void> _handleNavigation() async {
-    await Future.delayed(const Duration(seconds: 5));
+  @override
+  void dispose() {
 
-    if (!mounted) return;
-
-    final prefs = await SharedPreferences.getInstance();
-    final bool isFirstTime = prefs.getBool('isFirstTime') ?? true;
-
-    if (isFirstTime) {
-      _fadeNavigate(const OnboardingPage());
-      return;
-    }
-
-    final loginCubit = context.read<LoginCubit>();
-    final state = loginCubit.state;
-
-    // ✅ استخدام role مباشرة
-    if (state.status == LoginStatus.success) {
-      _navigateToHome(state);
-    } else {
-      _fadeNavigate(const LoginPage());
-    }
+    onboardingBloc.close();
+    // TODO: implement dispose
+    super.dispose();
   }
+
+  // Future<void> _handleNavigation() async {
+  //   await Future.delayed(const Duration(seconds: 5));
+  //
+  //   if (!mounted) return;
+  //
+  //   final prefs = await SharedPreferences.getInstance();
+  //   final bool isFirstTime = prefs.getBool('isFirstTime') ?? true;
+  //
+  //   if (isFirstTime) {
+  //     _fadeNavigate(const OnboardingPage());
+  //     return;
+  //   }
+  //
+  //   final loginCubit = context.read<LoginCubit>();
+  //   final state = loginCubit.state;
+  //
+  //   // ✅ استخدام role مباشرة
+  //   if (state.status == LoginStatus.success) {
+  //     _navigateToHome(state);
+  //   } else {
+  //     _fadeNavigate(const LoginPage());
+  //   }
+  // }
 
   void _fadeNavigate(Widget page) {
     Navigator.pushReplacement(
@@ -66,15 +89,7 @@ class _SplashscareenState extends State<Splashscareen> {
     );
   }
 
-  void _navigateToHome(LoginState state) {
-    final role = state.rols ?? '';
 
-    Widget targetPage = role == 'Admin'
-        ? const AdminHomePage()
-        : const MainPage();
-
-    _fadeNavigate(targetPage);
-  }
 
 
   @override
@@ -83,7 +98,32 @@ class _SplashscareenState extends State<Splashscareen> {
     final double logoSize = MediaQuery.of(context).size.width * 0.7;
 
     return Scaffold(
-      body: Container(
+      body: BlocListener<OnboardingBloc, OnboardingState>(
+        bloc: onboardingBloc,
+        listenWhen:
+            (previous, current) =>
+        previous.splashStatus != current.splashStatus,
+        listener: (context, state) {
+          if (state.splashStatus == SplashStatus.isAuth) {
+            AppVariables.role=='employee'?
+            _fadeNavigate(MainPage())
+                : _fadeNavigate(AdminHomePage())
+            ;
+
+          }
+          else if (state.splashStatus == SplashStatus.unauthorized) {
+            if(AppVariables.isFirstTime){
+              _fadeNavigate(OnboardingPage());
+
+            }else{
+              _fadeNavigate(LoginPage());
+
+            }
+
+
+          }
+        },
+  child: Container(
         width: double.infinity,
         height: double.infinity,
         decoration: const BoxDecoration(
@@ -105,6 +145,7 @@ class _SplashscareenState extends State<Splashscareen> {
           ).animate().fade(duration: 1500.ms).scale(delay: 500.ms),
         ),
       ),
+),
     );
   }
 }

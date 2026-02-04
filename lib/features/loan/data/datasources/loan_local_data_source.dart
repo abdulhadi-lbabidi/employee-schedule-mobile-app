@@ -1,6 +1,7 @@
 import 'package:hive/hive.dart';
 import '../models/loan_model.dart';
 
+
 class LoanLocalDataSource {
   final Box<Map> loanBox;
 

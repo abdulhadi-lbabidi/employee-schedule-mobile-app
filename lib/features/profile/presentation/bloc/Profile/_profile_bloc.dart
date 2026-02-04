@@ -1,20 +1,20 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../../Attendance/Repository/AttendanceRepository.dart';
+import '../../../../Attendance/presentation/bloc/Cubit_Attendance/attendance_cubit.dart';
 import '../../../../auth/data/repository/login_repo.dart';
 import '../../../data/models/profile_model.dart';
 import '_profile_event.dart';
 import '_profile_state.dart';
 
+import 'package:injectable/injectable.dart';
+
+@injectable
 class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
   final AuthRepository authRepository;
-  final AttendanceRepository attendanceRepository;
+  String? _cachedImagePath; // 🔹 لحفظ مسار الصورة محلياً
 
-  String? _cachedImagePath; // 🔹 متغير لحفظ مسار الصورة محلياً
-
-  ProfileBloc({
-    required this.authRepository,
-    required this.attendanceRepository,
-  }) : super(ProfileInitial()) {
+  ProfileBloc(
+    this.authRepository,
+  ) : super(ProfileState()) {
     on<LoadProfile>(_onLoadProfile);
     on<UpdateProfileImage>(_onUpdateProfileImage); // 🔹 معالجة حدث تحديث الصورة
   }
@@ -23,64 +23,31 @@ class ProfileBloc extends Bloc<ProfileEvent, ProfileState> {
     LoadProfile event,
     Emitter<ProfileState> emit,
   ) async {
-    emit(ProfileLoading());
-    try {
-      final user = await authRepository.getCurrentUser();
+    emit(state.copyWith(profile: state.profile.setLoading()));
 
-      if (user != null) {
-        final records = await attendanceRepository.getAllRecords(); // 🔹 تم إضافة await
+    final val = await authRepository.getCurrentUser();
 
-        double totalHours = 0;
-        for (var r in records) {
-          if (r.workDuration != null) {
-            totalHours += r.workDuration!.inMinutes / 60.0;
-          }
-        }
-
-        final activeDays = records.map((r) => r.date).toSet().length;
-        String lastWS = records.isNotEmpty
-            ? "W${records.last.workshopNumber}"
-            : "لم يحدد بعد";
-        final isIdmin = user.userableType?.toLowerCase() == 'admin';
-
-        // lib/features/profile/presentation/bloc/Profile/_profile_bloc.dart
-
-        final profile = ProfileModel(
-          user: User(
-            id: user.id,
-            fullName: user.fullName,
-            phoneNumber: user.phoneNumber,
-            email: user.email,
-            profileImageUrl: _cachedImagePath ?? user.profileImageUrl, // استخدام الصورة المخزنة أو القادمة من الباك
-            userable: Userable(
-              id: user.userableId,
-              position: user.userable?.name ?? (isIdmin ? "المدير العام (CEO)" : "موظف ميداني"),
-              department: isIdmin ? "مجلس الإدارة" : "قسم العمليات",
-              hourlyRate: user.userable?.hourlyRate?.toDouble(),
-              overtimeRate: user.userable?.overtimeRate?.toDouble(),
-            ),
-          ),
-          role: user.userableType,
-          status: 1, // حالة نشطة افتراضية
-        );
-
+    val.fold(
+      (l) {
         emit(
-          ProfileLoaded(
-            profile: profile,
-            totalHours: double.parse(totalHours.toStringAsFixed(1)),
-            activeDays: activeDays,
-            lastWorkshop: lastWS,
+          state.copyWith(
+            profile: state.profile.setFaild(errorMessage: l.message),
           ),
         );
-      } else {
-        emit(const ProfileError("فشل في تحميل بيانات المستخدم"));
-      }
-    } catch (e) {
-      emit(ProfileError(e.toString()));
-    }
+      },
+      (r) async {
+        emit(state.copyWith(profile: state.profile.setSuccess(data: r)));
+
+
+
+
+
+
+      },
+    );
   }
 
-  // 🔹 إضافة معالج حدث تحديث الصورة
+  // 🔹 معالجة حدث تحديث الصورة
   Future<void> _onUpdateProfileImage(
     UpdateProfileImage event,
     Emitter<ProfileState> emit,

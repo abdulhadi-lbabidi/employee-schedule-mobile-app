@@ -64,7 +64,7 @@ class WorkshopModel {
 
   static WorkshopEntity toEntity(WorkshopModel model) {
     return WorkshopEntity(
-      id: model.id?.toString() ?? '0',
+      id: model.id ?? 0,
       name: model.name ?? model.location ?? 'Unknown',
       latitude: model.latitude?.toDouble(),
       longitude: model.longitude?.toDouble(),
@@ -76,7 +76,7 @@ class WorkshopModel {
 
   static WorkshopModel fromEntity(WorkshopEntity entity) {
     return WorkshopModel(
-      id: int.tryParse(entity.id),
+      id: entity.id,
       name: entity.name,
       location: entity.name,
       latitude: entity.latitude,

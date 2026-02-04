@@ -2,6 +2,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 
 import '../../../domain/entities/finance_entity.dart';
+import 'package:injectable/injectable.dart';
 
 // Events
 abstract class FinanceEvent extends Equatable {
@@ -39,6 +40,7 @@ class FinanceError extends FinanceState {
 }
 
 // Bloc
+@injectable
 class FinanceBloc extends Bloc<FinanceEvent, FinanceState> {
   FinanceBloc() : super(FinanceInitial()) {
     on<LoadFinanceHistory>(_onLoadFinanceHistory);

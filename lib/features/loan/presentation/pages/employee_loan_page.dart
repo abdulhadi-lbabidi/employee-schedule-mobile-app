@@ -5,8 +5,6 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:intl/intl.dart';
 import '../../domain/entities/loan_entity.dart';
 import '../bloc/loan_bloc.dart';
-import '../../../auth/data/repository/login_repo.dart';
-import '../../../../core/di/service_locator.dart';
 
 class EmployeeLoanPage extends StatefulWidget {
   const EmployeeLoanPage({super.key});

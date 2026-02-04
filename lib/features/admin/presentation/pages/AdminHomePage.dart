@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import '../../../../core/di/service_locator.dart';
+import '../../../../core/di/injection.dart';
 import '../../../loan/presentation/bloc/loan_bloc.dart';
 import '../../../loan/presentation/pages/admin_loan_page.dart';
 import '../bloc/employees/employees_bloc.dart';

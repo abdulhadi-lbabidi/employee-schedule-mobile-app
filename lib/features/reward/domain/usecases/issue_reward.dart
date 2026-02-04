@@ -1,5 +1,7 @@
 import 'package:untitled8/features/reward/domain/repositories/reward_repository.dart';
+import 'package:injectable/injectable.dart';
 
+@lazySingleton
 class IssueRewardUseCase {
   final RewardRepository repository;
 

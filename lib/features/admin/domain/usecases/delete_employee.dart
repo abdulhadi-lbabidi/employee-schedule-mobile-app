@@ -1,5 +1,8 @@
+import 'package:injectable/injectable.dart';
+
 import '../repositories/admin_repository.dart';
 
+@lazySingleton
 class DeleteEmployeeUseCase {
   final AdminRepository repository;
 

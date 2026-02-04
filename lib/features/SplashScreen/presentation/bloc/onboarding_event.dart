@@ -1,3 +1,4 @@
+
  class OnboardingEvent {}
 
 class OnPageChanged extends OnboardingEvent {
@@ -6,3 +7,8 @@ class OnPageChanged extends OnboardingEvent {
 }
 
 class OnNextPressed extends OnboardingEvent {}
+
+ class CheckSplashStatus extends OnboardingEvent{}
+
+
+ class InitSplash extends OnboardingEvent{}

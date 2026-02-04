@@ -5,7 +5,9 @@ import 'package:untitled8/features/reward/domain/usecases/get_admin_rewards.dart
 import 'package:untitled8/features/reward/domain/usecases/issue_reward.dart';
 import 'package:untitled8/features/reward/presentation/bloc/reward_admin/reward_admin_event.dart';
 import 'package:untitled8/features/reward/presentation/bloc/reward_admin/reward_admin_state.dart';
+import 'package:injectable/injectable.dart';
 
+@injectable
 class RewardAdminBloc extends Bloc<RewardAdminEvent, RewardAdminState> {
   final GetAdminRewardsUseCase getAdminRewardsUseCase;
   final IssueRewardUseCase issueRewardUseCase;

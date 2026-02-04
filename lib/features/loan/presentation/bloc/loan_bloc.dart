@@ -8,10 +8,11 @@ import '../../domain/usecases/update_loan_status_usecase.dart';
 import '../../domain/usecases/record_payment_usecase.dart';
 import '../../../Notification/presentation/bloc/notification_bloc.dart';
 import '../../../Notification/presentation/bloc/notification_event.dart';
+import 'package:injectable/injectable.dart';
 
 part 'loan_event.dart';
 part 'loan_state.dart';
-
+@injectable
 class LoanBloc extends Bloc<LoanEvent, LoanState> {
   final GetAllLoansUseCase getAllLoansUseCase;
   final GetEmployeeLoansUseCase getEmployeeLoansUseCase;

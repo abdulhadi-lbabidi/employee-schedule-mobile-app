@@ -4,7 +4,7 @@
 
 import 'dart:convert';
 
-LoginResponse loginResponseFromJson(String str) => LoginResponse.fromJson(json.decode(str));
+LoginResponse loginResponseFromJson(str) => LoginResponse.fromJson(str);
 
 String loginResponseToJson(LoginResponse data) => json.encode(data.toJson());
 
@@ -147,8 +147,9 @@ class User {
 class Userable {
   final int? id;
   final String? name;
-  final num? hourlyRate; // 🔹 إضافة
-  final num? overtimeRate; // 🔹 إضافة
+  final double? hourlyRate; // 🔹 إضافة
+  final double? overtimeRate; // 🔹 إضافة
+  final String? department; // 🔹 إضافة
   final dynamic deletedAt;
   final DateTime? createdAt;
   final DateTime? updatedAt;
@@ -161,13 +162,15 @@ class Userable {
     this.deletedAt,
     this.createdAt,
     this.updatedAt,
+    this.department,
   });
 
   Userable copyWith({
     int? id,
     String? name,
-    num? hourlyRate,
-    num? overtimeRate,
+    String? department,
+    double? hourlyRate,
+    double? overtimeRate,
     dynamic deletedAt,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -180,13 +183,15 @@ class Userable {
         deletedAt: deletedAt ?? this.deletedAt,
         createdAt: createdAt ?? this.createdAt,
         updatedAt: updatedAt ?? this.updatedAt,
+        department: department ?? this.department,
       );
 
   factory Userable.fromJson(Map<String, dynamic> json) => Userable(
     id: json["id"],
     name: json["name"],
-    hourlyRate: json["hourly_rate"],
-    overtimeRate: json["overtime_rate"],
+    department: json["department"],
+    hourlyRate: json["hourly_rate"]?.toDouble(),
+    overtimeRate: json["overtime_rate"]?.toDouble(),
     deletedAt: json["deleted_at"],
     createdAt: json["created_at"] == null ? null : DateTime.parse(json["created_at"]),
     updatedAt: json["updated_at"] == null ? null : DateTime.parse(json["updated_at"]),

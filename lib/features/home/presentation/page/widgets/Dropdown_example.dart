@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
-
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:untitled8/core/widget/shimmer_widget.dart';
 import '../../../../admin/domain/entities/workshop_entity.dart';
 import '../../../../admin/presentation/bloc/workshops/workshops_bloc.dart';
 import '../../../../admin/presentation/bloc/workshops/workshops_event.dart';
@@ -10,11 +11,9 @@ import '../../bloc/Cubit_dropdown/dropdown_cubit.dart';
 import '../../bloc/Cubit_dropdown/dropdown_state.dart';
 
 class DropdownView extends StatefulWidget {
-  final bool isEnabled;
 
   const DropdownView({
     super.key,
-    this.isEnabled = true,
   });
 
   @override
@@ -35,12 +34,15 @@ class _DropdownViewState extends State<DropdownView> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<WorkshopsBloc, WorkshopsState>(
-      listener: _onWorkshopStateChanged,
-      child: BlocBuilder<WorkshopsBloc, WorkshopsState>(
+    return  BlocBuilder<WorkshopsBloc, WorkshopsState>(
+      // listener: _onWorkshopStateChanged,
         builder: (context, workshopState) {
           if (workshopState is WorkshopsLoading) {
-            return const Center(child: CircularProgressIndicator.adaptive());
+            return  ShimmerWidget(
+              borderRadius: BorderRadius.circular(12),
+              width:  double.infinity,
+              height:  45.h,
+            );
           }
 
           if (workshopState is WorkshopsError) {
@@ -58,29 +60,41 @@ class _DropdownViewState extends State<DropdownView> {
 
           return const Center(child: CircularProgressIndicator.adaptive());
         },
-      ),
-    );
+      )
+    ;
   }
 
-  void _onWorkshopStateChanged(BuildContext context, WorkshopsState state) {
-    if (state is WorkshopsLoaded && state.workshops.isNotEmpty) {
-      final dropdownCubit = context.read<DropdownCubit>();
-      final currentValue = dropdownCubit.state.selectedValue;
-
-      if (currentValue == null || currentValue.isEmpty) {
-        dropdownCubit.changeValue(state.workshops.first.name);
-      }
-    }
-  }
+  // void _onWorkshopStateChanged(BuildContext context, WorkshopsState state) {
+  //   // if (state is WorkshopsLoaded && state.workshops.isNotEmpty) {
+  //   //   final dropdownCubit = context.read<DropdownCubit>();
+  //   //   final currentValue = dropdownCubit.state.selectedValue;
+  //   //
+  //   //   if (currentValue == null || currentValue.isEmpty) {
+  //   //     dropdownCubit.changeValue(state.workshops.first.name);
+  //   //   }
+  //   // }
+  // }
 
   Widget _buildDropdown(List<WorkshopEntity> workshops) {
     return BlocBuilder<DropdownCubit, DropdownState>(
       builder: (context, dropdownState) {
-        final bool isValid = workshops.any((w) => w.name == dropdownState.selectedValue);
-        final String? effectiveValue = isValid ? dropdownState.selectedValue : null;
 
-        return DropdownButton2<String>(
-          value: effectiveValue,
+
+        final WorkshopEntity? selected =
+        dropdownState.selectedValue == null
+            ? null
+            : workshops.cast<WorkshopEntity?>().firstWhere(
+              (e) {
+
+                return e?.id == dropdownState.selectedValue!.id;
+              },
+          orElse: () => null,
+        );
+   bool   enable= !(selected !=null &&dropdownState.localeAttendanceModel!=null);
+
+        return DropdownButton2<WorkshopEntity?>(
+          underline: const SizedBox.shrink(),
+          value: selected,
           isExpanded: true,
           hint: const Text('اختر ورشة', style: TextStyle(color: Colors.grey, fontSize: 14)),
           buttonStyleData: ButtonStyleData(
@@ -88,8 +102,9 @@ class _DropdownViewState extends State<DropdownView> {
             padding: const EdgeInsets.symmetric(horizontal: 16),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: widget.isEnabled ? Colors.grey.shade300 : Colors.grey.shade200),
+              border: Border.all(color: enable ? Colors.grey.shade300 : Colors.grey.shade200),
               color: Colors.white,
+
             ),
           ),
           dropdownStyleData: DropdownStyleData(
@@ -99,17 +114,17 @@ class _DropdownViewState extends State<DropdownView> {
               color: Colors.white,
             ),
           ),
-          onChanged: widget.isEnabled 
+          onChanged: enable
               ? (value) => context.read<DropdownCubit>().changeValue(value!)
               : null,
-          items: workshops.map((workshop) => DropdownMenuItem<String>(
-            value: workshop.name,
+          items: workshops.map((workshop) => DropdownMenuItem<WorkshopEntity>(
+            value: workshop,
             child: Text(
-              workshop.name,
+              workshop.name!,
               style: TextStyle(
                 fontSize: 15,
-                fontWeight: effectiveValue == workshop.name ? FontWeight.bold : FontWeight.normal,
-                color: widget.isEnabled ? Colors.black : Colors.grey,
+                fontWeight: selected?.id == workshop.id ? FontWeight.bold : FontWeight.normal,
+                color:enable ? Colors.black : Colors.grey,
               ),
             ),
           )).toList(),
@@ -117,9 +132,9 @@ class _DropdownViewState extends State<DropdownView> {
             return workshops.map((workshop) => Align(
               alignment: Alignment.centerRight,
               child: Text(
-                workshop.name,
+                workshop.name!,
                 style: TextStyle(
-                  color: widget.isEnabled ? Colors.black : Colors.grey,
+                  color: enable ? Colors.black : Colors.grey,
                   fontWeight: FontWeight.w600,
                 ),
               ),

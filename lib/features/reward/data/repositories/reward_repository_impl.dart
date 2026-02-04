@@ -1,9 +1,13 @@
+import 'package:injectable/injectable.dart';
+import 'package:untitled8/features/reward/data/datasources/reward_remote_data_source_impl.dart';
+
 import '../../domain/repositories/reward_repository.dart';
 import '../datasources/reward_remote_data_source.dart';
 import '../../domain/entities/reward_entity.dart';
 
+@LazySingleton(as:RewardRepository )
 class RewardRepositoryImpl implements RewardRepository {
-  final RewardRemoteDataSource remoteDataSource;
+  final RewardRemoteDataSourceImpl remoteDataSource;
 
   RewardRepositoryImpl({required this.remoteDataSource});
 

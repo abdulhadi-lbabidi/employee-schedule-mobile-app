@@ -1,51 +1,72 @@
+import 'package:flutter/cupertino.dart';
 import 'package:hive/hive.dart';
+import '../../../../core/hive_service.dart';
 import '../../domain/entities/notification_entity.dart';
 import '../../domain/repositories/notification_repository.dart';
 import '../datasources/notification_remote_data_source.dart';
 import '../model/notification_model.dart';
+import 'package:injectable/injectable.dart';
 
+@LazySingleton(as: NotificationRepository)
 class NotificationRepositoryImpl implements NotificationRepository {
-  final Box<NotificationModel> localBox;
-  final NotificationRemoteDataSource remoteDataSource;
+  final HiveService hiveService;
+  final NotificationRemoteDataSourceImpl remoteDataSource;
 
-  NotificationRepositoryImpl({required this.localBox, required this.remoteDataSource});
+  NotificationRepositoryImpl({
+    required this.hiveService,
+    required this.remoteDataSource,
+  });
 
+  /// 🔹 جلب Box الإشعارات من HiveService
+  Future<Box<NotificationModel>> get _box async =>
+      await hiveService.notificationBox;
+
+  /// 🔹 جلب كل الإشعارات المخزنة محلياً وتحويلها إلى Entity
   @override
   Future<List<NotificationEntity>> getNotifications() async {
-    return localBox.values.map(_mapToEntity).toList();
+    final box = await _box;
+    return box.values.map(_mapToEntity).toList();
   }
 
+  /// 🔹 إضافة إشعار محلي في الـ Hive
   @override
   Future<void> addLocalNotification(NotificationModel notification) async {
-    await localBox.put(notification.id, notification);
+    final box = await _box;
+    await box.put(notification.id, notification);
   }
 
+  /// 🔹 مزامنة الإشعارات مع السيرفر
+  /// إذا كانت الإشعار موجودة محلياً، لا يتم إضافتها مرتين
   @override
   Future<void> syncNotifications() async {
     try {
       final remoteNotifications = await remoteDataSource.fetchNotifications();
+      final box = await _box;
       for (var model in remoteNotifications) {
-        if (!localBox.containsKey(model.id)) {
-          await localBox.put(model.id, model);
+        if (!box.containsKey(model.id)) {
+          await box.put(model.id, model);
         }
       }
-    } catch (_) {}
+    } catch (e) {
+      debugPrint("Sync notifications failed: $e");
+    }
   }
 
+  /// 🔹 إرسال إشعار للسيرفر وإضافة نسخة محلية
   @override
   Future<void> sendNotification({
-    required String title, 
-    required String body, 
+    required String title,
+    required String body,
     String? targetWorkshop,
     String? targetEmployeeId,
   }) async {
     await remoteDataSource.sendNotification(
-      title: title, 
-      body: body, 
+      title: title,
+      body: body,
       targetWorkshop: targetWorkshop,
       targetEmployeeId: targetEmployeeId,
     );
-    
+
     final localNotif = NotificationModel(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
       title: title,
@@ -54,30 +75,36 @@ class NotificationRepositoryImpl implements NotificationRepository {
       type: 'admin_broadcast',
       isRead: false,
     );
+
     await addLocalNotification(localNotif);
   }
 
+  /// 🔹 حذف إشعار محدد محلياً
   @override
   Future<void> deleteNotification(String id) async {
-    // يمكن هنا استدعاء السيرفر لحذف الإشعار من هناك أيضاً إذا كان ذلك مطلوباً
-    // await remoteDataSource.deleteNotification(id); 
-    await localBox.delete(id);
+    final box = await _box;
+    await box.delete(id);
   }
 
+  /// 🔹 حذف كل الإشعارات محلياً
   @override
   Future<void> deleteAllNotifications() async {
-    await localBox.clear();
+    final box = await _box;
+    await box.clear();
   }
 
+  /// 🔹 وضع إشعار كمقروء
   @override
   Future<void> markAsRead(String id) async {
-    final model = localBox.get(id);
+    final box = await _box;
+    final model = box.get(id);
     if (model != null) {
       model.isRead = true;
       await model.save();
     }
   }
 
+  /// 🔹 تحويل NotificationModel إلى NotificationEntity لاستخدامه في Presentation Layer
   NotificationEntity _mapToEntity(NotificationModel model) {
     return NotificationEntity(
       id: model.id,

@@ -3,23 +3,24 @@ import '../../../../core/unified_api/api_variables.dart';
 import '../../domain/entities/loan_entity.dart';
 import '../models/loan_model.dart';
 import 'loan_remote_data_source.dart';
-
+import 'package:injectable/injectable.dart';
+@LazySingleton(as: LoanRemoteDataSource)
 class LoanRemoteDataSourceImpl implements LoanRemoteDataSource {
   final Dio dio;
-  final ApiVariables apiVariables = ApiVariables();
+
 
   LoanRemoteDataSourceImpl(this.dio);
 
   @override
   Future<List<LoanModel>> getAllLoans() async {
-    final response = await dio.getUri(apiVariables.adminLoans());
+    final response = await dio.getUri(ApiVariables.adminLoans());
     final List list = response.data['data'];
     return list.map((e) => LoanModel.fromJson(e)).toList();
   }
 
   @override
   Future<List<LoanModel>> getEmployeeLoans(String employeeId) async {
-    final response = await dio.getUri(apiVariables.employeeLoans(employeeId));
+    final response = await dio.getUri(ApiVariables.employeeLoans(employeeId));
     final List list = response.data['data'];
     return list.map((e) => LoanModel.fromJson(e)).toList();
   }
@@ -27,7 +28,7 @@ class LoanRemoteDataSourceImpl implements LoanRemoteDataSource {
   @override
   Future<void> addLoan(LoanModel loan) async {
     await dio.postUri(
-      apiVariables.adminLoans(),
+      ApiVariables.adminLoans(),
       data: loan.toJson(),
     );
   }
@@ -35,7 +36,7 @@ class LoanRemoteDataSourceImpl implements LoanRemoteDataSource {
   @override
   Future<void> updateLoanStatus(String loanId, LoanStatus status) async {
     await dio.putUri(
-      apiVariables.loanStatus(loanId),
+      ApiVariables.loanStatus(loanId),
       data: {'status': status.toString().split('.').last},
     );
   }
@@ -43,7 +44,7 @@ class LoanRemoteDataSourceImpl implements LoanRemoteDataSource {
   @override
   Future<void> recordPayment(String loanId, double amount) async {
     await dio.postUri(
-      apiVariables.loanPayments(loanId),
+      ApiVariables.loanPayments(loanId),
       data: {'amount': amount},
     );
   }

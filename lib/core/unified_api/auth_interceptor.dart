@@ -1,15 +1,19 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:untitled8/common/helper/src/app_varibles.dart';
 import '../../features/SplashScreen/presentation/page/splashScareen.dart';
-import '../di/service_locator.dart';
-import '../../../main.dart'; 
+import '../di/injection.dart';
+import '../../../main.dart';
 
 class AuthInterceptor extends Interceptor {
-  bool _isRedirecting = false; 
+  bool _isRedirecting = false;
 
   @override
-  void onRequest(RequestOptions options, RequestInterceptorHandler handler) async {
+  void onRequest(
+    RequestOptions options,
+    RequestInterceptorHandler handler,
+  ) async {
     // 🔹 لا ترسل التوكن إذا كان الطلب لتسجيل الدخول أو التسجيل
     if (options.path.contains('login') || options.path.contains('register')) {
       return handler.next(options);
@@ -32,12 +36,15 @@ class AuthInterceptor extends Interceptor {
   @override
   void onError(DioException err, ErrorInterceptorHandler handler) {
     // 🔹 إذا كان الخطأ 401 والطلب ليس تسجيل دخول، قم بتسجيل الخروج
-    if (err.response?.statusCode == 401 && !err.requestOptions.path.contains('login')) {
+    if (err.response?.statusCode == 401 &&
+        !err.requestOptions.path.contains('login')) {
       if (!_isRedirecting) {
         _isRedirecting = true;
-        debugPrint("DEBUG: Session Expired (401) on ${err.requestOptions.path}");
+        debugPrint(
+          "DEBUG: Session Expired (401) on ${err.requestOptions.path}",
+        );
         _handleUnauthorized();
-        
+
         Future.delayed(const Duration(seconds: 3), () {
           _isRedirecting = false;
         });
@@ -51,7 +58,7 @@ class AuthInterceptor extends Interceptor {
     await storage.delete(key: 'auth_token');
     await storage.delete(key: 'user_data');
 
-    navigatorKey.currentState?.pushAndRemoveUntil(
+    AppVariables.navigatorKey.currentState?.pushAndRemoveUntil(
       MaterialPageRoute(builder: (_) => const Splashscareen()),
       (route) => false,
     );

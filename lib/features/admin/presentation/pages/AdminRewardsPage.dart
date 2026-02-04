@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
-import '../../../../core/di/service_locator.dart';
+import '../../../../core/di/injection.dart';
 import '../../../reward/presentation/bloc/reward_admin/reward_admin_bloc.dart';
 import '../../../reward/presentation/bloc/reward_admin/reward_admin_event.dart';
 import '../../../reward/presentation/bloc/reward_admin/reward_admin_state.dart';

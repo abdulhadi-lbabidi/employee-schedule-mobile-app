@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_animate/flutter_animate.dart'; // 🔹 إضافة الانميشن
-import '../../../../core/di/service_locator.dart';
+import '../../../../core/di/injection.dart';
 import '../../data/models/audit_log_model.dart';
 import '../../data/repositories/audit_log_repository.dart';
 

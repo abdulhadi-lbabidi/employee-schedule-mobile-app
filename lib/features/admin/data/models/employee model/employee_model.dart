@@ -2,6 +2,7 @@ import '../../../domain/entities/employee_entity.dart';
 import 'dart:convert';
 
 import '../workshop_model.dart';
+
 class Datum {
   final int id;
   final String position;
@@ -42,6 +43,7 @@ class Datum {
     );
   }
 }
+
 class UserModel {
   final int id;
   final String fullName;
@@ -59,7 +61,7 @@ class UserModel {
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
     return UserModel(
-      id: json['id'] ,
+      id: json['id'],
       fullName: json['full_name'] ?? '',
       phoneNumber: json['phone_number'] ?? '',
       email: json['email'] ?? '',
@@ -68,25 +70,35 @@ class UserModel {
   }
 }
 
-
-
-class User {
-  final int? id;
-  final String? fullName;
-  final String? phoneNumber;
-  final String? email;
-
-  User({
-    this.id,
-    this.fullName,
-    this.phoneNumber,
-    this.email,
-  });
-
-  factory User.fromJson(Map<String, dynamic> json) => User(
-    id: json["id"],
-    fullName: json["full_name"] ?? '',
-    phoneNumber: json["phone_number"] ?? '',
-    email: json["email"] ?? '',
-  );
-}
+//
+// class User {
+//   final int? id;
+//   final String? fullName;
+//   final String? phoneNumber;
+//   final String? email;
+//
+//   User({
+//     this.id,
+//     this.fullName,
+//     this.phoneNumber,
+//     this.email,
+//   });
+//
+//   factory User.fromJson(Map<String, dynamic> json) =>
+//       User(
+//         id: json["id"],
+//         fullName: json["full_name"] ?? '',
+//         phoneNumber: json["phone_number"] ?? '',
+//         email: json["email"] ?? '',
+//       );
+//
+//   Map<String, dynamic> toJson() =>
+//       {
+//         'id': id,
+//         'fullName': fullName,
+//         'phoneNumber': phoneNumber,
+//         'email': email,
+//
+//
+//       };
+// }

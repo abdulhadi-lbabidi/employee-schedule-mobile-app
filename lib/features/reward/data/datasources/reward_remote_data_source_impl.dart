@@ -2,17 +2,17 @@ import 'package:dio/dio.dart';
 import '../../../../core/unified_api/api_variables.dart';
 import 'reward_remote_data_source.dart';
 import '../models/reward_model.dart';
+import 'package:injectable/injectable.dart';
 
-class RewardRemoteDataSourceImpl implements RewardRemoteDataSource {
+@lazySingleton
+class RewardRemoteDataSourceImpl {
   final Dio dio;
-  final ApiVariables apiVariables = ApiVariables();
 
   RewardRemoteDataSourceImpl({required this.dio});
 
-  @override
   Future<List<RewardModel>> getAdminRewards() async {
     try {
-      final response = await dio.getUri(apiVariables.adminRewards());
+      final response = await dio.getUri(ApiVariables.adminRewards());
       if (response.statusCode == 200) {
         return (response.data['data'] as List)
             .map((json) => RewardModel.fromJson(json))
@@ -25,10 +25,9 @@ class RewardRemoteDataSourceImpl implements RewardRemoteDataSource {
     }
   }
 
-  @override
   Future<List<RewardModel>> getEmployeeRewards(String employeeId) async {
     try {
-      final response = await dio.getUri(apiVariables.employeeRewards(employeeId));
+      final response = await dio.getUri(ApiVariables.employeeRewards(employeeId));
       if (response.statusCode == 200) {
         return (response.data['data'] as List)
             .map((json) => RewardModel.fromJson(json))
@@ -41,7 +40,6 @@ class RewardRemoteDataSourceImpl implements RewardRemoteDataSource {
     }
   }
 
-  @override
   Future<void> issueReward({
     required String employeeId,
     required String employeeName,
@@ -49,9 +47,10 @@ class RewardRemoteDataSourceImpl implements RewardRemoteDataSource {
     required String adminName,
     required double amount,
     required String reason,
-  }) async {
+  })
+  async {
     try {
-      final response = await dio.postUri(apiVariables.issueReward(), data: {
+      final response = await dio.postUri(ApiVariables.issueReward(), data: {
         'employee_id': employeeId,
         'employee_name': employeeName,
         'admin_id': adminId,

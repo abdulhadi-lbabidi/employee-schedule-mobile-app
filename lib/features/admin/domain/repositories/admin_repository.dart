@@ -21,6 +21,6 @@ abstract class AdminRepository {
     double? longitude,
     double radius = 200,
   });
-  Future<void> deleteWorkshop(String id);
+  Future<void> deleteWorkshop(int id);
   Future<void> toggleWorkshopArchive(String id, bool isArchived);
 }

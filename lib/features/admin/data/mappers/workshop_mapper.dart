@@ -4,7 +4,7 @@ import '../models/workshop_model.dart';
 class WorkshopMapper {
   static WorkshopEntity toEntity(WorkshopModel model) {
     return WorkshopEntity(
-      id: model.id?.toString() ?? '0',
+      id: model.id?? 0,
       name: model.name ?? 'Unknown',
       latitude: model.latitude?.toDouble(),
       longitude: model.longitude?.toDouble(),

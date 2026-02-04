@@ -1,22 +1,23 @@
 import '../model/notification_model.dart';
 import 'notification_remote_data_source.dart';
+import 'package:injectable/injectable.dart';
 
-class NotificationRemoteDataSourceMock implements NotificationRemoteDataSource {
+@lazySingleton
+class NotificationRemoteDataSourceMock  {
   final List<NotificationModel> _mockNotifications = [];
 
-  @override
   Future<List<NotificationModel>> fetchNotifications() async {
     await Future.delayed(const Duration(milliseconds: 500));
     return _mockNotifications;
   }
 
-  @override
   Future<void> sendNotification({
     required String title, 
     required String body, 
     String? targetWorkshop,
     String? targetEmployeeId, // 🔹 تم إضافة الحقل المفقود هنا
-  }) async {
+  })
+  async {
     await Future.delayed(const Duration(milliseconds: 500));
     
     final newNotif = NotificationModel(
@@ -32,7 +33,6 @@ class NotificationRemoteDataSourceMock implements NotificationRemoteDataSource {
     print('MOCK NOTIF API: Notification Sent to $targetEmployeeId in $targetWorkshop');
   }
 
-  @override
   Future<void> deleteNotification(String id) async {
     await Future.delayed(const Duration(milliseconds: 300));
     _mockNotifications.removeWhere((n) => n.id == id);

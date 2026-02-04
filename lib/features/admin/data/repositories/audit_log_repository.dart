@@ -1,6 +1,7 @@
 import 'package:hive/hive.dart';
 import '../models/audit_log_model.dart';
-
+import 'package:injectable/injectable.dart';
+@lazySingleton
 class AuditLogRepository {
   final Box<AuditLogModel> _box;
 

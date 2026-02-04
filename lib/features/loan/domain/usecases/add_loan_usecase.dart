@@ -1,6 +1,7 @@
 import '../entities/loan_entity.dart';
 import '../repositories/loan_repository.dart';
-
+import 'package:injectable/injectable.dart';
+@lazySingleton
 class AddLoanUseCase {
   final LoanRepository repository;
 

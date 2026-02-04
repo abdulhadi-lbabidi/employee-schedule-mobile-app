@@ -1,23 +1,24 @@
-import 'package:dio/dio.dart';
+import 'package:injectable/injectable.dart';
+
 import '../../../../core/unified_api/api_variables.dart';
 import '../../../../core/unified_api/base_api.dart';
 import '../models/workshop_model.dart';
-import 'workshop_remote_data_source.dart';
 
-class WorkshopRemoteDataSourceImpl extends BaseApi implements WorkshopRemoteDataSource {
-  final ApiVariables apiVariables = ApiVariables();
+@lazySingleton
+class WorkshopRemoteDataSource {
+  final BaseApi _baseApi;
 
-  WorkshopRemoteDataSourceImpl({required Dio dio}) : super(dio);
+  WorkshopRemoteDataSource({required BaseApi baseApi}) : _baseApi = baseApi;
 
   @override
   Future<List<WorkshopModel>> getWorkshops() async {
-    final response = await dio.getUri(apiVariables.workshops());
-    
+    final response = await _baseApi.get(ApiVariables.workshops());
+
     if (response.statusCode == 200) {
       // تصحيح: التحقق إذا كانت البيانات تأتي داخل مفتاح 'data'
       final dynamic rawData = response.data;
       List<dynamic> list;
-      
+
       if (rawData is Map && rawData.containsKey('data')) {
         list = rawData['data'] as List;
       } else if (rawData is List) {
@@ -25,8 +26,10 @@ class WorkshopRemoteDataSourceImpl extends BaseApi implements WorkshopRemoteData
       } else {
         throw Exception('Unexpected data format: ${rawData.runtimeType}');
       }
-      
-      return list.map((e) => WorkshopModel.fromJson(e as Map<String, dynamic>)).toList();
+
+      return list
+          .map((e) => WorkshopModel.fromJson(e as Map<String, dynamic>))
+          .toList();
     } else {
       throw Exception('Failed to load workshops: ${response.statusCode}');
     }

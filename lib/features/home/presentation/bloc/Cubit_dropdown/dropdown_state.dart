@@ -1,18 +1,35 @@
+import 'package:untitled8/features/Attendance/data/models/attendance_model.dart';
+
+import '../../../../admin/domain/entities/workshop_entity.dart';
+
 class DropdownState {
-  final String? selectedValue;
+  final WorkshopEntity? selectedValue;
+  final AttendanceModel? localeAttendanceModel;
+  final AttendanceModel? setLocaleAttendanceForLogOut;
 
-  DropdownState({required this.selectedValue});
+  DropdownState({
+    this.selectedValue,
+    this.localeAttendanceModel,
+    this.setLocaleAttendanceForLogOut,
+  });
 
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-          other is DropdownState &&
-              runtimeType == other.runtimeType &&
-              selectedValue == other.selectedValue;
-
-  @override
-  int get hashCode => selectedValue.hashCode;
-
-  @override
-  String toString() => 'DropdownState(selectedValue: $selectedValue)';
+  DropdownState copyWith({
+    Object? selectedValue = _unset,
+    Object? localeAttendanceModel = _unset,
+    Object? setLocaleAttendanceForLogOut = _unset,
+  }) {
+    return DropdownState(
+      selectedValue: identical(selectedValue, _unset)
+          ? this.selectedValue
+          : selectedValue as WorkshopEntity?,
+      localeAttendanceModel: identical(localeAttendanceModel, _unset)
+          ? this.localeAttendanceModel
+          : localeAttendanceModel as AttendanceModel?,
+      setLocaleAttendanceForLogOut: identical(setLocaleAttendanceForLogOut, _unset)
+          ? this.setLocaleAttendanceForLogOut
+          : setLocaleAttendanceForLogOut as AttendanceModel?,
+    );
+  }
 }
+
+const _unset = Object();

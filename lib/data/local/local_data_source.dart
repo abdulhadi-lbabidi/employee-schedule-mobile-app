@@ -1,66 +1,100 @@
 import 'package:hive/hive.dart';
+import 'package:injectable/injectable.dart';
+import '../../core/hive_service.dart';
 import '../../features/Attendance/data/models/attendance_record.dart';
 import '../../features/admin/data/models/workshop_model.dart';
 
+@lazySingleton
 class LocalDataSource {
-  final Box settingsBox;
-  final Box<AttendanceRecord> attendanceBox;
-  final Box<AttendanceRecord> pendingBox;
-  final Box<WorkshopModel> workshopsBox;
+  final HiveService hiveService;
 
-  LocalDataSource({
-    required this.settingsBox,
-    required this.attendanceBox,
-    required this.pendingBox,
-    required this.workshopsBox,
-  });
+  LocalDataSource({required this.hiveService});
 
-  Future<void> saveToken(String token) => settingsBox.put('auth_token', token);
-  String? getToken() => settingsBox.get('auth_token');
+  /// 🔹 الحصول على Boxes من HiveService
+  Future<Box> get _settingsBox async => await hiveService.settingsBox;
+  Future<Box<AttendanceRecord>> get _attendanceBox async =>
+      await hiveService.attendanceBox;
+  Future<Box<AttendanceRecord>> get _pendingBox async =>
+      await hiveService.pendingAttendanceBox;
+  Future<Box<WorkshopModel>> get _workshopsBox async =>
+      await hiveService.workshopBox;
 
+  /// 🔹 تخزين التوكن
+  Future<void> saveToken(String token) async {
+    final box = await _settingsBox;
+    await box.put('auth_token', token);
+  }
+
+  /// 🔹 الحصول على التوكن
+  Future<String?> getToken() async {
+    final box = await _settingsBox;
+    return box.get('auth_token');
+  }
+
+  /// 🔹 حفظ قائمة الورش
   Future<void> saveWorkshops(List<WorkshopModel> list) async {
-    await workshopsBox.clear();
+    final box = await _workshopsBox;
+    await box.clear();
     for (var w in list) {
-      await workshopsBox.add(w);
+      await box.add(w);
     }
   }
 
-  List<WorkshopModel> getWorkshops() {
-    return workshopsBox.values.cast<WorkshopModel>().toList();
+  /// 🔹 جلب كل الورش
+  Future<List<WorkshopModel>> getWorkshops() async {
+    final box = await _workshopsBox;
+    return box.values.cast<WorkshopModel>().toList();
   }
 
+  /// 🔹 إضافة حضور مؤقت (Pending)
   Future<void> addPendingAttendance(AttendanceRecord rec) async {
-    await pendingBox.add(rec);
+    final box = await _pendingBox;
+    await box.add(rec);
   }
 
+  /// 🔹 تحديث سجل حضور
   Future<void> updateAttendanceRecord(AttendanceRecord rec) async {
-    await attendanceBox.add(rec); 
+    final box = await _attendanceBox;
+    await box.add(rec);
   }
 
+  /// 🔹 تحديث سجل حضور باستخدام المفتاح
   Future<void> updateAttendanceRecordWithKey(dynamic key, AttendanceRecord rec) async {
-    await attendanceBox.put(key, rec);
+    final box = await _attendanceBox;
+    await box.put(key, rec);
   }
 
-  Map<dynamic, AttendanceRecord> getPendingEntries() {
+  /// 🔹 الحصول على سجلات الحضور المعلقة
+  Future<Map<dynamic, AttendanceRecord>> getPendingEntries() async {
+    final pending = await _pendingBox;
+    final attendance = await _attendanceBox;
     final Map<dynamic, AttendanceRecord> result = {};
-    for (var key in pendingBox.keys) {
-      final rec = pendingBox.get(key);
+
+    for (var key in pending.keys) {
+      final rec = pending.get(key);
       if (rec != null) result[key] = rec;
     }
-    for (var key in attendanceBox.keys) {
-      final rec = attendanceBox.get(key);
+
+    for (var key in attendance.keys) {
+      final rec = attendance.get(key);
       if (rec != null && rec.syncStatus == 'pending') {
         result['main_$key'] = rec;
       }
     }
+
     return result;
   }
 
-  List<AttendanceRecord> getPendingAttendance() {
-    return getPendingEntries().values.toList();
+  /// 🔹 الحصول على قائمة الحضور المعلق
+  Future<List<AttendanceRecord>> getPendingAttendance() async {
+    final entries = await getPendingEntries();
+    return entries.values.toList();
   }
 
+  /// 🔹 حفظ حضور من السيرفر
   Future<void> saveAttendanceFromServer(List<Map<String, dynamic>> items) async {
+    final box = await _attendanceBox;
+
     for (var it in items) {
       final String? checkIn = it['checkInMillis']?.toString() ?? it['check_in']?.toString();
       final String? checkOut = it['checkOutMillis']?.toString() ?? it['check_out']?.toString();
@@ -78,44 +112,48 @@ class LocalDataSource {
         syncStatus: 'synced',
       );
 
-      bool exists = attendanceBox.values.any((element) => 
-        element.checkInMillis == checkIn && 
-        element.workshopNumber == rec.workshopNumber
-      );
+      final exists = box.values.any((element) =>
+      element.checkInMillis == checkIn &&
+          element.workshopNumber == rec.workshopNumber);
 
       if (!exists) {
-        await attendanceBox.add(rec);
+        await box.add(rec);
       }
     }
   }
 
-  List<AttendanceRecord> getAttendance() {
-    return attendanceBox.values.cast<AttendanceRecord>().toList();
+  /// 🔹 جلب كل سجلات الحضور
+  Future<List<AttendanceRecord>> getAttendance() async {
+    final box = await _attendanceBox;
+    return box.values.cast<AttendanceRecord>().toList();
   }
 
+  /// 🔹 حذف الحضور الأقدم من تاريخ محدد
   Future<void> pruneAttendanceOlderThan(DateTime cutoff) async {
+    final box = await _attendanceBox;
     final keysToDelete = <dynamic>[];
 
-    for (var key in attendanceBox.keys) {
-      final r = attendanceBox.get(key) as AttendanceRecord;
-      final created = r.checkInTime; 
-
-      if (created != null) {
-        if (created.isBefore(cutoff) && r.syncStatus == 'synced') {
-          keysToDelete.add(key);
-        }
+    for (var key in box.keys) {
+      final r = box.get(key) as AttendanceRecord;
+      final created = r.checkInTime;
+      if (created != null && created.isBefore(cutoff) && r.syncStatus == 'synced') {
+        keysToDelete.add(key);
       }
     }
 
     for (var k in keysToDelete) {
-      await attendanceBox.delete(k);
+      await box.delete(k);
     }
   }
 
+  /// 🔹 حذف سجل حضور معلق باستخدام المفتاح
   Future<void> removePendingByKey(dynamic key) async {
+    final box = await _pendingBox;
     if (key is String && key.startsWith('main_')) {
+      // لا تفعل شيء للحضور الرئيسي لأنه موجود في attendanceBox
     } else {
-      await pendingBox.delete(key);
+      await box.delete(key);
     }
   }
 }
+

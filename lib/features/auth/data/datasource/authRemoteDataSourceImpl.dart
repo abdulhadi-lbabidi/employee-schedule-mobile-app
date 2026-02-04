@@ -1,58 +1,50 @@
-import 'package:dartz/dartz.dart';
-import 'package:dio/dio.dart';
+import 'package:untitled8/core/unified_api/handling_api_manager.dart';
 import '../../../../core/unified_api/api_variables.dart';
 import '../../../../core/unified_api/base_api.dart';
-import '../../../../core/unified_api/failures.dart';
 import '../model/login_response.dart';
-import 'auth_remote_data_source.dart';
+import 'package:injectable/injectable.dart';
 
-class AuthRemoteDataSourceImpl extends BaseApi implements AuthRemoteDataSource {
-  final ApiVariables apiVariables = ApiVariables();
+@lazySingleton
+class AuthRemoteDataSourceImpl with HandlingApiManager {
+  final BaseApi _baseApi;
 
-  AuthRemoteDataSourceImpl({required Dio dio}) : super(dio);
+  AuthRemoteDataSourceImpl({required BaseApi baseApi}) : _baseApi = baseApi;
 
-  @override
   Future<LoginResponse> login({
     required String email,
     required String password,
-  }) async {
-    // سنستخدم الـ raw call هنا لأننا سنعالج النتيجة في الـ Repository 
-    // أو يمكننا استخدام wrapHandling إذا أردنا توحيد الأخطاء
-    final response = await dio.postUri(
-      apiVariables.login(),
-      data: {
-        'email': email,
-        'password': password,
-      },
+  })
+  async {
+    return wrapHandlingApi(
+      tryCall:
+          () => _baseApi.post(
+            ApiVariables.login(),
+            data: {'email': email, 'password': password},
+          ),
+      jsonConvert: loginResponseFromJson,
     );
-    return LoginResponse.fromJson(response.data);
   }
 
-  @override
-  Future<bool> verifyToken(String token) async {
+  Future<bool> verifyToken(String token)
+  async {
     try {
-      final response = await dio.getUri(
-        apiVariables.verifyToken(),
-        options: Options(
-          headers: {'Authorization': 'Bearer $token'},
-        ),
-      );
+      final response = await _baseApi.get(ApiVariables.verifyToken());
       return response.statusCode == 200;
     } catch (_) {
       return false;
     }
   }
 
-  @override
   Future<LoginResponse> register({
     required String username,
     required String password,
     required String email,
     required String fullName,
     required String role,
-  }) async {
-    final response = await dio.postUri(
-      apiVariables.register(),
+  })
+  async {
+    final response = await _baseApi.post(
+      ApiVariables.register(),
       data: {
         'username': username,
         'password': password,
@@ -63,4 +55,17 @@ class AuthRemoteDataSourceImpl extends BaseApi implements AuthRemoteDataSource {
     );
     return LoginResponse.fromJson(response.data);
   }
+
+
+  Future<LoginResponse> getMe()
+  async {
+    return wrapHandlingApi(
+      tryCall:
+          () => _baseApi.get(
+        ApiVariables.getProfile(),
+      ),
+      jsonConvert: loginResponseFromJson,
+    );
+  }
+
 }

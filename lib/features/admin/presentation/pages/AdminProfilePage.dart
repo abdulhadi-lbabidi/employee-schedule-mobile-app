@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_animate/flutter_animate.dart'; // 🔹 إضافة مكتبة الانميشن
-import '../../../../core/di/service_locator.dart';
+import '../../../../core/di/injection.dart';
 import '../bloc/admin_profile/admin_profile_bloc.dart';
 import 'package:untitled8/features/auth/presentation/bloc/login_Cubit/login_cubit.dart';
 import 'package:untitled8/features/SplashScreen/presentation/page/splashScareen.dart';

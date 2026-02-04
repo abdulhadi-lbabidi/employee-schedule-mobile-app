@@ -4,7 +4,8 @@ import '../datasources/loan_remote_data_source.dart';
 import '../datasources/loan_local_data_source.dart';
 import '../models/loan_model.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
-
+import 'package:injectable/injectable.dart';
+@LazySingleton(as: LoanRepository)
 class LoanRepositoryImpl implements LoanRepository {
   final LoanRemoteDataSource remoteDataSource;
   final LoanLocalDataSource localDataSource;

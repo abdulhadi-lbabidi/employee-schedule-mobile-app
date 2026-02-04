@@ -1,81 +1,126 @@
 import 'package:dio/dio.dart';
-import 'package:dartz/dartz.dart';
-import 'failures.dart';
-import 'handling_exception_manager.dart';
+import 'package:injectable/injectable.dart';
+import '../../common/helper/src/app_varibles.dart';
+import '../../common/helper/src/helper_func.dart';
+import 'logger_interceptor.dart';
 
-class BaseApi with HandlingExceptionManager {
-  final Dio dio;
+@lazySingleton
+class BaseApi {
+  final LoggerInterceptor loggingInterceptor;
+  late Dio dio;
 
-  BaseApi(this.dio); // إزالة إضافة الـ Interceptor من هنا لتجنب التكرار
+  BaseApi(Dio dioC, {required this.loggingInterceptor}) {
+    dio = dioC;
+    dio
+      ..options.connectTimeout = const Duration(milliseconds: 30000)
+      ..options.receiveTimeout = const Duration(milliseconds: 30000)
+      ..httpClientAdapter
+      ..options.headers = {
+        'Accept': 'application/json',
+        if (HelperFunc.isAuth())
+          "Authorization": "Bearer ${AppVariables.token}",
+      };
+    dio.interceptors.clear();
+    dio.interceptors.addAll([loggingInterceptor]);
+  }
 
-  /// تنفيذ طلب GET بطريقة آمنة
-  Future<Either<Failure, T>> get<T>({
-    required Uri uri,
-    required T Function(dynamic json) fromJson,
+  resetHeader() {
+    dio.options.headers.clear();
+    dio
+      ..options.connectTimeout = const Duration(milliseconds: 30000)
+      ..options.receiveTimeout = const Duration(milliseconds: 30000)
+      ..httpClientAdapter
+      ..options.headers = {
+        'Accept': 'application/json',
+        if (HelperFunc.isAuth())
+          "Authorization": "Bearer ${AppVariables.token}",
+      };
+    dio.interceptors.clear();
+    dio.interceptors.add(loggingInterceptor);
+  }
+
+  Future<Response> get(
+    Uri uri, {
+    Options? options,
+    CancelToken? cancelToken,
+    ProgressCallback? onReceiveProgress,
+    data,
+  }) async {
+    return await dio.getUri(
+      uri,
+      data: data,
+      options: options,
+      cancelToken: cancelToken,
+      onReceiveProgress: onReceiveProgress,
+    );
+  }
+
+  Future<Response> post(
+    Uri uri, {
+    data,
+    Options? options,
+    CancelToken? cancelToken,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  }) async {
+    return await dio.postUri(
+      uri,
+      data: data,
+      options: options,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
+  }
+
+  Future<Response> put(
+    Uri uri, {
+    data,
+    Options? options,
+    CancelToken? cancelToken,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  }) async {
+    return await dio.putUri(
+      uri,
+      data: data,
+      options: options,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
+  }
+
+  Future<Response> patch(
+    Uri uri, {
+    data,
+    Options? options,
+    CancelToken? cancelToken,
+    ProgressCallback? onSendProgress,
+    ProgressCallback? onReceiveProgress,
+  }) async {
+    return await dio.patchUri(
+      uri,
+      data: data,
+      options: options,
+      cancelToken: cancelToken,
+      onSendProgress: onSendProgress,
+      onReceiveProgress: onReceiveProgress,
+    );
+  }
+
+  Future<Response> delete(
+    Uri uri, {
+    data,
     Map<String, dynamic>? queryParameters,
+    Options? options,
+    CancelToken? cancelToken,
   }) async {
-    return wrapHandling(
-      tryCall: () async {
-        Uri finalUri = uri;
-        if (queryParameters != null && queryParameters.isNotEmpty) {
-          finalUri = uri.replace(
-            queryParameters: {
-              ...uri.queryParameters,
-              ...queryParameters.map((key, value) => MapEntry(key, value.toString())),
-            },
-          );
-        }
-        
-        final response = await dio.getUri(finalUri);
-        return fromJson(response.data);
-      },
-    );
-  }
-
-  /// تنفيذ طلب POST بطريقة آمنة
-  Future<Either<Failure, T>> post<T>({
-    required Uri uri,
-    required T Function(dynamic json) fromJson,
-    dynamic body,
-  }) async {
-    return wrapHandling(
-      tryCall: () async {
-        final response = await dio.postUri(
-          uri,
-          data: body,
-        );
-        return fromJson(response.data);
-      },
-    );
-  }
-
-  /// تنفيذ طلب PUT بطريقة آمنة
-  Future<Either<Failure, T>> put<T>({
-    required Uri uri,
-    required T Function(dynamic json) fromJson,
-    dynamic body,
-  }) async {
-    return wrapHandling(
-      tryCall: () async {
-        final response = await dio.putUri(
-          uri,
-          data: body,
-        );
-        return fromJson(response.data);
-      },
-    );
-  }
-
-  /// تنفيذ طلب DELETE بطريقة آمنة
-  Future<Either<Failure, T>> delete<T>({
-    required Uri uri,
-    required T Function(dynamic json) fromJson,
-  }) async {
-    return wrapHandling(
-      tryCall: () async {
-        final response = await dio.deleteUri(uri);
-        return fromJson(response.data);
-      },
+    return await dio.deleteUri(
+      uri,
+      data: data,
+      options: options,
+      cancelToken: cancelToken,
     );
   }
 }

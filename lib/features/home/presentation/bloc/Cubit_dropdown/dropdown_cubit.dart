@@ -1,28 +1,52 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:untitled8/common/helper/src/app_varibles.dart';
+import 'package:untitled8/features/Attendance/data/models/attendance_model.dart';
+import '../../../../admin/domain/entities/workshop_entity.dart';
 import 'dropdown_state.dart';
+import 'package:injectable/injectable.dart';
 
+@injectable
 class DropdownCubit extends Cubit<DropdownState> {
-  // لم يعد هذا الـ Cubit مسؤولاً عن جلب الورشات، لذا يمكن إزالة getWorkshopsUseCase
-  DropdownCubit() : super(DropdownState(selectedValue: null));
+  DropdownCubit() : super(DropdownState());
 
   /// تغيير القيمة المختارة (اسم الورشة)
-  void changeValue(String newValue) {
-    emit(DropdownState(selectedValue: newValue));
+  void changeValue(WorkshopEntity newValue) {
+    emit(state.copyWith(selectedValue: newValue));
   }
 
-  /// إعادة تعيين الـ Dropdown
-  void reset() {
-    print('🔄 Dropdown Reset');
-    emit(DropdownState(selectedValue: null));
+  void initDropDown() {
+    emit(
+      state.copyWith(
+        selectedValue: AppVariables.selectedWorkShop,
+        localeAttendanceModel: AppVariables.localeAttendance,
+      ),
+    );
   }
 
-  /// الحصول على القيمة المختارة الحالية
-  String? getSelectedValue() {
-    return state.selectedValue;
+  void clearSelected() {
+    AppVariables.clearSelectedWorkShop();
+    AppVariables.clearLocaleAttendance();
+    emit(state.copyWith(selectedValue: null, localeAttendanceModel: null));
   }
 
-  /// التحقق من وجود قيمة مختارة
-  bool hasSelectedValue() {
-    return state.selectedValue != null && state.selectedValue!.isNotEmpty;
+  void clearSelected2() {
+    emit(state.copyWith(setLocaleAttendanceForLogOut: null));
+  }
+
+  void changeAttendance({
+    required AttendanceModel newValue,
+    required WorkshopEntity workshopEntity,
+  }) {
+    AppVariables.localeAttendance = newValue;
+    AppVariables.selectedWorkShop = workshopEntity;
+
+
+    emit(
+      state.copyWith(
+        localeAttendanceModel: newValue,
+        setLocaleAttendanceForLogOut: newValue,
+        selectedValue: workshopEntity,
+      ),
+    );
   }
 }

@@ -1,16 +1,22 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:hive/hive.dart';
+import '../../../../../core/hive_service.dart';
 import 'active_unactive_state.dart';
+import 'package:injectable/injectable.dart';
 
+
+
+@injectable
 class ActiveUnactiveCubit extends Cubit<ActiveUnactiveState> {
-  final Box statusBox;
+  final HiveService _hiveService;
 
-  ActiveUnactiveCubit({required this.statusBox}) : super(ActiveUnactiveState.initial()) {
+  ActiveUnactiveCubit(this._hiveService) : super(ActiveUnactiveState.initial()) {
     _loadPersistedStatus();
   }
 
-  // استعادة الحالة من Hive عند تشغيل التطبيق
-  void _loadPersistedStatus() {
+  /// استعادة الحالة عند تشغيل التطبيق
+  Future<void> _loadPersistedStatus() async {
+    final statusBox = await _hiveService.attendanceStatusBox;
+
     final savedStatus = statusBox.get("status", defaultValue: "inactive");
     final savedCheckIn = statusBox.get("checkIn");
 
@@ -22,11 +28,12 @@ class ActiveUnactiveCubit extends Cubit<ActiveUnactiveState> {
     }
   }
 
-  void checkIn() {
+  Future<void> checkIn() async {
+    final statusBox = await _hiveService.attendanceStatusBox;
     final now = DateTime.now();
-    // الحفظ في Hive لضمان البقاء بعد الإغلاق
-    statusBox.put("status", "active");
-    statusBox.put("checkIn", now.toIso8601String());
+
+    await statusBox.put("status", "active");
+    await statusBox.put("checkIn", now.toIso8601String());
 
     emit(state.copyWith(
       status: ActiveUnactiveStatue.active,
@@ -35,10 +42,11 @@ class ActiveUnactiveCubit extends Cubit<ActiveUnactiveState> {
     ));
   }
 
-  void checkOut() {
-    // تحديث Hive
-    statusBox.put("status", "inactive");
-    statusBox.delete("checkIn");
+  Future<void> checkOut() async {
+    final statusBox = await _hiveService.attendanceStatusBox;
+
+    await statusBox.put("status", "inactive");
+    await statusBox.delete("checkIn");
 
     emit(state.copyWith(
       status: ActiveUnactiveStatue.inactive,

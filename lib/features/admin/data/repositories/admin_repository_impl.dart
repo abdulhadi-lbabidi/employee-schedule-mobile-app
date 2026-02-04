@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:injectable/injectable.dart';
 import '../../domain/entities/employee_entity.dart';
 import '../../domain/entities/workshop_entity.dart';
 import '../../domain/repositories/admin_repository.dart';
@@ -8,7 +9,7 @@ import '../mappers/employee_to_datum_mapper.dart';
 import '../mappers/workshop_mapper.dart';
 import '../models/employee model/employee_model.dart';
 
-
+@LazySingleton(as: AdminRepository)
 class AdminRepositoryImpl implements AdminRepository {
   final AdminRemoteDataSource remote;
 
@@ -142,7 +143,7 @@ class AdminRepositoryImpl implements AdminRepository {
   }
 
   @override
-  Future<void> deleteWorkshop(String id) {
+  Future<void> deleteWorkshop(int id) {
     return remote.deleteWorkshop(id);
   }
 

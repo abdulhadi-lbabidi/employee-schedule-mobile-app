@@ -21,7 +21,7 @@ abstract class AdminRemoteDataSource {
     double? longitude,
     double radius,
   });
-  Future<void> deleteWorkshop(String id);
+  Future<void> deleteWorkshop(int id);
   Future<void> toggleWorkshopArchive(String id, bool isArchived);
 
   // Rates

@@ -1,5 +1,7 @@
-import '../repositories/admin_repository.dart';
+import 'package:injectable/injectable.dart';
 
+import '../repositories/admin_repository.dart';
+@lazySingleton
 class AddWorkshopUseCase {
   final AdminRepository repository;
 
