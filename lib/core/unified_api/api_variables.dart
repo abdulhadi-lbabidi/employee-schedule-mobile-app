@@ -104,11 +104,11 @@ class ApiVariables {
   // --- Loans ---
   static Uri adminLoans() => _mainUri('/api/loans');
 
-  static Uri employeeLoans(String empId) => _mainUri('/api/loans/$empId');
+  static Uri employeeLoans(int empId) => _mainUri('/api/loans/$empId');
 
-  static Uri updateLoanStatus(String loanId) => _mainUri('/api/loans/$loanId');
+  static Uri updateLoanStatus(int loanId) => _mainUri('/api/loans/$loanId');
 
-  static Uri archiveLoans(String loanId) => _mainUri('/api/loans/$loanId');
+  static Uri archiveLoans(int loanId) => _mainUri('/api/loans/$loanId');
 
   static Uri archiveRestoreLoans(String loanId) =>
       _mainUri('/api/loans/$loanId/restore');
@@ -124,9 +124,9 @@ class ApiVariables {
   static Uri addLoan() => _mainUri('/api/loans');
 
   // دالتان إضافيتان مطلوبة من قبل الـ DataSource
-  static Uri loanStatus(String id) => _mainUri('/api/loans/$id/status');
+  static Uri loanStatus(int id) => _mainUri('/api/loans/$id/status');
 
-  static Uri loanPayments(String id) => _mainUri('/api/loans/$id/payments');
+  static Uri loanPayments(int id) => _mainUri('/api/loans/$id/payments');
 
   // --- Rewards ---
   static Uri adminRewards() => _mainUri('/api/rewards/admin');

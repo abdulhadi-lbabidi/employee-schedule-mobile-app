@@ -1,51 +1,57 @@
-import 'package:dio/dio.dart';
+import 'package:untitled8/core/unified_api/base_api.dart';
+import 'package:untitled8/core/unified_api/handling_api_manager.dart';
 import '../../../../core/unified_api/api_variables.dart';
-import '../../domain/entities/loan_entity.dart';
-import '../models/loan_model.dart';
-import 'loan_remote_data_source.dart';
+import '../../domain/usecases/add_loan_usecase.dart';
+import '../models/get_all_loan_response.dart';
 import 'package:injectable/injectable.dart';
-@LazySingleton(as: LoanRemoteDataSource)
-class LoanRemoteDataSourceImpl implements LoanRemoteDataSource {
-  final Dio dio;
 
+@lazySingleton
+class LoanRemoteDataSourceImpl with HandlingApiManager {
+  final BaseApi _baseApi;
 
-  LoanRemoteDataSourceImpl(this.dio);
+  LoanRemoteDataSourceImpl({required BaseApi baseApi}) : _baseApi = baseApi;
 
-  @override
-  Future<List<LoanModel>> getAllLoans() async {
-    final response = await dio.getUri(ApiVariables.adminLoans());
-    final List list = response.data['data'];
-    return list.map((e) => LoanModel.fromJson(e)).toList();
-  }
-
-  @override
-  Future<List<LoanModel>> getEmployeeLoans(String employeeId) async {
-    final response = await dio.getUri(ApiVariables.employeeLoans(employeeId));
-    final List list = response.data['data'];
-    return list.map((e) => LoanModel.fromJson(e)).toList();
-  }
-
-  @override
-  Future<void> addLoan(LoanModel loan) async {
-    await dio.postUri(
-      ApiVariables.adminLoans(),
-      data: loan.toJson(),
+  Future<GetAllLoansResponse> getAllLoans() async {
+    return wrapHandlingApi(
+      tryCall: () => _baseApi.get(ApiVariables.adminLoans()),
+      jsonConvert: getAllLoansResponseFromJson
     );
   }
 
-  @override
-  Future<void> updateLoanStatus(String loanId, LoanStatus status) async {
-    await dio.putUri(
-      ApiVariables.loanStatus(loanId),
-      data: {'status': status.toString().split('.').last},
+  Future<GetAllLoansResponse> getEmployeeLoans(int employeeId) async {
+    return wrapHandlingApi(
+      tryCall: () => _baseApi.get(ApiVariables.employeeLoans(employeeId)),
+      jsonConvert: getAllLoansResponseFromJson
     );
   }
 
-  @override
-  Future<void> recordPayment(String loanId, double amount) async {
-    await dio.postUri(
-      ApiVariables.loanPayments(loanId),
-      data: {'amount': amount},
+  Future<void> addLoan(AddLoanParams loan) async {
+    return wrapHandlingApi(
+      tryCall:
+          () => _baseApi.post(ApiVariables.adminLoans(), data: loan.getBody()),
+      jsonConvert: (_) {},
+    );
+  }
+
+  Future<void> updateLoanStatus(int loanId, int amount) async {
+    return wrapHandlingApi(
+      tryCall:
+          () => _baseApi.put(
+            ApiVariables.loanStatus(loanId),
+            data: {'amount': amount},
+          ),
+      jsonConvert: (_) {},
+    );
+  }
+
+  Future<void> recordPayment(int loanId, double amount) async {
+    return wrapHandlingApi(
+      tryCall:
+          () => _baseApi.post(
+            ApiVariables.loanPayments(loanId),
+            data: {'amount': amount},
+          ),
+      jsonConvert: (_) {},
     );
   }
 }

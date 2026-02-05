@@ -95,12 +95,8 @@ import '../../features/home/presentation/bloc/finance/finance_bloc.dart'
     as _i964;
 import '../../features/loan/data/datasources/loan_local_data_source.dart'
     as _i251;
-import '../../features/loan/data/datasources/loan_remote_data_source.dart'
-    as _i630;
 import '../../features/loan/data/datasources/loan_remote_data_source_impl.dart'
     as _i851;
-import '../../features/loan/data/datasources/loan_remote_data_source_mock.dart'
-    as _i942;
 import '../../features/loan/data/repositories/loan_repository_impl.dart'
     as _i609;
 import '../../features/loan/domain/repositories/loan_repository.dart' as _i415;
@@ -172,12 +168,12 @@ _i174.GetIt $initGetIt(
   gh.singleton<_i558.FlutterSecureStorage>(
       () => injectableModule.secureStorage);
   gh.lazySingleton<_i424.LoggerInterceptor>(() => _i424.LoggerInterceptor());
-  gh.lazySingleton<_i942.LoanRemoteDataSourceMock>(
-      () => _i942.LoanRemoteDataSourceMock());
   gh.lazySingleton<_i1064.NotificationRemoteDataSourceMock>(
       () => _i1064.NotificationRemoteDataSourceMock());
   gh.lazySingleton<_i278.RewardRemoteDataSourceMock>(
       () => _i278.RewardRemoteDataSourceMock());
+  gh.lazySingleton<_i251.LoanLocalDataSource>(
+      () => _i251.LoanLocalDataSource(gh<_i460.SharedPreferences>()));
   gh.lazySingleton<_i517.AdminRemoteDataSource>(
       () => _i14.AdminRemoteDataSourceImpl(gh<_i361.Dio>()));
   gh.lazySingleton<_i583.AdminRepository>(
@@ -214,8 +210,6 @@ _i174.GetIt $initGetIt(
       () => _i36.ActiveUnactiveCubit(gh<_i351.HiveService>()));
   gh.factory<_i492.ButtonCubit>(
       () => _i492.ButtonCubit(gh<_i351.HiveService>()));
-  gh.lazySingleton<_i630.LoanRemoteDataSource>(
-      () => _i851.LoanRemoteDataSourceImpl(gh<_i361.Dio>()));
   gh.lazySingleton<_i18.LocalDataSource>(
       () => _i18.LocalDataSource(hiveService: gh<_i351.HiveService>()));
   gh.lazySingleton<_i893.BaseApi>(() => _i893.BaseApi(
@@ -244,19 +238,20 @@ _i174.GetIt $initGetIt(
         local: gh<_i18.LocalDataSource>(),
         connectivity: gh<_i895.Connectivity>(),
       ));
-  gh.lazySingleton<_i415.LoanRepository>(() => _i609.LoanRepositoryImpl(
-        remoteDataSource: gh<_i630.LoanRemoteDataSource>(),
-        localDataSource: gh<_i251.LoanLocalDataSource>(),
-        connectivity: gh<_i895.Connectivity>(),
-      ));
   gh.lazySingleton<_i1069.WorkshopRemoteDataSource>(
       () => _i1069.WorkshopRemoteDataSource(baseApi: gh<_i893.BaseApi>()));
   gh.lazySingleton<_i220.AttendanceRemoteData>(
       () => _i220.AttendanceRemoteData(baseApi: gh<_i893.BaseApi>()));
   gh.lazySingleton<_i87.AuthRemoteDataSourceImpl>(
       () => _i87.AuthRemoteDataSourceImpl(baseApi: gh<_i893.BaseApi>()));
+  gh.lazySingleton<_i851.LoanRemoteDataSourceImpl>(
+      () => _i851.LoanRemoteDataSourceImpl(baseApi: gh<_i893.BaseApi>()));
   gh.lazySingleton<_i306.NotificationRemoteDataSourceImpl>(() =>
       _i306.NotificationRemoteDataSourceImpl(baseApi: gh<_i893.BaseApi>()));
+  gh.lazySingleton<_i415.LoanRepository>(() => _i609.LoanRepositoryImpl(
+        remoteDataSource: gh<_i851.LoanRemoteDataSourceImpl>(),
+        localDataSource: gh<_i251.LoanLocalDataSource>(),
+      ));
   gh.lazySingleton<_i28.AddLoanUseCase>(
       () => _i28.AddLoanUseCase(gh<_i415.LoanRepository>()));
   gh.lazySingleton<_i150.GetAllLoansUseCase>(
@@ -354,12 +349,12 @@ _i174.GetIt $initGetIt(
         markAsReadUseCase: gh<_i585.MarkNotificationAsReadUseCase>(),
       ));
   gh.factory<_i408.LoanBloc>(() => _i408.LoanBloc(
-        getAllLoansUseCase: gh<_i150.GetAllLoansUseCase>(),
-        getEmployeeLoansUseCase: gh<_i363.GetEmployeeLoansUseCase>(),
-        addLoanUseCase: gh<_i28.AddLoanUseCase>(),
-        updateLoanStatusUseCase: gh<_i226.UpdateLoanStatusUseCase>(),
-        recordPaymentUseCase: gh<_i850.RecordPaymentUseCase>(),
-        notificationBloc: gh<_i23.NotificationBloc>(),
+        gh<_i150.GetAllLoansUseCase>(),
+        gh<_i363.GetEmployeeLoansUseCase>(),
+        gh<_i28.AddLoanUseCase>(),
+        gh<_i226.UpdateLoanStatusUseCase>(),
+        gh<_i850.RecordPaymentUseCase>(),
+        gh<_i23.NotificationBloc>(),
       ));
   return getIt;
 }

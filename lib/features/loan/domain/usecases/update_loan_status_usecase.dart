@@ -1,4 +1,4 @@
-import '../entities/loan_entity.dart';
+import '../../../../common/helper/src/typedef.dart';
 import '../repositories/loan_repository.dart';
 import 'package:injectable/injectable.dart';
 @lazySingleton
@@ -7,7 +7,7 @@ class UpdateLoanStatusUseCase {
 
   UpdateLoanStatusUseCase(this.repository);
 
-  Future<void> call(String loanId, LoanStatus status) async {
-    return await repository.updateLoanStatus(loanId, status);
+  DataResponse<void> call(int loanId, int amount) async {
+    return await repository.updateLoanStatus(loanId, amount);
   }
 }

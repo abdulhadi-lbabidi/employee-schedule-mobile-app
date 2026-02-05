@@ -1,44 +1,42 @@
 part of 'loan_bloc.dart';
 
-abstract class LoanEvent extends Equatable {
+abstract class LoanEvent  {
   const LoanEvent();
 
-  @override
-  List<Object?> get props => [];
 }
 
-class LoadAllLoans extends LoanEvent {}
+class GetAllLoansEvent extends LoanEvent {}
 
-class LoadEmployeeLoans extends LoanEvent {
-  final String employeeId;
-  const LoadEmployeeLoans(this.employeeId);
+class GetAllEmployeeLoansEvent extends LoanEvent {
+  final int employeeId;
 
-  @override
-  List<Object?> get props => [employeeId];
+  const GetAllEmployeeLoansEvent({required this.employeeId});
+
+
 }
 
-class AddLoan extends LoanEvent {
-  final LoanEntity loan;
-  const AddLoan(this.loan);
+class AddLoanEvent extends LoanEvent {
+  final AddLoanParams params;
 
-  @override
-  List<Object?> get props => [loan];
+  const AddLoanEvent({required this.params});
+
 }
 
-class UpdateLoanStatus extends LoanEvent {
+class UpdateLoanStatusEvent extends LoanEvent {
   final String loanId;
-  final LoanStatus status;
-  const UpdateLoanStatus(this.loanId, this.status);
+  final int amount;
 
-  @override
-  List<Object?> get props => [loanId, status];
-}
-
-class RecordPayment extends LoanEvent {
-  final String loanId;
-  final double amount;
-  const RecordPayment(this.loanId, this.amount);
+  const UpdateLoanStatusEvent({required this.loanId, required this.amount});
 
   @override
   List<Object?> get props => [loanId, amount];
+}
+
+class RecordPaymentEvent extends LoanEvent {
+  final String loanId;
+  final double amount;
+
+  const RecordPaymentEvent({required this.loanId, required this.amount});
+
+
 }

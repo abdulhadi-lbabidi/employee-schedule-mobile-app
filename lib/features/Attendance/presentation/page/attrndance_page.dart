@@ -138,19 +138,27 @@ class _AttendanceHistoryPageState extends State<AttendanceHistoryPage> {
               return state.syncAttendanceData.status == BlocStatus.init
                   ? TextButton.icon(
                     onPressed: () {
-                      if (state.getAllAttendanceData.data!.data!.any(
-                        (e) => e.status == "pending")){
+                      final isEnable = state.getAllAttendanceData.data!.data!
+                          .any((e) => e.status == "pending");
+                      print(AppVariables.localeAttendance?.toJson());
+                      final isNotEnd = AppVariables.localeAttendance != null;
+                      if ((isNotEnd && isEnable)) {
+                        _showSnackBar(
+                          context,
+                          'الرجاء انهاء المناوبة اولا',
+                          Colors.red,
+                        );
+                      } else if (isEnable) {
                         context.read<AttendanceBloc>().add(
                           SyncAttendanceEvent(),
                         );
-                      }else{
+                      } else {
                         _showSnackBar(
                           context,
                           'لايوجد ساعات لرفعها',
                           Colors.orange,
                         );
                       }
-
                     },
                     icon: Icon(
                       Icons.sync_rounded,
@@ -169,22 +177,21 @@ class _AttendanceHistoryPageState extends State<AttendanceHistoryPage> {
                   : state.syncAttendanceData.builder(
                     onSuccess: (_) {
                       return TextButton.icon(
-                        onPressed:
-                        () {
-                        if (state.getAllAttendanceData.data!.data!.any(
-                                (e) => e.status == "pending")){
-                          context.read<AttendanceBloc>().add(
-                            SyncAttendanceEvent(),
-                          );
-                        }else{
-                          _showSnackBar(
-                            context,
-                            'لايوجد ساعات لرفعها',
-                            Colors.orange,
-                          );
-                        }
-
-                      },
+                        onPressed: () {
+                          if (state.getAllAttendanceData.data!.data!.any(
+                            (e) => e.status == "pending",
+                          )) {
+                            context.read<AttendanceBloc>().add(
+                              SyncAttendanceEvent(),
+                            );
+                          } else {
+                            _showSnackBar(
+                              context,
+                              'لايوجد ساعات لرفعها',
+                              Colors.orange,
+                            );
+                          }
+                        },
                         icon: Icon(
                           Icons.sync_rounded,
                           color: theme.primaryColor,
@@ -879,6 +886,7 @@ String extractHoursAndMinutes(String? value) {
     return '0';
   }
 }
+
 void _showSnackBar(BuildContext context, String msg, Color color) {
   ScaffoldMessenger.of(context).hideCurrentSnackBar();
   ScaffoldMessenger.of(context).showSnackBar(

@@ -1,9 +1,11 @@
-import '../entities/loan_entity.dart';
+import 'package:untitled8/common/helper/src/typedef.dart';
+import 'package:untitled8/features/loan/data/models/get_all_loan_response.dart';
+import '../usecases/add_loan_usecase.dart';
 
 abstract class LoanRepository {
-  Future<List<LoanEntity>> getAllLoans();
-  Future<List<LoanEntity>> getEmployeeLoans(String employeeId);
-  Future<void> addLoan(LoanEntity loan);
-  Future<void> updateLoanStatus(String loanId, LoanStatus status);
-  Future<void> recordPayment(String loanId, double amount);
+  DataResponse<GetAllLoansResponse> getAllLoans();
+  DataResponse<GetAllLoansResponse> getEmployeeLoans(int employeeId);
+  DataResponse<void> addLoan(AddLoanParams loan);
+  DataResponse<void> updateLoanStatus(int loanId, int amount);
+  DataResponse<void> recordPayment(int loanId, double amount);
 }

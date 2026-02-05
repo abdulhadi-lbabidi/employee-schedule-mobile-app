@@ -1,24 +1,52 @@
 import 'package:hive/hive.dart';
-import '../models/loan_model.dart';
+import 'package:injectable/injectable.dart';
+import '../models/get_all_loan_response.dart';
+import '../models/get_loan_response.dart';
 
+import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 
+@lazySingleton
 class LoanLocalDataSource {
-  final Box<Map> loanBox;
+  static const String _loansKey = 'cached_loans';
 
-  LoanLocalDataSource(this.loanBox);
+  final SharedPreferences prefs;
 
+  LoanLocalDataSource(this.prefs);
+
+  /// تخزين القروض
   Future<void> cacheLoans(List<LoanModel> loans) async {
-    await loanBox.clear();
-    for (var loan in loans) {
-      await loanBox.put(loan.id, loan.toJson());
+    final loansJsonList =
+        loans.map((loan) => jsonEncode(loan.toJson())).toList();
+
+    await prefs.setStringList(_loansKey, loansJsonList);
+  }
+
+  /// جلب جميع القروض المخزنة
+  Future<GetAllLoansResponse> getCachedLoans() async {
+    final loansJsonList = prefs.getString(_loansKey);
+    if (loansJsonList == null) {
+      return GetAllLoansResponse(data: []);
     }
+    final Map<String, dynamic> val = json.decode(loansJsonList);
+
+    return GetAllLoansResponse.fromJson(val);
   }
 
-  List<LoanModel> getCachedLoans() {
-    return loanBox.values.map((e) => LoanModel.fromJson(Map<String, dynamic>.from(e))).toList();
+  /// جلب قروض موظف محدد
+  Future<GetAllLoansResponse> getCachedEmployeeLoans(int employeeId) async {
+    final val = await getCachedLoans();
+    if (val.data == null) {
+      return GetAllLoansResponse(data: []);
+    }
+    final result = val.copyWith(
+      data: val.data?.where((loan) => loan.employee?.id == employeeId).toList()
+    );
+    return result;
   }
 
-  List<LoanModel> getCachedEmployeeLoans(String employeeId) {
-    return getCachedLoans().where((loan) => loan.employeeId == employeeId).toList();
+  /// مسح الكاش (اختياري)
+  Future<void> clearLoans() async {
+    await prefs.remove(_loansKey);
   }
 }
