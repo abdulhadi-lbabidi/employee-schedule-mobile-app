@@ -1,27 +1,27 @@
-
-
-abstract class AuthState {}
-
-class AuthInitial extends AuthState {}
-
-class AuthLoading extends AuthState {}
-
-class AuthSuccess extends AuthState {
-  final String message;
-  AuthSuccess(this.message);
-}
-
-class AuthError extends AuthState {
-  final String message;
-  AuthError(this.message);
-}
-
-class PasswordVisibilityState extends AuthState {
-  final bool isPasswordVisible;
-  final bool isConfirmPasswordVisible;
-
-  PasswordVisibilityState({
-    required this.isPasswordVisible,
-    required this.isConfirmPasswordVisible,
-  });
-}
+//
+//
+// abstract class AuthState {}
+//
+// class AuthInitial extends AuthState {}
+//
+// class AuthLoading extends AuthState {}
+//
+// class AuthSuccess extends AuthState {
+//   final String message;
+//   AuthSuccess(this.message);
+// }
+//
+// class AuthError extends AuthState {
+//   final String message;
+//   AuthError(this.message);
+// }
+//
+// class PasswordVisibilityState extends AuthState {
+//   final bool isPasswordVisible;
+//   final bool isConfirmPasswordVisible;
+//
+//   PasswordVisibilityState({
+//     required this.isPasswordVisible,
+//     required this.isConfirmPasswordVisible,
+//   });
+// }

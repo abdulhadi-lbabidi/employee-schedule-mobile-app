@@ -74,7 +74,7 @@ class MyApp extends StatelessWidget {
             BlocProvider(create: (_) => sl<DropdownCubit>()),
             BlocProvider(create: (_) => sl<ButtonCubit>()),
             BlocProvider(create: (_) => sl<ActiveUnactiveCubit>()),
-            BlocProvider(create: (_) => sl<ProfileBloc>()),
+            // BlocProvider(create: (_) => sl<ProfileBloc>()),
             // BlocProvider(create: (_) => sl<AttendanceCubit>()),
             BlocProvider(create: (_) => sl<NotificationBloc>()),
             BlocProvider(create: (_) => sl<AdminDashboardBloc>()),

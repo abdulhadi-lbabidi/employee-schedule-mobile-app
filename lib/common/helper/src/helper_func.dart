@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:untitled8/common/helper/src/prefs_keys.dart';
+import 'package:untitled8/core/unified_api/base_api.dart';
 import '../../../core/di/injection.dart';
 
 class HelperFunc {
@@ -11,7 +12,7 @@ class HelperFunc {
 
   static void logout() {
     _pref.clear();
-    // getIt<ApiClient>().resetHeader();
+    sl<BaseApi>().resetHeader();
   }
 
   // static void changeLang() {

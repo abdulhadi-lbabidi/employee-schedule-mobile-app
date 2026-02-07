@@ -4,12 +4,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:untitled8/features/auth/presentation/bloc/login_Cubit/login_cubit.dart';
 import 'package:untitled8/features/profile/presentation/pages/widgets/edit_profile_page.dart';
 import 'package:untitled8/features/profile/presentation/pages/widgets/widget_foCard.dart';
 import 'package:untitled8/features/SplashScreen/presentation/page/splashScareen.dart';
 import 'package:untitled8/features/employee/presentation/pages/EmployeeRewardsPage.dart';
-
+import '../../../../core/di/injection.dart';
 import '../../../auth/data/model/login_response.dart';
 import '../bloc/Profile/_profile_bloc.dart';
 import '../bloc/Profile/_profile_event.dart';
@@ -18,23 +17,37 @@ import '../bloc/Profile/_profile_state.dart';
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
 
+
+
   @override
   State<ProfilePage> createState() => _ProfilePageState();
 }
 
 class _ProfilePageState extends State<ProfilePage> {
+  late final ProfileBloc profileBloc;
+
+
   @override
   void initState() {
-    context.read<ProfileBloc>().add(LoadProfile());
+    profileBloc = sl<ProfileBloc>()..add(LoadProfile());
+
     // TODO: implement initState
     super.initState();
+  }
+
+  @override
+  void dispose() {
+    profileBloc.close();
+    // TODO: implement dispose
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return BlocBuilder<ProfileBloc, ProfileState>(
+    return BlocConsumer<ProfileBloc, ProfileState>(
+      bloc: profileBloc,
       builder: (context, state) {
         return state.profile.builder(
           onSuccess: (_) {
@@ -117,7 +130,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     ),
 
                     SizedBox(height: 40.h),
-                    _buildLogoutButton(context, theme),
+                    _buildLogoutButton(context, theme, profileBloc),
                     SizedBox(height: 20.h),
                   ],
                 ),
@@ -137,6 +150,18 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
             ),
           ),
+        );
+      },
+      listenWhen: (pre, cur) => pre.logOutData.status != cur.logOutData.status,
+      listener: (context, state) {
+        state.logOutData.listenerFunction(
+          onSuccess: () {
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (_) => const Splashscareen()),
+              (route) => false,
+            );
+          },
         );
       },
     );
@@ -208,7 +233,11 @@ class _ProfilePageState extends State<ProfilePage> {
     ).animate().scale(delay: 200.ms);
   }
 
-  Widget _buildHeader(BuildContext context, LoginResponse profile, ThemeData theme) {
+  Widget _buildHeader(
+    BuildContext context,
+    LoginResponse profile,
+    ThemeData theme,
+  ) {
     final user = profile.user;
     final String? profileImg = user?.profileImageUrl;
 
@@ -244,10 +273,12 @@ class _ProfilePageState extends State<ProfilePage> {
                   final picked = await ImagePicker().pickImage(
                     source: ImageSource.gallery,
                   );
-                  if (picked != null)
-                    context.read<ProfileBloc>().add(
-                      UpdateProfileImage(picked.path),
+                  if (picked != null) {
+                    final file = File(picked.path);
+                    profileBloc.add(
+                      UpdateProfileImage(file),
                     );
+                  }
                 },
               ),
             ),
@@ -351,7 +382,11 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  Widget _buildLogoutButton(BuildContext context, ThemeData theme) {
+  Widget _buildLogoutButton(
+    BuildContext context,
+    ThemeData theme,
+    ProfileBloc profileBloc,
+  ) {
     return SizedBox(
       width: double.infinity,
       child: OutlinedButton.icon(
@@ -362,7 +397,7 @@ class _ProfilePageState extends State<ProfilePage> {
             borderRadius: BorderRadius.circular(15.r),
           ),
         ),
-        onPressed: () => _showLogoutDialog(context, theme),
+        onPressed: () => _showLogoutDialog(context, theme, profileBloc),
         icon: Icon(Icons.logout_rounded, color: Colors.redAccent, size: 20.sp),
         label: Text(
           "تسجيل الخروج من النظام",
@@ -376,7 +411,11 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  void _showLogoutDialog(BuildContext context, ThemeData theme) {
+  void _showLogoutDialog(
+    BuildContext context,
+    ThemeData theme,
+    ProfileBloc profileBloc,
+  ) {
     showDialog(
       context: context,
       builder:
@@ -414,12 +453,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 ),
                 onPressed: () {
                   Navigator.pop(d);
-                  context.read<LoginCubit>().logout();
-                  Navigator.pushAndRemoveUntil(
-                    context,
-                    MaterialPageRoute(builder: (_) => const Splashscareen()),
-                    (route) => false,
-                  );
+                  profileBloc.add(LogOutEvent());
                 },
                 child: Text(
                   "خروج",

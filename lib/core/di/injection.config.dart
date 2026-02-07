@@ -80,7 +80,6 @@ import '../../features/Attendance/presentation/bloc/Cubit_Attendance/attendance_
 import '../../features/auth/data/datasource/authRemoteDataSourceImpl.dart'
     as _i87;
 import '../../features/auth/data/repository/login_repo.dart' as _i675;
-import '../../features/auth/presentation/bloc/auth_Cubit.dart' as _i1040;
 import '../../features/auth/presentation/bloc/login_Cubit/login_cubit.dart'
     as _i424;
 import '../../features/home/presentation/bloc/cubit_active_unactive/active_unactive_cubit.dart'
@@ -334,8 +333,6 @@ _i174.GetIt $initGetIt(
         issueRewardUseCase: gh<_i679.IssueRewardUseCase>(),
         getAllEmployeesUseCase: gh<_i345.GetAllEmployeesUseCase>(),
       ));
-  gh.factory<_i1040.AuthCubit>(
-      () => _i1040.AuthCubit(repository: gh<_i675.AuthRepository>()));
   gh.factory<_i424.LoginCubit>(
       () => _i424.LoginCubit(repository: gh<_i675.AuthRepository>()));
   gh.factory<_i23.NotificationBloc>(() => _i23.NotificationBloc(

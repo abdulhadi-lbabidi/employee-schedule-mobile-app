@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:equatable/equatable.dart';
 
 abstract class ProfileEvent extends Equatable {
@@ -6,6 +8,7 @@ abstract class ProfileEvent extends Equatable {
 }
 
 class LoadProfile extends ProfileEvent {}
+class LogOutEvent extends ProfileEvent {}
 
 class UpdateProfileInfo extends ProfileEvent {
   final String name;
@@ -18,7 +21,7 @@ class UpdateProfileInfo extends ProfileEvent {
 }
 
 class UpdateProfileImage extends ProfileEvent {
-  final String imagePath;
+  final File imagePath;
 
   UpdateProfileImage(this.imagePath);
 

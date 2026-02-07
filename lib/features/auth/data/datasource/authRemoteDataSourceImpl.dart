@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:dio/dio.dart';
 import 'package:untitled8/core/unified_api/handling_api_manager.dart';
 import '../../../../core/unified_api/api_variables.dart';
 import '../../../../core/unified_api/base_api.dart';
@@ -25,15 +28,7 @@ class AuthRemoteDataSourceImpl with HandlingApiManager {
     );
   }
 
-  Future<bool> verifyToken(String token)
-  async {
-    try {
-      final response = await _baseApi.get(ApiVariables.verifyToken());
-      return response.statusCode == 200;
-    } catch (_) {
-      return false;
-    }
-  }
+
 
   Future<LoginResponse> register({
     required String username,
@@ -67,5 +62,42 @@ class AuthRemoteDataSourceImpl with HandlingApiManager {
       jsonConvert: loginResponseFromJson,
     );
   }
+
+
+  Future<void> logOut()
+  async {
+    return wrapHandlingApi(
+      tryCall:
+          () => _baseApi.post(
+        ApiVariables.logout(),
+
+
+      ),
+      jsonConvert: (_){},
+    );
+  }
+
+  Future<LoginResponse> updateProfile({
+    required File image,
+  })
+  async {
+    return wrapHandlingApi(
+      tryCall:
+          () async{
+            final formData = FormData.fromMap({
+              'profile_image_url': await MultipartFile.fromFile(
+                image.path,
+                filename: image.path.split('/').last,
+              ),
+            });
+            return _baseApi.post(
+        ApiVariables.updateProfile(),
+        data:formData,
+      );
+          },
+      jsonConvert: loginResponseFromJson,
+    );
+  }
+
 
 }

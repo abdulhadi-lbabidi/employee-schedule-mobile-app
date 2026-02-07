@@ -1,18 +1,30 @@
-import 'package:equatable/equatable.dart';
 import 'package:untitled8/core/data_state_model.dart';
-import 'package:untitled8/features/auth/data/repository/login_repo.dart';
 import '../../../../auth/data/model/login_response.dart';
-import '../../../data/models/profile_model.dart';
 
 class ProfileState {
   final DataStateModel<LoginResponse?> profile;
+  final DataStateModel<LoginResponse?> updateProfile;
+  final DataStateModel<void> logOutData;
 
   ProfileState({
     this.profile = const DataStateModel.setDefultValue(defultValue: null),
+    this.updateProfile = const DataStateModel.setDefultValue(defultValue: null),
+    this.logOutData = const DataStateModel.setDefultValue(defultValue: null),
   });
 
-  ProfileState copyWith({DataStateModel<LoginResponse?>? profile}) {
-    return ProfileState(profile: profile ?? this.profile);
+  ProfileState copyWith({ DataStateModel<LoginResponse?>? profile,
+    DataStateModel<LoginResponse?>? updateProfile,
+    DataStateModel<void>? logOutData,
+
+  }
+
+      ) {
+    return ProfileState(
+        profile: profile ?? this.profile,
+      updateProfile: updateProfile ?? this.updateProfile,
+      logOutData: logOutData ?? this.logOutData,
+
+    );
   }
 }
 

@@ -1,3 +1,5 @@
+import 'package:intl/intl.dart';
+import 'package:untitled8/common/helper/src/app_varibles.dart';
 import 'package:untitled8/core/unified_api/use_case.dart';
 import '../../../../common/helper/src/typedef.dart';
 import '../repositories/loan_repository.dart';
@@ -15,32 +17,29 @@ class AddLoanUseCase {
 }
 
 class AddLoanParams with Params {
-  final int employeeId;
+
   final int adminId;
   final int amount;
   final int paidAmount;
-  final String role;
-  final String date;
+
 
   AddLoanParams({
-    required this.employeeId,
+
     required this.adminId,
     required this.amount,
     required this.paidAmount,
-    required this.role,
-    required this.date,
   });
 
   @override
   BodyMap getBody() {
     // TODO: implement getBody
     return {
-      'employee_id': employeeId,
+      'employee_id': AppVariables.user!.id,
       'admin_id': adminId,
       'amount': amount,
       'paid_amount': paidAmount,
-      'role': role,
-      'date': date,
+      'role': AppVariables.role,
+      'date': DateFormat('yyyy-MM-dd').format(DateTime.now()),
     };
   }
 }

@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:untitled8/common/helper/src/app_varibles.dart';
+import '../../../../core/di/injection.dart';
 import '../../../../core/theme/App theme/bloc/theme_bloc.dart';
 import '../../../Attendance/presentation/page/attrndance_page.dart';
 import '../../../Notification/presentation/pages/notifications_page.dart';
@@ -35,8 +37,9 @@ class _HomePageState extends State<MainPage> {
 
   @override
   void initState() {
+
     super.initState();
-    context.read<ProfileBloc>().add(LoadProfile());
+    // context.read<ProfileBloc>().add(LoadProfile());
   }
 
   @override
@@ -64,61 +67,46 @@ class _HomePageState extends State<MainPage> {
           style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22.sp),
         ),
         actions: [
-          BlocBuilder<ProfileBloc, ProfileState>(
-            builder: (context, state) {
-              String? imageUrl;
-              if (state.profile.isSuccess) {
-                imageUrl = state.profile.data!.user?.profileImageUrl;
-              }
-
-              ImageProvider? imageProvider;
-              if (imageUrl != null && imageUrl.isNotEmpty) {
-                if (imageUrl.startsWith('http')) {
-                  imageProvider = NetworkImage(imageUrl);
-                } else {
-                  imageProvider = FileImage(File(imageUrl));
-                }
-              }
-
-              return GestureDetector(
-                onTap:
-                    () => Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => const ProfilePage()),
-                    ),
-                child: Container(
-                  margin: EdgeInsets.only(left: 10.w),
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: Colors.blueAccent.withOpacity(0.5),
-                      width: 1.5.r,
-                    ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.blueAccent.withOpacity(0.21),
-                        blurRadius: 7.r,
-                        spreadRadius: 1.r,
-                      ),
-                    ],
-                  ),
-                  child: CircleAvatar(
-                    radius: 14.r,
-                    backgroundColor: Colors.white.withOpacity(0.05),
-                    backgroundImage: imageProvider,
-                    child:
-                        imageProvider == null
-                            ? Icon(
-                              Icons.person_rounded,
-                              color: Colors.blueAccent,
-                              size: 22.sp,
-                            )
-                            : null,
-                  ),
+          GestureDetector(
+            onTap:
+                () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder:
+                    (_) => ProfilePage(),
+              ),
+            ),
+            child: Container(
+              margin: EdgeInsets.only(left: 10.w),
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: Colors.blueAccent.withOpacity(0.5),
+                  width: 1.5.r,
                 ),
-              ).animate().fadeIn(duration: 500.ms).scale(delay: 100.ms);
-            },
-          ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.blueAccent.withOpacity(0.21),
+                    blurRadius: 7.r,
+                    spreadRadius: 1.r,
+                  ),
+                ],
+              ),
+              child: CircleAvatar(
+                radius: 14.r,
+                backgroundColor: Colors.white.withOpacity(0.05),
+                // backgroundImage: NetworkImage(imageUrl),
+                child:
+                AppVariables.user!.profileImageUrl == null
+                    ? Icon(
+                  Icons.person_rounded,
+                  color: Colors.blueAccent,
+                  size: 22.sp,
+                )
+                    : Image.network( AppVariables.user!.profileImageUrl),
+              ),
+            ),
+          ).animate().fadeIn(duration: 500.ms).scale(delay: 100.ms),
           SizedBox(width: 15.w),
         ],
       ),

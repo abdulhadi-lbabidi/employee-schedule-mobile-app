@@ -10,6 +10,7 @@ import 'package:untitled8/features/home/presentation/page/widgets/CardAttendance
 import 'package:untitled8/features/home/presentation/page/widgets/Card_Tod_record.dart';
 import 'package:untitled8/features/home/presentation/page/widgets/Dropdown_example.dart';
 import 'package:untitled8/features/home/presentation/page/widgets/button_on.dart';
+import '../../../../core/di/injection.dart';
 import '../../../Attendance/data/models/attendance_model.dart';
 import '../../../Attendance/presentation/bloc/Cubit_Attendance/attendance_cubit.dart';
 import '../../../Attendance/presentation/bloc/Cubit_Attendance/attendance_state.dart'
@@ -18,6 +19,7 @@ import '../../../admin/presentation/bloc/workshops/workshops_bloc.dart';
 import '../../../admin/presentation/bloc/workshops/workshops_event.dart';
 import '../../../admin/presentation/bloc/workshops/workshops_state.dart';
 import '../../../profile/presentation/bloc/Profile/_profile_bloc.dart';
+import '../../../profile/presentation/bloc/Profile/_profile_event.dart';
 import '../../../profile/presentation/bloc/Profile/_profile_state.dart';
 import '../bloc/Cubit_Button/button_cubit.dart';
 import '../bloc/Cubit_Button/button_state.dart';
@@ -34,6 +36,8 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+
+
   @override
   void initState() {
     super.initState();
