@@ -17,8 +17,6 @@ import '../bloc/Profile/_profile_state.dart';
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
 
-
-
   @override
   State<ProfilePage> createState() => _ProfilePageState();
 }
@@ -26,19 +24,15 @@ class ProfilePage extends StatefulWidget {
 class _ProfilePageState extends State<ProfilePage> {
   late final ProfileBloc profileBloc;
 
-
   @override
   void initState() {
     profileBloc = sl<ProfileBloc>()..add(LoadProfile());
-
-    // TODO: implement initState
     super.initState();
   }
 
   @override
   void dispose() {
     profileBloc.close();
-    // TODO: implement dispose
     super.dispose();
   }
 
@@ -72,13 +66,12 @@ class _ProfilePageState extends State<ProfilePage> {
                       size: 28.sp,
                       color: theme.primaryColor,
                     ),
-                    onPressed:
-                        () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const EditProfilePage(),
-                          ),
-                        ),
+                    onPressed: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const EditProfilePage(),
+                      ),
+                    ),
                   ),
                   SizedBox(width: 10.w),
                 ],
@@ -89,16 +82,13 @@ class _ProfilePageState extends State<ProfilePage> {
                   children: [
                     _buildHeader(context, state.profile.data!, theme),
                     SizedBox(height: 30.h),
-
                     _buildStatsRow(state.profile, theme),
-
                     SizedBox(height: 25.h),
                     _buildRewardShortcut(
                       context,
-                      state.profile.data!.user?.id.toString() ?? "0",
+                      state.profile.data!.user?.id ?? 0,
                       theme,
                     ),
-
                     SizedBox(height: 35.h),
                     _buildSectionTitle("المعلومات الشخصية", theme),
                     SizedBox(height: 15.h),
@@ -112,7 +102,6 @@ class _ProfilePageState extends State<ProfilePage> {
                       label: 'البريد الإلكتروني',
                       value: state.profile.data!.user?.email ?? "---",
                     ),
-
                     SizedBox(height: 25.h),
                     _buildSectionTitle("تفاصيل العمل", theme),
                     SizedBox(height: 15.h),
@@ -124,11 +113,8 @@ class _ProfilePageState extends State<ProfilePage> {
                     WidgetFocard(
                       icon: Icons.lan_outlined,
                       label: "القسم",
-                      value:
-                          state.profile.data!.user?.userable?.department ??
-                          "عام",
+                      value: state.profile.data!.user?.userable?.department ?? "عام",
                     ),
-
                     SizedBox(height: 40.h),
                     _buildLogoutButton(context, theme, profileBloc),
                     SizedBox(height: 20.h),
@@ -169,17 +155,16 @@ class _ProfilePageState extends State<ProfilePage> {
 
   Widget _buildRewardShortcut(
     BuildContext context,
-    String employeeId,
+    int employeeId,
     ThemeData theme,
   ) {
     return GestureDetector(
-      onTap:
-          () => Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => EmployeeRewardsPage(employeeId: employeeId),
-            ),
-          ),
+      onTap: () => Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => EmployeeRewardsPage(employeeId: employeeId),
+        ),
+      ),
       child: Container(
         padding: EdgeInsets.all(16.w),
         decoration: BoxDecoration(
@@ -249,20 +234,18 @@ class _ProfilePageState extends State<ProfilePage> {
             CircleAvatar(
               radius: 65.r,
               backgroundColor: theme.primaryColor.withOpacity(0.1),
-              backgroundImage:
-                  (profileImg != null && profileImg.isNotEmpty)
-                      ? (profileImg.startsWith('http')
-                          ? NetworkImage(profileImg)
-                          : FileImage(File(profileImg)) as ImageProvider)
-                      : null,
-              child:
-                  (profileImg == null || profileImg.isEmpty)
-                      ? Icon(
-                        Icons.person,
-                        size: 60.sp,
-                        color: theme.primaryColor,
-                      )
-                      : null,
+              backgroundImage: (profileImg != null && profileImg.isNotEmpty)
+                  ? (profileImg.startsWith('http')
+                      ? NetworkImage(profileImg)
+                      : FileImage(File(profileImg)) as ImageProvider)
+                  : null,
+              child: (profileImg == null || profileImg.isEmpty)
+                  ? Icon(
+                      Icons.person,
+                      size: 60.sp,
+                      color: theme.primaryColor,
+                    )
+                  : null,
             ),
             CircleAvatar(
               backgroundColor: theme.primaryColor,
@@ -315,7 +298,6 @@ class _ProfilePageState extends State<ProfilePage> {
         SizedBox(width: 12.w),
         _buildStatCard(
           "أيام الدوام",
-          // state.activeDays.toString(),
           '6',
           Icons.calendar_today_rounded,
           [const Color(0xFF00695C), const Color(0xFF43A047)],
@@ -418,54 +400,53 @@ class _ProfilePageState extends State<ProfilePage> {
   ) {
     showDialog(
       context: context,
-      builder:
-          (d) => AlertDialog(
-            backgroundColor: theme.cardColor,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(15.r),
-            ),
-            title: Text(
-              "تأكيد الخروج",
-              style: TextStyle(
-                fontSize: 16.sp,
-                fontWeight: FontWeight.bold,
-                color: theme.colorScheme.error,
-              ),
-            ),
-            content: Text(
-              "هل تريد حقاً تسجيل الخروج من حسابك؟",
-              style: TextStyle(
-                fontSize: 14.sp,
-                color: theme.textTheme.bodyMedium?.color,
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(d),
-                child: const Text("إلغاء"),
-              ),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.redAccent,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8.r),
-                  ),
-                ),
-                onPressed: () {
-                  Navigator.pop(d);
-                  profileBloc.add(LogOutEvent());
-                },
-                child: Text(
-                  "خروج",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 13.sp,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ],
+      builder: (d) => AlertDialog(
+        backgroundColor: theme.cardColor,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(15.r),
+        ),
+        title: Text(
+          "تأكيد الخروج",
+          style: TextStyle(
+            fontSize: 16.sp,
+            fontWeight: FontWeight.bold,
+            color: theme.colorScheme.error,
           ),
+        ),
+        content: Text(
+          "هل تريد حقاً تسجيل الخروج من حسابك؟",
+          style: TextStyle(
+            fontSize: 14.sp,
+            color: theme.textTheme.bodyMedium?.color,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(d),
+            child: const Text("إلغاء"),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.redAccent,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8.r),
+              ),
+            ),
+            onPressed: () {
+              Navigator.pop(d);
+              profileBloc.add(LogOutEvent());
+            },
+            child: Text(
+              "خروج",
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 13.sp,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 

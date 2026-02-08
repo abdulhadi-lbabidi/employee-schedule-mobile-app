@@ -18,16 +18,16 @@ class AddLoanUseCase {
 
 class AddLoanParams with Params {
 
-  final int adminId;
+
   final int amount;
-  final int paidAmount;
+  final DateTime date;
 
 
   AddLoanParams({
 
-    required this.adminId,
+
     required this.amount,
-    required this.paidAmount,
+    required this.date,
   });
 
   @override
@@ -35,10 +35,7 @@ class AddLoanParams with Params {
     // TODO: implement getBody
     return {
       'employee_id': AppVariables.user!.id,
-      'admin_id': adminId,
       'amount': amount,
-      'paid_amount': paidAmount,
-      'role': AppVariables.role,
       'date': DateFormat('yyyy-MM-dd').format(DateTime.now()),
     };
   }

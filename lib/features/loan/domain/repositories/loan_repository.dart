@@ -6,6 +6,12 @@ abstract class LoanRepository {
   DataResponse<GetAllLoansResponse> getAllLoans();
   DataResponse<GetAllLoansResponse> getEmployeeLoans(int employeeId);
   DataResponse<void> addLoan(AddLoanParams loan);
+  DataResponse<void> approveLoan(int loanId);
+  DataResponse<void> rejectLoan(int loanId);
+  DataResponse<void> payLoan(int loanId, double amount);
+  
+  @Deprecated('Use approveLoan or rejectLoan')
   DataResponse<void> updateLoanStatus(int loanId, int amount);
+  @Deprecated('Use payLoan')
   DataResponse<void> recordPayment(int loanId, double amount);
 }

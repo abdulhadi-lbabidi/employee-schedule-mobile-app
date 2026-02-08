@@ -1,18 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:untitled8/features/admin/domain/entities/employee_entity.dart';
 import 'package:untitled8/features/reward/presentation/bloc/reward_admin/reward_admin_bloc.dart';
 import 'package:untitled8/features/reward/presentation/bloc/reward_admin/reward_admin_event.dart';
 
 class IssueRewardDialog extends StatefulWidget {
-  final String adminId;
-  final String adminName;
+  final int employeeId;
+  final String employeeName;
 
   const IssueRewardDialog({
     super.key,
-    required this.adminId,
-    required this.adminName,
+    required this.employeeId,
+    required this.employeeName,
   });
 
   @override
@@ -23,25 +22,6 @@ class _IssueRewardDialogState extends State<IssueRewardDialog> {
   final _formKey = GlobalKey<FormState>();
   final _amountController = TextEditingController();
   final _reasonController = TextEditingController();
-  EmployeeEntity? _selectedEmployee;
-  List<EmployeeEntity> _employees = [];
-  bool _isLoadingEmployees = true;
-
-  @override
-  void initState() {
-    super.initState();
-    _loadEmployees();
-  }
-
-  Future<void> _loadEmployees() async {
-    final employees = await context.read<RewardAdminBloc>().fetchAllEmployees();
-    if (mounted) {
-      setState(() {
-        _employees = employees;
-        _isLoadingEmployees = false;
-      });
-    }
-  }
 
   @override
   void dispose() {
@@ -53,35 +33,13 @@ class _IssueRewardDialogState extends State<IssueRewardDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text("صرف مكافأة جديدة", style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold)),
+      title: Text("منح مكافأة لـ ${widget.employeeName}", style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold)),
       content: SingleChildScrollView(
         child: Form(
           key: _formKey,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              if (_isLoadingEmployees)
-                const CircularProgressIndicator()
-              else if (_employees.isEmpty)
-                const Text("لا يوجد موظفين متاحين")
-              else
-                DropdownButtonFormField<EmployeeEntity>(
-                  value: _selectedEmployee,
-                  hint: const Text("اختر الموظف"),
-                  items: _employees.map((employee) {
-                    return DropdownMenuItem(
-                      value: employee,
-                      child: Text(employee.name),
-                    );
-                  }).toList(),
-                  onChanged: (value) {
-                    setState(() {
-                      _selectedEmployee = value;
-                    });
-                  },
-                  validator: (value) => value == null ? "يرجى اختيار موظف" : null,
-                ),
-              SizedBox(height: 16.h),
               TextFormField(
                 controller: _amountController,
                 decoration: const InputDecoration(
@@ -119,12 +77,10 @@ class _IssueRewardDialogState extends State<IssueRewardDialog> {
         ),
         ElevatedButton(
           onPressed: () {
-            if (_formKey.currentState!.validate() && _selectedEmployee != null) {
-              context.read<RewardAdminBloc>().add(IssueNewReward(
-                employeeId: _selectedEmployee!.id,
-                employeeName: _selectedEmployee!.name,
-                adminId: widget.adminId,
-                adminName: widget.adminName,
+            if (_formKey.currentState!.validate()) {
+              context.read<RewardAdminBloc>().add(IssueRewardEvent(
+                employeeId: widget.employeeId,
+                employeeName: widget.employeeName,
                 amount: double.parse(_amountController.text),
                 reason: _reasonController.text,
               ));

@@ -5,7 +5,7 @@ class AppTheme {
   static const Color primaryColor = Color(0xFF273085);
   static const Color accentColor = Color(0xFF2196F3);
 
-  // 🔹 1. الثيم الفاتح (للمدير)
+  //  1. الثيم الفاتح (للمدير)
   static final ThemeData lightTheme = ThemeData(
     brightness: Brightness.light,
     primaryColor: primaryColor,

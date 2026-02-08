@@ -13,6 +13,7 @@ import 'package:dio/dio.dart' as _i361;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart' as _i558;
 import 'package:get_it/get_it.dart' as _i174;
 import 'package:hive/hive.dart' as _i979;
+import 'package:hive_flutter/hive_flutter.dart' as _i986;
 import 'package:injectable/injectable.dart' as _i526;
 import 'package:shared_preferences/shared_preferences.dart' as _i460;
 
@@ -100,12 +101,15 @@ import '../../features/loan/data/repositories/loan_repository_impl.dart'
     as _i609;
 import '../../features/loan/domain/repositories/loan_repository.dart' as _i415;
 import '../../features/loan/domain/usecases/add_loan_usecase.dart' as _i28;
+import '../../features/loan/domain/usecases/approve_loan_usecase.dart' as _i941;
 import '../../features/loan/domain/usecases/get_all_loans_usecase.dart'
     as _i150;
 import '../../features/loan/domain/usecases/get_employee_loans_usecase.dart'
     as _i363;
+import '../../features/loan/domain/usecases/pay_loan_usecase.dart' as _i560;
 import '../../features/loan/domain/usecases/record_payment_usecase.dart'
     as _i850;
+import '../../features/loan/domain/usecases/reject_loan_usecase.dart' as _i579;
 import '../../features/loan/domain/usecases/update_loan_status_usecase.dart'
     as _i226;
 import '../../features/loan/presentation/bloc/loan_bloc.dart' as _i408;
@@ -123,10 +127,10 @@ import '../../features/Notification/presentation/bloc/notification_bloc.dart'
     as _i23;
 import '../../features/profile/presentation/bloc/Profile/_profile_bloc.dart'
     as _i207;
+import '../../features/reward/data/datasources/reward_remote_data_source.dart'
+    as _i777;
 import '../../features/reward/data/datasources/reward_remote_data_source_impl.dart'
     as _i22;
-import '../../features/reward/data/datasources/reward_remote_data_source_mock.dart'
-    as _i278;
 import '../../features/reward/data/repositories/reward_repository_impl.dart'
     as _i144;
 import '../../features/reward/domain/repositories/reward_repository.dart'
@@ -144,20 +148,22 @@ import '../../features/SplashScreen/presentation/bloc/onboarding_bloc.dart'
 import '../hive_service.dart' as _i351;
 import '../unified_api/base_api.dart' as _i893;
 import '../unified_api/logger_interceptor.dart' as _i424;
+import 'hive_module.dart' as _i576;
 import 'injection.dart' as _i464;
 
 // initializes the registration of main-scope dependencies inside of GetIt
-_i174.GetIt $initGetIt(
+Future<_i174.GetIt> $initGetIt(
   _i174.GetIt getIt, {
   String? environment,
   _i526.EnvironmentFilter? environmentFilter,
-}) {
+}) async {
   final gh = _i526.GetItHelper(
     getIt,
     environment,
     environmentFilter,
   );
   final injectableModule = _$InjectableModule();
+  final hiveModule = _$HiveModule();
   gh.factory<_i402.DropdownCubit>(() => _i402.DropdownCubit());
   gh.factory<_i208.NavigationnCubit>(() => _i208.NavigationnCubit());
   gh.factory<_i964.FinanceBloc>(() => _i964.FinanceBloc());
@@ -169,10 +175,10 @@ _i174.GetIt $initGetIt(
   gh.lazySingleton<_i424.LoggerInterceptor>(() => _i424.LoggerInterceptor());
   gh.lazySingleton<_i1064.NotificationRemoteDataSourceMock>(
       () => _i1064.NotificationRemoteDataSourceMock());
-  gh.lazySingleton<_i278.RewardRemoteDataSourceMock>(
-      () => _i278.RewardRemoteDataSourceMock());
-  gh.lazySingleton<_i251.LoanLocalDataSource>(
-      () => _i251.LoanLocalDataSource(gh<_i460.SharedPreferences>()));
+  await gh.lazySingletonAsync<_i986.Box<Map<dynamic, dynamic>>>(
+    () => hiveModule.loanBox,
+    preResolve: true,
+  );
   gh.lazySingleton<_i517.AdminRemoteDataSource>(
       () => _i14.AdminRemoteDataSourceImpl(gh<_i361.Dio>()));
   gh.lazySingleton<_i583.AdminRepository>(
@@ -209,6 +215,8 @@ _i174.GetIt $initGetIt(
       () => _i36.ActiveUnactiveCubit(gh<_i351.HiveService>()));
   gh.factory<_i492.ButtonCubit>(
       () => _i492.ButtonCubit(gh<_i351.HiveService>()));
+  gh.lazySingleton<_i251.LoanLocalDataSource>(
+      () => _i251.LoanLocalDataSource(gh<_i979.Box<Map<dynamic, dynamic>>>()));
   gh.lazySingleton<_i18.LocalDataSource>(
       () => _i18.LocalDataSource(hiveService: gh<_i351.HiveService>()));
   gh.lazySingleton<_i893.BaseApi>(() => _i893.BaseApi(
@@ -230,13 +238,15 @@ _i174.GetIt $initGetIt(
           sharedPreferences: gh<_i460.SharedPreferences>()));
   gh.lazySingleton<_i184.AuditLogRepository>(
       () => _i184.AuditLogRepository(gh<_i979.Box<_i254.AuditLogModel>>()));
-  gh.lazySingleton<_i180.RewardRepository>(() => _i144.RewardRepositoryImpl(
-      remoteDataSource: gh<_i22.RewardRemoteDataSourceImpl>()));
+  gh.lazySingleton<_i777.RewardRemoteDataSource>(
+      () => _i777.RewardRemoteDataSource(gh<_i893.BaseApi>()));
   gh.lazySingleton<_i1057.AppRepository>(() => _i1057.AppRepository(
         remote: gh<_i803.RemoteDataSource>(),
         local: gh<_i18.LocalDataSource>(),
         connectivity: gh<_i895.Connectivity>(),
       ));
+  gh.lazySingleton<_i180.RewardRepository>(() => _i144.RewardRepositoryImpl(
+      remoteDataSource: gh<_i777.RewardRemoteDataSource>()));
   gh.lazySingleton<_i1069.WorkshopRemoteDataSource>(
       () => _i1069.WorkshopRemoteDataSource(baseApi: gh<_i893.BaseApi>()));
   gh.lazySingleton<_i220.AttendanceRemoteData>(
@@ -251,6 +261,12 @@ _i174.GetIt $initGetIt(
         remoteDataSource: gh<_i851.LoanRemoteDataSourceImpl>(),
         localDataSource: gh<_i251.LoanLocalDataSource>(),
       ));
+  gh.factory<_i941.ApproveLoanUseCase>(
+      () => _i941.ApproveLoanUseCase(gh<_i415.LoanRepository>()));
+  gh.factory<_i560.PayLoanUseCase>(
+      () => _i560.PayLoanUseCase(gh<_i415.LoanRepository>()));
+  gh.factory<_i579.RejectLoanUseCase>(
+      () => _i579.RejectLoanUseCase(gh<_i415.LoanRepository>()));
   gh.lazySingleton<_i28.AddLoanUseCase>(
       () => _i28.AddLoanUseCase(gh<_i415.LoanRepository>()));
   gh.lazySingleton<_i150.GetAllLoansUseCase>(
@@ -267,11 +283,11 @@ _i174.GetIt $initGetIt(
             local: gh<_i241.AttendanceLocaleDataSource>(),
             connectivity: gh<_i895.Connectivity>(),
           ));
-  gh.lazySingleton<_i1.GetAdminRewardsUseCase>(
+  gh.factory<_i1.GetAdminRewardsUseCase>(
       () => _i1.GetAdminRewardsUseCase(gh<_i180.RewardRepository>()));
-  gh.lazySingleton<_i1050.GetEmployeeRewardsUseCase>(
+  gh.factory<_i1050.GetEmployeeRewardsUseCase>(
       () => _i1050.GetEmployeeRewardsUseCase(gh<_i180.RewardRepository>()));
-  gh.lazySingleton<_i679.IssueRewardUseCase>(
+  gh.factory<_i679.IssueRewardUseCase>(
       () => _i679.IssueRewardUseCase(gh<_i180.RewardRepository>()));
   gh.lazySingleton<_i538.GetEmployeeAttendanceUseCase>(() =>
       _i538.GetEmployeeAttendanceUseCase(
@@ -289,6 +305,10 @@ _i174.GetIt $initGetIt(
       repositories: gh<_i240.AttendanceRepositories>()));
   gh.factory<_i467.RewardEmployeeBloc>(() => _i467.RewardEmployeeBloc(
       getEmployeeRewardsUseCase: gh<_i1050.GetEmployeeRewardsUseCase>()));
+  gh.factory<_i830.RewardAdminBloc>(() => _i830.RewardAdminBloc(
+        getAdminRewardsUseCase: gh<_i1.GetAdminRewardsUseCase>(),
+        issueRewardUseCase: gh<_i679.IssueRewardUseCase>(),
+      ));
   gh.lazySingleton<_i585.GetNotificationsUseCase>(
       () => _i585.GetNotificationsUseCase(gh<_i697.NotificationRepository>()));
   gh.lazySingleton<_i585.AddLocalNotificationUseCase>(() =>
@@ -328,11 +348,6 @@ _i174.GetIt $initGetIt(
         gh<_i23.NotificationBloc>(),
         gh<_i1057.AppRepository>(),
       ));
-  gh.factory<_i830.RewardAdminBloc>(() => _i830.RewardAdminBloc(
-        getAdminRewardsUseCase: gh<_i1.GetAdminRewardsUseCase>(),
-        issueRewardUseCase: gh<_i679.IssueRewardUseCase>(),
-        getAllEmployeesUseCase: gh<_i345.GetAllEmployeesUseCase>(),
-      ));
   gh.factory<_i424.LoginCubit>(
       () => _i424.LoginCubit(repository: gh<_i675.AuthRepository>()));
   gh.factory<_i23.NotificationBloc>(() => _i23.NotificationBloc(
@@ -349,11 +364,14 @@ _i174.GetIt $initGetIt(
         gh<_i150.GetAllLoansUseCase>(),
         gh<_i363.GetEmployeeLoansUseCase>(),
         gh<_i28.AddLoanUseCase>(),
-        gh<_i226.UpdateLoanStatusUseCase>(),
-        gh<_i850.RecordPaymentUseCase>(),
+        gh<_i941.ApproveLoanUseCase>(),
+        gh<_i579.RejectLoanUseCase>(),
+        gh<_i560.PayLoanUseCase>(),
         gh<_i23.NotificationBloc>(),
       ));
   return getIt;
 }
 
 class _$InjectableModule extends _i464.InjectableModule {}
+
+class _$HiveModule extends _i576.HiveModule {}

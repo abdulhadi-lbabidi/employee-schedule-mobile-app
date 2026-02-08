@@ -1,63 +1,49 @@
-import 'package:untitled8/features/reward/domain/entities/reward_entity.dart';
+import '../../domain/entities/reward_entity.dart';
 
 class RewardModel extends RewardEntity {
   const RewardModel({
-    required String id,
-    required String employeeId,
-    required String employeeName,
-    required String adminId,
-    required String adminName,
-    required double amount,
-    required String reason,
-    required DateTime dateIssued,
-  }) : super(
-          id: id,
-          employeeId: employeeId,
-          employeeName: employeeName,
-          adminId: adminId,
-          adminName: adminName,
-          amount: amount,
-          reason: reason,
-          dateIssued: dateIssued,
-        );
+    required super.id,
+    required super.amount,
+    required super.reason,
+    required super.dateIssued,
+    required super.employeeName,
+    super.adminName,
+  });
 
   factory RewardModel.fromJson(Map<String, dynamic> json) {
+    // استخراج الاسم من هيكلية الـ JSON المعقدة التي أرسلتها
+    String name = "Unknown";
+    if (json['employee'] != null && json['employee']['user'] != null) {
+      name = json['employee']['user']['full_name'] ?? "Unknown";
+    }
+
     return RewardModel(
-      id: json['id'] as String,
-      employeeId: json['employee_id'] as String,
-      employeeName: json['employee_name'] as String,
-      adminId: json['admin_id'] as String,
-      adminName: json['admin_name'] as String,
+      id: json['id'] as int,
       amount: (json['amount'] as num).toDouble(),
       reason: json['reason'] as String,
-      dateIssued: DateTime.parse(json['date_issued'] as String),
+      dateIssued: DateTime.parse(json['date_issued']),
+      employeeName: name, // استخدام الاسم المستخرج
+      adminName: json['admin_name'] as String?,
     );
   }
+}
 
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'employee_id': employeeId,
-      'employee_name': employeeName,
-      'admin_id': adminId,
-      'admin_name': adminName,
-      'amount': amount,
-      'reason': reason,
-      'date_issued': dateIssued.toIso8601String(),
-    };
-  }
+class RewardResponse {
+  final List<RewardModel> data;
 
-  // Convert entity to model for convenience if needed for database operations
-  factory RewardModel.fromEntity(RewardEntity entity) {
-    return RewardModel(
-      id: entity.id,
-      employeeId: entity.employeeId,
-      employeeName: entity.employeeName,
-      adminId: entity.adminId,
-      adminName: entity.adminName,
-      amount: entity.amount,
-      reason: entity.reason,
-      dateIssued: entity.dateIssued,
-    );
+  RewardResponse({required this.data});
+
+  factory RewardResponse.fromJson(Map<String, dynamic> json) {
+    if (json['data'] is List) {
+      return RewardResponse(
+        data: (json['data'] as List).map((e) => RewardModel.fromJson(e)).toList(),
+      );
+    } else if (json['data'] != null) {
+      return RewardResponse(
+        data: [RewardModel.fromJson(json['data'])],
+      );
+    } else {
+      return RewardResponse(data: []);
+    }
   }
 }

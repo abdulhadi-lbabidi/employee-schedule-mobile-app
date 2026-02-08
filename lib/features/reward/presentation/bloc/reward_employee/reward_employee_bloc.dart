@@ -19,11 +19,12 @@ class RewardEmployeeBloc extends Bloc<RewardEmployeeEvent, RewardEmployeeState> 
     Emitter<RewardEmployeeState> emit,
   ) async {
     emit(RewardEmployeeLoading());
-    try {
-      final rewards = await getEmployeeRewardsUseCase(event.employeeId);
-      emit(RewardEmployeeLoaded(rewards: rewards));
-    } catch (e) {
-      emit(RewardEmployeeError('فشل تحميل المكافآت: ${e.toString()}'));
-    }
+    
+    final result = await getEmployeeRewardsUseCase(event.employeeId); // employeeId is already an int in the event
+    
+    result.fold(
+      (failure) => emit(RewardEmployeeError('فشل تحميل المكافآت: ${failure.message}')),
+      (rewards) => emit(RewardEmployeeLoaded(rewards: rewards)),
+    );
   }
 }

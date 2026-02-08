@@ -1,6 +1,6 @@
-import '../../domain/entities/loan_entity.dart';
-import '../models/get_loan_response.dart';
-import 'package:injectable/injectable.dart';
+// import '../../domain/entities/loan_entity.dart';
+// import '../models/get_loan_response.dart';
+// import 'package:injectable/injectable.dart';
 // @lazySingleton
 // class LoanRemoteDataSourceMock {
 //   final List<LoanModel> _mockLoans = [
