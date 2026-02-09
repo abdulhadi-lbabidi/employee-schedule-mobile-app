@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:untitled8/common/helper/src/app_varibles.dart';
+import 'package:untitled8/core/widgets/cached_network_image_with_auth.dart';
 import '../../../../core/di/injection.dart';
 import '../../../../core/theme/App theme/bloc/theme_bloc.dart';
 import '../../../Attendance/presentation/page/attrndance_page.dart';
@@ -104,7 +105,7 @@ class _HomePageState extends State<MainPage> {
                   color: Colors.blueAccent,
                   size: 22.sp,
                 )
-                    : Image.network( AppVariables.user!.profileImageUrl),
+                    : CachedNetworkImageWithAuth(imageUrl: AppVariables.user!.profileImageUrl),
               ),
             ),
           ).animate().fadeIn(duration: 500.ms).scale(delay: 100.ms),

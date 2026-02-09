@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import '../../../../core/di/injection.dart';
 import '../../../../core/utils/app_strings.dart';
+import '../../../../core/widgets/cached_network_image_with_auth.dart';
 import '../bloc/employees/employees_bloc.dart';
 import '../bloc/employees/employees_event.dart';
 import '../bloc/employees/employees_state.dart';
@@ -182,7 +183,7 @@ class _EmployeesPageState extends State<EmployeesPage> {
           child: emp.imageUrl.isNotEmpty 
             ? ClipRRect(
                 borderRadius: BorderRadius.circular(22.r),
-                child: Image.network(emp.imageUrl, fit: BoxFit.cover, errorBuilder: (_, __, ___) => Icon(Icons.person, color: theme.primaryColor)))
+                child: CachedNetworkImageWithAuth(imageUrl: emp.imageUrl))
             : Icon(Icons.person, color: theme.primaryColor, size: 24.sp)
         ),
 
