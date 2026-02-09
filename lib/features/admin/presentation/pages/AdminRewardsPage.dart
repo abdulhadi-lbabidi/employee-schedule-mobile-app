@@ -56,7 +56,7 @@ class _AdminRewardsPageState extends State<AdminRewardsPage> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        Text("${reward.amount} ل.س", style: const TextStyle(color: Colors.green, fontWeight: FontWeight.bold)),
+                        Text("${reward.amount} \$", style: const TextStyle(color: Colors.green, fontWeight: FontWeight.bold)),
                         Text(DateFormat('yyyy-MM-dd').format(reward.dateIssued), style: TextStyle(fontSize: 10.sp)),
                       ],
                     ),

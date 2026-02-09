@@ -9,6 +9,7 @@ import '../../../../core/theme/App theme/bloc/theme_bloc.dart';
 import '../../../Attendance/presentation/page/attrndance_page.dart';
 import '../../../Notification/presentation/pages/notifications_page.dart';
 import '../../../admin/presentation/bloc/workshops/workshops_bloc.dart';
+import '../../../employee/presentation/pages/EmployeeSummaryPage.dart';
 import '../../../loan/presentation/pages/employee_loan_page.dart';
 import '../../../profile/presentation/bloc/Profile/_profile_bloc.dart';
 import '../../../profile/presentation/bloc/Profile/_profile_event.dart';
@@ -17,7 +18,6 @@ import '../../../profile/presentation/pages/profie_page.dart';
 
 import '../bloc/Cubit_Navigation/navigation_cubit.dart';
 import 'home_page.dart';
-import 'EmployeeFinancePage.dart';
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
@@ -27,18 +27,19 @@ class MainPage extends StatefulWidget {
 }
 
 class _HomePageState extends State<MainPage> {
-  final List<Widget> pages = [
-    const HomePage(),
-    const AttendanceHistoryPage(),
-    const NotificationsPage(),
-    const EmployeeFinancePage(),
-    const EmployeeLoanPage(),
-  ];
+
+  late final List<Widget> pages;
 
   @override
   void initState() {
-
     super.initState();
+    pages = [
+      const HomePage(),
+      const AttendanceHistoryPage(),
+      const NotificationsPage(),
+      EmployeeSummaryPage(employeeId: AppVariables.user?.userableId.toString() ?? ''),
+      const EmployeeLoanPage(),
+    ];
     // context.read<ProfileBloc>().add(LoadProfile());
   }
 

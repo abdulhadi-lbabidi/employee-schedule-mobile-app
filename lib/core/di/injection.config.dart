@@ -83,6 +83,16 @@ import '../../features/auth/data/datasource/authRemoteDataSourceImpl.dart'
 import '../../features/auth/data/repository/login_repo.dart' as _i675;
 import '../../features/auth/presentation/bloc/login_Cubit/login_cubit.dart'
     as _i424;
+import '../../features/employee/data/datasources/employee_summary_remote_data_source.dart'
+    as _i921;
+import '../../features/employee/data/repositories/employee_summary_repository_impl.dart'
+    as _i183;
+import '../../features/employee/domain/repositories/employee_summary_repository.dart'
+    as _i482;
+import '../../features/employee/domain/usecases/get_employee_summary_usecase.dart'
+    as _i443;
+import '../../features/employee/presentation/bloc/employee_summary/employee_summary_bloc.dart'
+    as _i390;
 import '../../features/home/presentation/bloc/cubit_active_unactive/active_unactive_cubit.dart'
     as _i36;
 import '../../features/home/presentation/bloc/Cubit_Button/button_cubit.dart'
@@ -240,6 +250,11 @@ Future<_i174.GetIt> $initGetIt(
       () => _i184.AuditLogRepository(gh<_i979.Box<_i254.AuditLogModel>>()));
   gh.lazySingleton<_i777.RewardRemoteDataSource>(
       () => _i777.RewardRemoteDataSource(gh<_i893.BaseApi>()));
+  gh.lazySingleton<_i921.EmployeeSummaryRemoteDataSource>(
+      () => _i921.EmployeeSummaryRemoteDataSource(gh<_i893.BaseApi>()));
+  gh.lazySingleton<_i482.EmployeeSummaryRepository>(() =>
+      _i183.EmployeeSummaryRepositoryImpl(
+          remoteDataSource: gh<_i921.EmployeeSummaryRemoteDataSource>()));
   gh.lazySingleton<_i1057.AppRepository>(() => _i1057.AppRepository(
         remote: gh<_i803.RemoteDataSource>(),
         local: gh<_i18.LocalDataSource>(),
@@ -277,6 +292,8 @@ Future<_i174.GetIt> $initGetIt(
       () => _i850.RecordPaymentUseCase(gh<_i415.LoanRepository>()));
   gh.lazySingleton<_i226.UpdateLoanStatusUseCase>(
       () => _i226.UpdateLoanStatusUseCase(gh<_i415.LoanRepository>()));
+  gh.lazySingleton<_i443.GetEmployeeSummaryUseCase>(() =>
+      _i443.GetEmployeeSummaryUseCase(gh<_i482.EmployeeSummaryRepository>()));
   gh.lazySingleton<_i240.AttendanceRepositories>(
       () => _i54.AttendanceRepositoryImpl(
             remote: gh<_i220.AttendanceRemoteData>(),
@@ -305,24 +322,26 @@ Future<_i174.GetIt> $initGetIt(
       repositories: gh<_i240.AttendanceRepositories>()));
   gh.factory<_i467.RewardEmployeeBloc>(() => _i467.RewardEmployeeBloc(
       getEmployeeRewardsUseCase: gh<_i1050.GetEmployeeRewardsUseCase>()));
+  gh.factory<_i390.EmployeeSummaryBloc>(() => _i390.EmployeeSummaryBloc(
+      getEmployeeSummaryUseCase: gh<_i443.GetEmployeeSummaryUseCase>()));
   gh.factory<_i830.RewardAdminBloc>(() => _i830.RewardAdminBloc(
         getAdminRewardsUseCase: gh<_i1.GetAdminRewardsUseCase>(),
         issueRewardUseCase: gh<_i679.IssueRewardUseCase>(),
       ));
-  gh.lazySingleton<_i585.GetNotificationsUseCase>(
+  gh.factory<_i585.GetNotificationsUseCase>(
       () => _i585.GetNotificationsUseCase(gh<_i697.NotificationRepository>()));
-  gh.lazySingleton<_i585.AddLocalNotificationUseCase>(() =>
-      _i585.AddLocalNotificationUseCase(gh<_i697.NotificationRepository>()));
-  gh.lazySingleton<_i585.SyncNotificationsUseCase>(
-      () => _i585.SyncNotificationsUseCase(gh<_i697.NotificationRepository>()));
-  gh.lazySingleton<_i585.SendNotificationUseCase>(
-      () => _i585.SendNotificationUseCase(gh<_i697.NotificationRepository>()));
-  gh.lazySingleton<_i585.DeleteNotificationUseCase>(() =>
-      _i585.DeleteNotificationUseCase(gh<_i697.NotificationRepository>()));
-  gh.lazySingleton<_i585.DeleteAllNotificationsUseCase>(() =>
-      _i585.DeleteAllNotificationsUseCase(gh<_i697.NotificationRepository>()));
-  gh.lazySingleton<_i585.MarkNotificationAsReadUseCase>(() =>
+  gh.factory<_i585.MarkNotificationAsReadUseCase>(() =>
       _i585.MarkNotificationAsReadUseCase(gh<_i697.NotificationRepository>()));
+  gh.factory<_i585.SendNotificationUseCase>(
+      () => _i585.SendNotificationUseCase(gh<_i697.NotificationRepository>()));
+  gh.factory<_i585.SyncNotificationsUseCase>(
+      () => _i585.SyncNotificationsUseCase(gh<_i697.NotificationRepository>()));
+  gh.factory<_i585.AddLocalNotificationUseCase>(() =>
+      _i585.AddLocalNotificationUseCase(gh<_i697.NotificationRepository>()));
+  gh.factory<_i585.DeleteNotificationUseCase>(() =>
+      _i585.DeleteNotificationUseCase(gh<_i697.NotificationRepository>()));
+  gh.factory<_i585.DeleteAllNotificationsUseCase>(() =>
+      _i585.DeleteAllNotificationsUseCase(gh<_i697.NotificationRepository>()));
   gh.lazySingleton<_i200.WorkshopRepository>(() => _i429.WorkshopRepositoryImpl(
         remoteDataSource: gh<_i1069.WorkshopRemoteDataSource>(),
         localeDataSource: gh<_i573.WorkshopLocaleDataSource>(),

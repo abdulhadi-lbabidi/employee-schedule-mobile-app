@@ -433,7 +433,7 @@ class _WeeklyWorkSection extends StatelessWidget {
     if (state is EmployeeDetailsLoaded) {
       final emp = state.employee;
       context.read<EmployeeDetailsBloc>().add(ConfirmPaymentEvent(emp, weekNumber, amountPaid: amount, isFullPayment: isFull));
-      context.read<NotificationBloc>().add(AdminSendNotificationEvent(title: "دفع مالي", body: "تم صرف ${amount.toInt()} ل.س للأسبوع $weekNumber", targetEmployeeId: emp.id));
+      context.read<NotificationBloc>().add(AdminSendNotificationEvent(title: "دفع مالي", body: "تم صرف ${amount.toInt()} ل.س للأسبوع $weekNumber", targetEmployeeId: int.tryParse(emp.id))); // تم التحويل هنا
     }
   }
 }

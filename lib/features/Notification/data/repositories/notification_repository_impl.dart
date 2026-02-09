@@ -1,7 +1,7 @@
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/cupertino.dart'; // Keep this import as debugPrint is used
 import 'package:hive/hive.dart';
 import '../../../../core/hive_service.dart';
-import '../../domain/entities/notification_entity.dart';
+// import '../../domain/entities/notification_entity.dart'; // No longer needed directly for getNotifications return type
 import '../../domain/repositories/notification_repository.dart';
 import '../datasources/notification_remote_data_source.dart';
 import '../model/notification_model.dart';
@@ -10,7 +10,7 @@ import 'package:injectable/injectable.dart';
 @LazySingleton(as: NotificationRepository)
 class NotificationRepositoryImpl implements NotificationRepository {
   final HiveService hiveService;
-  final NotificationRemoteDataSourceImpl remoteDataSource;
+  final NotificationRemoteDataSourceImpl remoteDataSource; // Assuming this is correct
 
   NotificationRepositoryImpl({
     required this.hiveService,
@@ -21,11 +21,11 @@ class NotificationRepositoryImpl implements NotificationRepository {
   Future<Box<NotificationModel>> get _box async =>
       await hiveService.notificationBox;
 
-  /// 🔹 جلب كل الإشعارات المخزنة محلياً وتحويلها إلى Entity
+  /// 🔹 جلب كل الإشعارات المخزنة محلياً (كـ Models)
   @override
-  Future<List<NotificationEntity>> getNotifications() async {
+  Future<List<NotificationModel>> getNotifications() async { // Changed return type to List<NotificationModel>
     final box = await _box;
-    return box.values.map(_mapToEntity).toList();
+    return box.values.toList(); // Directly return list of models
   }
 
   /// 🔹 إضافة إشعار محلي في الـ Hive
@@ -58,17 +58,17 @@ class NotificationRepositoryImpl implements NotificationRepository {
     required String title,
     required String body,
     String? targetWorkshop,
-    String? targetEmployeeId,
+    int? targetEmployeeId, // Changed type to int?
   }) async {
     await remoteDataSource.sendNotification(
       title: title,
       body: body,
       targetWorkshop: targetWorkshop,
-      targetEmployeeId: targetEmployeeId,
+      targetEmployeeId: targetEmployeeId, // Pass int?
     );
 
     final localNotif = NotificationModel(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      id: DateTime.now().millisecondsSinceEpoch.toString(), // ID is String here as per NotificationModel
       title: title,
       body: body,
       createdAt: DateTime.now(),
@@ -95,24 +95,12 @@ class NotificationRepositoryImpl implements NotificationRepository {
 
   /// 🔹 وضع إشعار كمقروء
   @override
-  Future<void> markAsRead(String id) async {
+  Future<void> markNotificationAsRead(String id) async { // Corrected method name to match interface
     final box = await _box;
     final model = box.get(id);
     if (model != null) {
       model.isRead = true;
       await model.save();
     }
-  }
-
-  /// 🔹 تحويل NotificationModel إلى NotificationEntity لاستخدامه في Presentation Layer
-  NotificationEntity _mapToEntity(NotificationModel model) {
-    return NotificationEntity(
-      id: model.id,
-      title: model.title,
-      body: model.body,
-      type: model.type,
-      isRead: model.isRead,
-      createdAt: model.createdAt,
-    );
   }
 }

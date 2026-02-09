@@ -63,7 +63,7 @@ class EmployeeRewardsPage extends StatelessWidget {
                       child: Container(
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(15.r),
-                          color: Colors.white,
+                          color: Colors.white60,
                         ),
                         padding: EdgeInsets.all(16.w),
                         child: Column(
@@ -79,7 +79,7 @@ class EmployeeRewardsPage extends StatelessWidget {
                                     Text("مكافأة مالية", style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, color: Colors.amber.shade900)),
                                   ],
                                 ),
-                                Text("${NumberFormat.decimalPattern().format(reward.amount)} ل.س",
+                                Text("${NumberFormat.decimalPattern().format(reward.amount)}\$",
                                     style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold, color: Colors.green.shade700)),
                               ],
                             ),

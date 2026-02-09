@@ -20,7 +20,7 @@ class AdminSendNotificationEvent extends NotificationEvent {
   final String title;
   final String body;
   final String? targetWorkshop; 
-  final String? targetEmployeeId; 
+  final int? targetEmployeeId; // تم التعديل من String إلى int ليتوافق مع بقية المشروع
 
   AdminSendNotificationEvent({
     required this.title,

@@ -88,6 +88,9 @@ class ApiVariables {
   static Uri employeeRewards(String empId) => _mainUri('/api/rewards/employee/$empId');
   static Uri issueReward() => _mainUri('/api/rewards/issue');
 
+  static Uri getEmployeesHoursAndPaySummary(String empId) => _mainUri('/api/employees/$empId/hours-and-pay-summary');
+
+
   // --- Notifications ---
   static Uri notifications() => _mainUri('/api/notifications');
   static Uri sendNotification() => _mainUri('/api/notifications/send');
