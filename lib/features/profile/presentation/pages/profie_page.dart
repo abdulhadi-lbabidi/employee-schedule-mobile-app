@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:untitled8/features/profile/presentation/pages/widgets/change_password_dialog.dart';
 import 'package:untitled8/features/profile/presentation/pages/widgets/edit_profile_page.dart';
 import 'package:untitled8/features/profile/presentation/pages/widgets/widget_foCard.dart';
 import 'package:untitled8/features/SplashScreen/presentation/page/splashScareen.dart';
@@ -69,7 +70,10 @@ class _ProfilePageState extends State<ProfilePage> {
                     onPressed: () => Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => const EditProfilePage(),
+                        builder: (_) => BlocProvider.value(
+                          value: profileBloc,
+                          child: const EditProfilePage(),
+                        ),
                       ),
                     ),
                   ),
@@ -81,8 +85,8 @@ class _ProfilePageState extends State<ProfilePage> {
                 child: Column(
                   children: [
                     _buildHeader(context, state.profile.data!, theme),
-                    SizedBox(height: 30.h),
-                    _buildStatsRow(state.profile, theme),
+                    // SizedBox(height: 30.h),
+                    // _buildStatsRow(state.profile, theme),
                     SizedBox(height: 25.h),
                     _buildRewardShortcut(
                       context,
@@ -102,6 +106,8 @@ class _ProfilePageState extends State<ProfilePage> {
                       label: 'البريد الإلكتروني',
                       value: state.profile.data!.user?.email ?? "---",
                     ),
+                    SizedBox(height: 15.h),
+                    _buildChangePasswordButton(context, theme),
                     SizedBox(height: 25.h),
                     _buildSectionTitle("تفاصيل العمل", theme),
                     SizedBox(height: 15.h),
@@ -138,7 +144,7 @@ class _ProfilePageState extends State<ProfilePage> {
           ),
         );
       },
-      listenWhen: (pre, cur) => pre.logOutData.status != cur.logOutData.status,
+      listenWhen: (pre, cur) => pre.logOutData.status != cur.logOutData.status || pre.updateProfile.status != cur.updateProfile.status,
       listener: (context, state) {
         state.logOutData.listenerFunction(
           onSuccess: () {
@@ -149,8 +155,48 @@ class _ProfilePageState extends State<ProfilePage> {
             );
           },
         );
+        state.updateProfile.listenerFunction(
+          onSuccess: () {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('تم تحديث البيانات بنجاح'), backgroundColor: Colors.green),
+            );
+          },
+          onFailed: () {
+             // الرسالة تظهر تلقائياً من الـ DataStateModel
+          }
+        );
       },
     );
+  }
+
+  Widget _buildChangePasswordButton(BuildContext context, ThemeData theme) {
+    return InkWell(
+      onTap: () => showChangePasswordDialog(context, profileBloc),
+      child: Container(
+        padding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 16.w),
+        decoration: BoxDecoration(
+          color: theme.primaryColor.withOpacity(0.05),
+          borderRadius: BorderRadius.circular(15.r),
+          border: Border.all(color: theme.primaryColor.withOpacity(0.2)),
+        ),
+        child: Row(
+          children: [
+            Icon(Icons.lock_reset_rounded, color: theme.primaryColor, size: 22.sp),
+            SizedBox(width: 12.w),
+            Text(
+              "تغيير كلمة المرور",
+              style: TextStyle(
+                fontSize: 14.sp,
+                color: theme.primaryColor,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const Spacer(),
+            Icon(Icons.arrow_forward_ios_rounded, color: theme.primaryColor, size: 14.sp),
+          ],
+        ),
+      ),
+    ).animate().fadeIn(delay: 300.ms);
   }
 
   Widget _buildRewardShortcut(
@@ -288,29 +334,29 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  Widget _buildStatsRow(state, ThemeData theme) {
-    return Row(
-      children: [
-        _buildStatCard("ساعات العمل", '8', Icons.access_time_filled, [
-          const Color(0xFF1A237E),
-          const Color(0xFF3949AB),
-        ], theme),
-        SizedBox(width: 12.w),
-        _buildStatCard(
-          "أيام الدوام",
-          '6',
-          Icons.calendar_today_rounded,
-          [const Color(0xFF00695C), const Color(0xFF43A047)],
-          theme,
-        ),
-        SizedBox(width: 12.w),
-        _buildStatCard("آخر ورشة", 'أخر ورشة', Icons.warehouse_rounded, [
-          const Color(0xFF4527A0),
-          const Color(0xFF7B1FA2),
-        ], theme),
-      ],
-    ).animate().fadeIn(duration: 600.ms).slideY(begin: 0.2, end: 0);
-  }
+  // Widget _buildStatsRow(state, ThemeData theme) {
+  //   return Row(
+  //     children: [
+  //       _buildStatCard("ساعات العمل", '8', Icons.access_time_filled, [
+  //         const Color(0xFF1A237E),
+  //         const Color(0xFF3949AB),
+  //       ], theme),
+  //       SizedBox(width: 12.w),
+  //       _buildStatCard(
+  //         "أيام الدوام",
+  //         '6',
+  //         Icons.calendar_today_rounded,
+  //         [const Color(0xFF00695C), const Color(0xFF43A047)],
+  //         theme,
+  //       ),
+  //       SizedBox(width: 12.w),
+  //       _buildStatCard("آخر ورشة", 'أخر ورشة', Icons.warehouse_rounded, [
+  //         const Color(0xFF4527A0),
+  //         const Color(0xFF7B1FA2),
+  //       ], theme),
+  //     ],
+  //   ).animate().fadeIn(duration: 600.ms).slideY(begin: 0.2, end: 0);
+  // }
 
   Widget _buildStatCard(
     String title,

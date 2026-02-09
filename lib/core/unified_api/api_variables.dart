@@ -18,7 +18,7 @@ class ApiVariables {
   // --- Auth ---
   static Uri login() => _mainUri('/api/login');
   static Uri logout() => _mainUri('/api/logout');
-  static Uri updatePassword() => _mainUri('/api/update-password');
+  static Uri updatePassword() => _mainUri('/api/update-profile');
   static Uri register() => _mainUri('/api/auth/register');
   static Uri verifyToken() => _mainUri('/api/auth/verify');
 

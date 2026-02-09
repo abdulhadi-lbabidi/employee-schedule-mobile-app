@@ -28,3 +28,18 @@ class UpdateProfileImage extends ProfileEvent {
   @override
   List<Object?> get props => [imagePath];
 }
+
+class UpdatePasswordEvent extends ProfileEvent {
+  final String oldPassword;
+  final String newPassword;
+  final String confirmPassword;
+
+  UpdatePasswordEvent({
+    required this.oldPassword,
+    required this.newPassword,
+    required this.confirmPassword,
+  });
+
+  @override
+  List<Object?> get props => [oldPassword, newPassword, confirmPassword];
+}

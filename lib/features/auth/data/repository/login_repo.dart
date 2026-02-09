@@ -25,15 +25,21 @@ class AuthRepository with HandlingException {
     );
   }
 
-  DataResponse<void> logout() async {
-    return wrapHandlingException(tryCall: () => remoteDataSource.logOut());
+  Future<Either<Failure, void>> logout() async {
+     try {
+      await remoteDataSource.logOut();
+      return const Right(());
+    } catch (e) {
+      return Left(ErrorHandler.handle(e).failure);
+    }
   }
 
   Future<Either<Failure, LoginResponse>> getCurrentUser() async {
     return wrapHandlingException(tryCall: () => remoteDataSource.getMe());
   }
 
-  DataResponse<LoginResponse> updateProfile(File image) async {
+  Future<Either<Failure, LoginResponse>> updateProfile(File image) async {
+    // تعديل بسيط هنا لضمان أن الدالة ترجع Either<Failure, LoginResponse>
     return wrapHandlingException(
       tryCall: () => remoteDataSource.updateProfile(image: image),
     );

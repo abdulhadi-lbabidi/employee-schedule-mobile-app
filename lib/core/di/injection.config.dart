@@ -135,6 +135,16 @@ import '../../features/Notification/domain/usecases/get_notifications.dart'
     as _i585;
 import '../../features/Notification/presentation/bloc/notification_bloc.dart'
     as _i23;
+import '../../features/profile/data/datasources/update_password_remote_data_source.dart'
+    as _i138;
+import '../../features/profile/data/repositories/profile_repository_impl.dart'
+    as _i334;
+import '../../features/profile/domain/repositories/profile_repository.dart'
+    as _i894;
+import '../../features/profile/domain/usecases/update_password_usecase.dart'
+    as _i525;
+import '../../features/profile/domain/usecases/update_profile_info_usecase.dart'
+    as _i389;
 import '../../features/profile/presentation/bloc/Profile/_profile_bloc.dart'
     as _i207;
 import '../../features/reward/data/datasources/reward_remote_data_source.dart'
@@ -252,6 +262,8 @@ Future<_i174.GetIt> $initGetIt(
       () => _i777.RewardRemoteDataSource(gh<_i893.BaseApi>()));
   gh.lazySingleton<_i921.EmployeeSummaryRemoteDataSource>(
       () => _i921.EmployeeSummaryRemoteDataSource(gh<_i893.BaseApi>()));
+  gh.lazySingleton<_i138.UpdatePasswordRemoteDataSource>(
+      () => _i138.UpdatePasswordRemoteDataSource(gh<_i893.BaseApi>()));
   gh.lazySingleton<_i482.EmployeeSummaryRepository>(() =>
       _i183.EmployeeSummaryRepositoryImpl(
           remoteDataSource: gh<_i921.EmployeeSummaryRemoteDataSource>()));
@@ -292,8 +304,10 @@ Future<_i174.GetIt> $initGetIt(
       () => _i850.RecordPaymentUseCase(gh<_i415.LoanRepository>()));
   gh.lazySingleton<_i226.UpdateLoanStatusUseCase>(
       () => _i226.UpdateLoanStatusUseCase(gh<_i415.LoanRepository>()));
-  gh.lazySingleton<_i443.GetEmployeeSummaryUseCase>(() =>
+  gh.factory<_i443.GetEmployeeSummaryUseCase>(() =>
       _i443.GetEmployeeSummaryUseCase(gh<_i482.EmployeeSummaryRepository>()));
+  gh.lazySingleton<_i894.ProfileRepository>(() =>
+      _i334.ProfileRepositoryImpl(gh<_i138.UpdatePasswordRemoteDataSource>()));
   gh.lazySingleton<_i240.AttendanceRepositories>(
       () => _i54.AttendanceRepositoryImpl(
             remote: gh<_i220.AttendanceRemoteData>(),
@@ -322,11 +336,20 @@ Future<_i174.GetIt> $initGetIt(
       repositories: gh<_i240.AttendanceRepositories>()));
   gh.factory<_i467.RewardEmployeeBloc>(() => _i467.RewardEmployeeBloc(
       getEmployeeRewardsUseCase: gh<_i1050.GetEmployeeRewardsUseCase>()));
+  gh.factory<_i525.UpdatePasswordUseCase>(
+      () => _i525.UpdatePasswordUseCase(gh<_i894.ProfileRepository>()));
+  gh.factory<_i389.UpdateProfileInfoUseCase>(
+      () => _i389.UpdateProfileInfoUseCase(gh<_i894.ProfileRepository>()));
   gh.factory<_i390.EmployeeSummaryBloc>(() => _i390.EmployeeSummaryBloc(
       getEmployeeSummaryUseCase: gh<_i443.GetEmployeeSummaryUseCase>()));
   gh.factory<_i830.RewardAdminBloc>(() => _i830.RewardAdminBloc(
         getAdminRewardsUseCase: gh<_i1.GetAdminRewardsUseCase>(),
         issueRewardUseCase: gh<_i679.IssueRewardUseCase>(),
+      ));
+  gh.factory<_i207.ProfileBloc>(() => _i207.ProfileBloc(
+        gh<_i675.AuthRepository>(),
+        gh<_i525.UpdatePasswordUseCase>(),
+        gh<_i389.UpdateProfileInfoUseCase>(),
       ));
   gh.factory<_i585.GetNotificationsUseCase>(
       () => _i585.GetNotificationsUseCase(gh<_i697.NotificationRepository>()));
@@ -346,8 +369,6 @@ Future<_i174.GetIt> $initGetIt(
         remoteDataSource: gh<_i1069.WorkshopRemoteDataSource>(),
         localeDataSource: gh<_i573.WorkshopLocaleDataSource>(),
       ));
-  gh.factory<_i207.ProfileBloc>(
-      () => _i207.ProfileBloc(gh<_i675.AuthRepository>()));
   gh.lazySingleton<_i951.AttendanceBloc>(() => _i951.AttendanceBloc(
         gh<_i538.GetEmployeeAttendanceUseCase>(),
         gh<_i0.SyncAttendanceUseCase>(),
