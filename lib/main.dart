@@ -6,7 +6,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_messaging/firebase_messaging.dart'; // 🔹 إضافة
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:hive_flutter/hive_flutter.dart'; // 🔹 إضافة
+// import 'package:untitled8/features/admin/data/models/audit_log_model.dart'; // 🔹 سيتم التسجيل في HiveService
 import 'package:untitled8/common/helper/src/app_varibles.dart';
 import 'package:untitled8/core/services/notification_service.dart';
 import 'package:untitled8/core/theme/App%20theme/bloc/theme_bloc.dart';
@@ -31,48 +33,37 @@ import 'features/admin/presentation/bloc/employee_details/employee_details_bloc.
 import 'features/admin/presentation/bloc/workshops/workshops_bloc.dart';
 import 'features/loan/presentation/bloc/loan_bloc.dart';
 
-// 🔹 معالج رسائل الخلفية لـ Firebase Messaging
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
-  // يمكنك معالجة الإشعارات الواردة في الخلفية هنا
-  // NotificationService().showNotification(title: message.notification?.title ?? 'Notification', body: message.notification?.body ?? 'You have a new notification.');
   debugPrint("Handling a background message: ${message.messageId}");
 }
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  // 🔹 تهيئة Hive تتم الآن عبر HiveService المحقون
+  await Hive.initFlutter();
+  // Hive.registerAdapter(AuditLogModelAdapter()); // ❌ إزالة التسجيل المكرر من هنا
+
   await configureInjection();
 
   try {
     await Firebase.initializeApp();
-    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler); // 🔹 تعيين معالج الخلفية
+    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
   } catch (e) {
     debugPrint("Firebase Initialize Error: $e");
   }
 
-  // 🔹 تهيئة Firebase Messaging والأذونات
   final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
   NotificationSettings settings = await _firebaseMessaging.requestPermission(
-    alert: true,
-    announcement: false,
-    badge: true,
-    carPlay: false,
-    criticalAlert: false,
-    provisional: false,
-    sound: true,
+    alert: true, announcement: false, badge: true, carPlay: false,
+    criticalAlert: false, provisional: false, sound: true,
   );
-
   debugPrint('User granted permission: ${settings.authorizationStatus}');
 
-  // 🔹 معالجة الرسائل الواردة أثناء وجود التطبيق في المقدمة
   FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-    debugPrint('Got a message whilst in the foreground!');
-    debugPrint('Message data: ${message.data}');
-
     if (message.notification != null) {
-      debugPrint('Message also contained a notification: ${message.notification}');
       NotificationService().showNotification(
         title: message.notification?.title ?? 'إشعار جديد',
         body: message.notification?.body ?? 'لديك إشعار جديد.',
@@ -80,7 +71,7 @@ void main() async {
     }
   });
 
-  await NotificationService().init(); // 🔹 تهيئة الإشعارات المحلية
+  await NotificationService().init();
 
   runApp(const MyApp());
 }
@@ -97,18 +88,13 @@ class MyApp extends StatelessWidget {
       builder: (context, child) {
         return MultiBlocProvider(
           providers: [
-            BlocProvider(
-              create: (_) => ThemeBloc()..add(GetCurrentThemeEvent()),
-            ),
+            BlocProvider(create: (_) => ThemeBloc()..add(GetCurrentThemeEvent())),
             BlocProvider(create: (_) => sl<LoginCubit>()),
             BlocProvider(create: (_) => sl<AttendanceBloc>()),
-
             BlocProvider(create: (_) => sl<NavigationnCubit>()),
             BlocProvider(create: (_) => sl<DropdownCubit>()),
             BlocProvider(create: (_) => sl<ButtonCubit>()),
             BlocProvider(create: (_) => sl<ActiveUnactiveCubit>()),
-            // BlocProvider(create: (_) => sl<ProfileBloc>()),
-            // BlocProvider(create: (_) => sl<AttendanceCubit>()),
             BlocProvider(create: (_) => sl<NotificationBloc>()),
             BlocProvider(create: (_) => sl<AdminDashboardBloc>()),
             BlocProvider(create: (_) => sl<AdminProfileBloc>()),
@@ -124,7 +110,6 @@ class MyApp extends StatelessWidget {
               if (themeState is LoadedThemeState) {
                 currentTheme = themeState.themeData;
               }
-
               return MaterialApp(
                 navigatorKey: AppVariables.navigatorKey,
                 debugShowCheckedModeBanner: false,
@@ -137,8 +122,6 @@ class MyApp extends StatelessWidget {
                   GlobalWidgetsLocalizations.delegate,
                   GlobalCupertinoLocalizations.delegate,
                 ],
-
-
                 navigatorObservers: [BotToastNavigatorObserver()],
                 builder: BotToastInit(),
                 home: const Splashscareen(),

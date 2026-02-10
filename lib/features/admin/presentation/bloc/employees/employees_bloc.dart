@@ -6,12 +6,13 @@ import '../../../domain/usecases/get_all_employees.dart';
 import '../../../domain/usecases/toggle_employee_archive.dart';
 import 'employees_event.dart';
 import 'employees_state.dart';
+
 @injectable
 class EmployeesBloc extends Bloc<EmployeesEvent, EmployeesState> {
   final GetAllEmployeesUseCase getAllEmployeesUseCase;
   final AddEmployeeUseCase addEmployeeUseCase;
   final ToggleEmployeeArchiveUseCase toggleEmployeeArchiveUseCase;
-  
+
   List<EmployeeEntity> _allEmployees = [];
 
   EmployeesBloc({
@@ -31,20 +32,16 @@ class EmployeesBloc extends Bloc<EmployeesEvent, EmployeesState> {
     Emitter<EmployeesState> emit,
   ) async {
     emit(EmployeesLoading());
-
     try {
       final employees = await getAllEmployeesUseCase();
       _allEmployees = employees;
-      print('Loaded employees: $_allEmployees');
-
-
       if (employees.isEmpty) {
         emit(EmployeesEmpty());
       } else {
         emit(EmployeesLoaded(employees));
       }
     } catch (e) {
-      emit(EmployeesError('حدث خطأ أثناء تحميل الموظفين'));
+      emit(EmployeesError('حدث خطأ أثناء تحميل الموظفين: ${e.toString()}'));
     }
   }
 
@@ -52,11 +49,12 @@ class EmployeesBloc extends Bloc<EmployeesEvent, EmployeesState> {
     AddEmployeeEvent event,
     Emitter<EmployeesState> emit,
   ) async {
+    emit(EmployeesLoading());
     try {
       await addEmployeeUseCase(event.employee);
       add(LoadEmployeesEvent());
     } catch (e) {
-      emit(EmployeesError('فشل إضافة الموظف الجديد'));
+      emit(EmployeesError('فشل إضافة الموظف الجديد: ${e.toString()}'));
     }
   }
 
@@ -64,11 +62,12 @@ class EmployeesBloc extends Bloc<EmployeesEvent, EmployeesState> {
     ToggleArchiveEmployeeEvent event,
     Emitter<EmployeesState> emit,
   ) async {
+    emit(EmployeesLoading());
     try {
       await toggleEmployeeArchiveUseCase(event.id, event.isArchived);
       add(LoadEmployeesEvent());
     } catch (e) {
-      emit(EmployeesError('فشل تغيير حالة أرشفة الموظف'));
+      emit(EmployeesError('فشل تغيير حالة أرشفة الموظف: ${e.toString()}'));
     }
   }
 
@@ -77,14 +76,18 @@ class EmployeesBloc extends Bloc<EmployeesEvent, EmployeesState> {
     Emitter<EmployeesState> emit,
   ) {
     if (event.query.isEmpty) {
-      emit(EmployeesLoaded(_allEmployees));
+      if (_allEmployees.isEmpty) {
+        emit(EmployeesEmpty());
+      } else {
+        emit(EmployeesLoaded(_allEmployees));
+      }
       return;
     }
 
     final filteredEmployees = _allEmployees
         .where((employee) =>
-            employee.name.toLowerCase().contains(event.query.toLowerCase()) ||
-            employee.phoneNumber.contains(event.query))
+            (employee.name).toLowerCase().contains(event.query.toLowerCase()) ||
+            (employee.phoneNumber).contains(event.query))
         .toList();
 
     if (filteredEmployees.isEmpty) {

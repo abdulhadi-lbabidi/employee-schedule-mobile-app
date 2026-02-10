@@ -6,7 +6,7 @@ import '../features/Notification/data/model/notification_model.dart';
 import '../features/admin/data/models/audit_log_model.dart';
 import '../features/admin/data/models/workshop_model.dart';
 
-@lazySingleton
+// ❌ إزالة @lazySingleton لمنع التسجيل المزدوج
 class HiveService {
   final Map<String, Box> _boxes = {};
   bool _initialized = false;
@@ -26,7 +26,7 @@ class HiveService {
       openBox('attendanceStatusBox'),
       openBox<WorkshopModel>('workshopBox'),
       openBox<NotificationModel>('notificationBox'),
-      openBox<AuditLogModel>('auditLogBox'),
+      openBox<AuditLogModel>('auditLogBox'), // ✅ الصندوق يتم فتحه هنا
       openBox('settings'),
     ]);
 
@@ -34,10 +34,12 @@ class HiveService {
   }
 
   void _registerAdapters() {
+    // ✅ الـ Adapter يتم تسجيله هنا
     if (!Hive.isAdapterRegistered(0)) Hive.registerAdapter(AttendanceRecordAdapter());
     if (!Hive.isAdapterRegistered(1)) Hive.registerAdapter(WorkshopModelAdapter());
     if (!Hive.isAdapterRegistered(2)) Hive.registerAdapter(NotificationModelAdapter());
-    if (!Hive.isAdapterRegistered(3)) Hive.registerAdapter(AuditLogModelAdapter());
+    // لاحظ أن AuditLogModelAdapter يستخدم typeId: 3 هنا بناءً على الكود الذي أرفقته
+    if (!Hive.isAdapterRegistered(3)) Hive.registerAdapter(AuditLogModelAdapter()); 
   }
 
   Future<Box<T>> openBox<T>(String name) async {
@@ -63,4 +65,3 @@ class HiveService {
   Future<Box<AuditLogModel>> get auditLogBox async => getBox('auditLogBox');
   Future<Box> get settingsBox async => getBox('settings');
 }
-

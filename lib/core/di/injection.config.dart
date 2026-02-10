@@ -13,7 +13,6 @@ import 'package:dio/dio.dart' as _i361;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart' as _i558;
 import 'package:get_it/get_it.dart' as _i174;
 import 'package:hive/hive.dart' as _i979;
-import 'package:hive_flutter/hive_flutter.dart' as _i986;
 import 'package:injectable/injectable.dart' as _i526;
 import 'package:shared_preferences/shared_preferences.dart' as _i460;
 
@@ -60,6 +59,8 @@ import '../../features/admin/domain/usecases/update_overtime_rate.dart'
     as _i949;
 import '../../features/admin/presentation/bloc/admin_dashboard/admin_dashboard_bloc.dart'
     as _i371;
+import '../../features/admin/presentation/bloc/admin_profile/admin_profile_bloc.dart'
+    as _i1018;
 import '../../features/admin/presentation/bloc/employee_details/employee_details_bloc.dart'
     as _i125;
 import '../../features/admin/presentation/bloc/employees/employees_bloc.dart'
@@ -175,22 +176,21 @@ import '../hive_service.dart' as _i351;
 import '../services/notification_service.dart' as _i941;
 import '../unified_api/base_api.dart' as _i893;
 import '../unified_api/logger_interceptor.dart' as _i424;
-import 'hive_module.dart' as _i576;
 import 'injection.dart' as _i464;
 
 // initializes the registration of main-scope dependencies inside of GetIt
-Future<_i174.GetIt> $initGetIt(
+_i174.GetIt $initGetIt(
   _i174.GetIt getIt, {
   String? environment,
   _i526.EnvironmentFilter? environmentFilter,
-}) async {
+}) {
   final gh = _i526.GetItHelper(
     getIt,
     environment,
     environmentFilter,
   );
   final injectableModule = _$InjectableModule();
-  final hiveModule = _$HiveModule();
+  gh.factory<_i1018.AdminProfileBloc>(() => _i1018.AdminProfileBloc());
   gh.factory<_i402.DropdownCubit>(() => _i402.DropdownCubit());
   gh.factory<_i208.NavigationnCubit>(() => _i208.NavigationnCubit());
   gh.factory<_i964.FinanceBloc>(() => _i964.FinanceBloc());
@@ -199,10 +199,6 @@ Future<_i174.GetIt> $initGetIt(
   gh.singleton<_i895.Connectivity>(() => injectableModule.connectivity);
   gh.singleton<_i558.FlutterSecureStorage>(
       () => injectableModule.secureStorage);
-  await gh.lazySingletonAsync<_i986.Box<Map<dynamic, dynamic>>>(
-    () => hiveModule.loanBox,
-    preResolve: true,
-  );
   gh.lazySingleton<_i941.NotificationService>(
       () => _i941.NotificationService());
   gh.lazySingleton<_i424.LoggerInterceptor>(() => _i424.LoggerInterceptor());
@@ -441,5 +437,3 @@ Future<_i174.GetIt> $initGetIt(
 }
 
 class _$InjectableModule extends _i464.InjectableModule {}
-
-class _$HiveModule extends _i576.HiveModule {}
