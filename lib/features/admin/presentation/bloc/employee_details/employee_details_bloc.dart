@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:injectable/injectable.dart';
 
 import '../../../../admin/data/datasources/admin_remote_data_source.dart';
 import '../../../../admin/data/repositories/audit_log_repository.dart';
@@ -13,7 +14,7 @@ import '../../../domain/usecases/update_overtime_rate.dart';
 import '../../../domain/usecases/toggle_employee_archive.dart';
 import 'employee_details_event.dart';
 import 'employee_details_state.dart';
-
+@injectable
 class EmployeeDetailsBloc
     extends Bloc<EmployeeDetailsEvent, EmployeeDetailsState> {
   final GetEmployeeDetailsUseCase getEmployeeDetailsUseCase;

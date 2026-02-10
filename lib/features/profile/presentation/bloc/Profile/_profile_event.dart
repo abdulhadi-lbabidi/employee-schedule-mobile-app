@@ -9,6 +9,7 @@ abstract class ProfileEvent extends Equatable {
 
 class LoadProfile extends ProfileEvent {}
 class LogOutEvent extends ProfileEvent {}
+class ResetUpdateStatus extends ProfileEvent {}
 
 class UpdateProfileInfo extends ProfileEvent {
   final String name;

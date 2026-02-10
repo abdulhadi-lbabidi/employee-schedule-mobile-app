@@ -1,6 +1,8 @@
 import 'dart:io';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:injectable/injectable.dart';
 
+@lazySingleton
 class NotificationService {
   static final NotificationService _instance = NotificationService._internal();
 

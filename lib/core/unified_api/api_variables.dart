@@ -21,6 +21,8 @@ class ApiVariables {
   static Uri updatePassword() => _mainUri('/api/update-profile');
   static Uri register() => _mainUri('/api/auth/register');
   static Uri verifyToken() => _mainUri('/api/auth/verify');
+  static Uri updateFCMToken() => _mainUri('/api/update-fcm-token'); // 🔹 إضافة
+  static Uri deleteFCMToken() => _mainUri('/api/delete-fcm-token'); // 🔹 إضافة
 
   // --- Profile ---
   static Uri getProfile() => _mainUri('/api/me');

@@ -1,3 +1,5 @@
+import 'package:injectable/injectable.dart';
+
 import '../models/employee model/employee_model.dart';
 
 import '../models/workshop_model.dart';

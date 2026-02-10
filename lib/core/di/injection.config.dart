@@ -58,6 +58,12 @@ import '../../features/admin/domain/usecases/toggle_workshop_archive.dart'
 import '../../features/admin/domain/usecases/update_hourly_rate.dart' as _i547;
 import '../../features/admin/domain/usecases/update_overtime_rate.dart'
     as _i949;
+import '../../features/admin/presentation/bloc/admin_dashboard/admin_dashboard_bloc.dart'
+    as _i371;
+import '../../features/admin/presentation/bloc/employee_details/employee_details_bloc.dart'
+    as _i125;
+import '../../features/admin/presentation/bloc/employees/employees_bloc.dart'
+    as _i934;
 import '../../features/admin/presentation/bloc/workshops/workshops_bloc.dart'
     as _i331;
 import '../../features/Attendance/data/data_source/attendance_locale_data_source.dart'
@@ -166,6 +172,7 @@ import '../../features/reward/presentation/bloc/reward_employee/reward_employee_
 import '../../features/SplashScreen/presentation/bloc/onboarding_bloc.dart'
     as _i653;
 import '../hive_service.dart' as _i351;
+import '../services/notification_service.dart' as _i941;
 import '../unified_api/base_api.dart' as _i893;
 import '../unified_api/logger_interceptor.dart' as _i424;
 import 'hive_module.dart' as _i576;
@@ -192,13 +199,15 @@ Future<_i174.GetIt> $initGetIt(
   gh.singleton<_i895.Connectivity>(() => injectableModule.connectivity);
   gh.singleton<_i558.FlutterSecureStorage>(
       () => injectableModule.secureStorage);
-  gh.lazySingleton<_i424.LoggerInterceptor>(() => _i424.LoggerInterceptor());
-  gh.lazySingleton<_i1064.NotificationRemoteDataSourceMock>(
-      () => _i1064.NotificationRemoteDataSourceMock());
   await gh.lazySingletonAsync<_i986.Box<Map<dynamic, dynamic>>>(
     () => hiveModule.loanBox,
     preResolve: true,
   );
+  gh.lazySingleton<_i941.NotificationService>(
+      () => _i941.NotificationService());
+  gh.lazySingleton<_i424.LoggerInterceptor>(() => _i424.LoggerInterceptor());
+  gh.lazySingleton<_i1064.NotificationRemoteDataSourceMock>(
+      () => _i1064.NotificationRemoteDataSourceMock());
   gh.lazySingleton<_i517.AdminRemoteDataSource>(
       () => _i14.AdminRemoteDataSourceImpl(gh<_i361.Dio>()));
   gh.lazySingleton<_i583.AdminRepository>(
@@ -250,6 +259,10 @@ Future<_i174.GetIt> $initGetIt(
         workshopsBox: gh<_i979.Box<_i267.WorkshopModel>>(),
         connectivity: gh<_i895.Connectivity>(),
       ));
+  gh.factory<_i371.AdminDashboardBloc>(() => _i371.AdminDashboardBloc(
+        gh<_i940.GetOnlineEmployeesUseCase>(),
+        gh<_i345.GetAllEmployeesUseCase>(),
+      ));
   gh.lazySingleton<_i573.WorkshopLocaleDataSource>(() =>
       _i573.WorkshopLocaleDataSource(
           sharedPreferences: gh<_i460.SharedPreferences>()));
@@ -258,15 +271,30 @@ Future<_i174.GetIt> $initGetIt(
           sharedPreferences: gh<_i460.SharedPreferences>()));
   gh.lazySingleton<_i184.AuditLogRepository>(
       () => _i184.AuditLogRepository(gh<_i979.Box<_i254.AuditLogModel>>()));
-  gh.lazySingleton<_i777.RewardRemoteDataSource>(
-      () => _i777.RewardRemoteDataSource(gh<_i893.BaseApi>()));
   gh.lazySingleton<_i921.EmployeeSummaryRemoteDataSource>(
       () => _i921.EmployeeSummaryRemoteDataSource(gh<_i893.BaseApi>()));
   gh.lazySingleton<_i138.UpdatePasswordRemoteDataSource>(
       () => _i138.UpdatePasswordRemoteDataSource(gh<_i893.BaseApi>()));
+  gh.lazySingleton<_i777.RewardRemoteDataSource>(
+      () => _i777.RewardRemoteDataSource(gh<_i893.BaseApi>()));
   gh.lazySingleton<_i482.EmployeeSummaryRepository>(() =>
       _i183.EmployeeSummaryRepositoryImpl(
           remoteDataSource: gh<_i921.EmployeeSummaryRemoteDataSource>()));
+  gh.factory<_i125.EmployeeDetailsBloc>(() => _i125.EmployeeDetailsBloc(
+        gh<_i253.GetEmployeeDetailsUseCase>(),
+        gh<_i547.UpdateHourlyRateUseCase>(),
+        gh<_i949.UpdateOvertimeRateUseCase>(),
+        gh<_i1024.ConfirmPaymentUseCase>(),
+        gh<_i381.DeleteEmployeeUseCase>(),
+        gh<_i368.ToggleEmployeeArchiveUseCase>(),
+        gh<_i517.AdminRemoteDataSource>(),
+        gh<_i184.AuditLogRepository>(),
+      ));
+  gh.factory<_i934.EmployeesBloc>(() => _i934.EmployeesBloc(
+        getAllEmployeesUseCase: gh<_i345.GetAllEmployeesUseCase>(),
+        addEmployeeUseCase: gh<_i541.AddEmployeeUseCase>(),
+        toggleEmployeeArchiveUseCase: gh<_i368.ToggleEmployeeArchiveUseCase>(),
+      ));
   gh.lazySingleton<_i1057.AppRepository>(() => _i1057.AppRepository(
         remote: gh<_i803.RemoteDataSource>(),
         local: gh<_i18.LocalDataSource>(),

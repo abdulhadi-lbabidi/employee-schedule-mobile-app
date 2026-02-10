@@ -6,7 +6,7 @@ import '../features/Notification/data/model/notification_model.dart';
 import '../features/admin/data/models/audit_log_model.dart';
 import '../features/admin/data/models/workshop_model.dart';
 
-
+@lazySingleton
 class HiveService {
   final Map<String, Box> _boxes = {};
   bool _initialized = false;

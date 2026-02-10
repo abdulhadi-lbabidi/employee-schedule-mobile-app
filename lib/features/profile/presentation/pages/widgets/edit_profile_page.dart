@@ -2,18 +2,16 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:untitled8/core/data_state_model.dart';
-
+import 'package:untitled8/core/di/injection.dart';
 import '../../bloc/Profile/_profile_bloc.dart';
 import '../../bloc/Profile/_profile_event.dart';
 import '../../bloc/Profile/_profile_state.dart';
 
 class EditProfilePage extends StatefulWidget {
   const EditProfilePage({super.key});
-
-
-
 
   @override
   State<EditProfilePage> createState() => _EditProfilePageState();
@@ -23,10 +21,12 @@ class _EditProfilePageState extends State<EditProfilePage> {
   late TextEditingController nameController;
   late TextEditingController phoneController;
   File? _imageFile;
+  String? _authToken;
 
   @override
   void initState() {
     super.initState();
+    _loadToken();
     final state = context.read<ProfileBloc>().state.profile;
     if (state.status == BlocStatus.success) {
       nameController = TextEditingController(text: state.data!.user!.fullName ?? "");
@@ -37,10 +37,21 @@ class _EditProfilePageState extends State<EditProfilePage> {
     }
   }
 
+  Future<void> _loadToken() async {
+    final storage = sl<FlutterSecureStorage>();
+    final token = await storage.read(key: 'auth_token');
+    if (mounted) {
+      setState(() {
+        _authToken = token;
+      });
+    }
+  }
+
   @override
   void dispose() {
     nameController.dispose();
     phoneController.dispose();
+    context.read<ProfileBloc>().add(ResetUpdateStatus());
     super.dispose();
   }
 
@@ -110,18 +121,29 @@ class _EditProfilePageState extends State<EditProfilePage> {
     );
   }
 
-  Widget _buildImagePicker(ThemeData theme) {
+  ImageProvider? _getImageProvider() {
     final user = context.read<ProfileBloc>().state.profile.data?.user;
+    if (_imageFile != null) {
+      return FileImage(_imageFile!);
+    }
+    if (user?.profileImageUrl != null && _authToken != null) {
+      return NetworkImage(
+        user!.profileImageUrl!,
+        headers: {'Authorization': 'Bearer $_authToken'},
+      );
+    }
+    return null;
+  }
+
+  Widget _buildImagePicker(ThemeData theme) {
     return Center(
       child: Stack(
         children: [
           CircleAvatar(
             radius: 50.r,
             backgroundColor: theme.primaryColor.withOpacity(0.1),
-            backgroundImage: _imageFile != null
-                ? FileImage(_imageFile!)
-                : (user?.profileImageUrl != null ? NetworkImage(user!.profileImageUrl!) : null) as ImageProvider?,
-            child: _imageFile == null && user?.profileImageUrl == null
+            backgroundImage: _getImageProvider(),
+            child: _getImageProvider() == null
                 ? Icon(Icons.person, size: 50.sp, color: theme.primaryColor)
                 : null,
           ),

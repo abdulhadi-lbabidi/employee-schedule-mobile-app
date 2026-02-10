@@ -28,6 +28,8 @@ class AuthRepository with HandlingException {
   Future<Either<Failure, void>> logout() async {
      try {
       await remoteDataSource.logOut();
+      // 🔹 عند تسجيل الخروج، يجب أيضًا حذف رمز FCM من الخادم
+      // يتم ذلك في `deleteFCMToken` في `LoginCubit` أو `ProfileBloc`
       return const Right(());
     } catch (e) {
       return Left(ErrorHandler.handle(e).failure);
@@ -39,9 +41,21 @@ class AuthRepository with HandlingException {
   }
 
   Future<Either<Failure, LoginResponse>> updateProfile(File image) async {
-    // تعديل بسيط هنا لضمان أن الدالة ترجع Either<Failure, LoginResponse>
     return wrapHandlingException(
       tryCall: () => remoteDataSource.updateProfile(image: image),
+    );
+  }
+
+  // 🔹 إضافة دوال تحديث وحذف رمز FCM
+  Future<Either<Failure, void>> updateFCMToken(String? token) async {
+    return wrapHandlingException(
+      tryCall: () => remoteDataSource.updateFCMToken(token: token),
+    );
+  }
+
+  Future<Either<Failure, void>> deleteFCMToken() async {
+    return wrapHandlingException(
+      tryCall: () => remoteDataSource.deleteFCMToken(),
     );
   }
 }

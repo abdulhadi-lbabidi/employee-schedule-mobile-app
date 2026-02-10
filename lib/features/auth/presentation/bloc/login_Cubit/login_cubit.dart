@@ -1,5 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:untitled8/core/unified_api/base_api.dart';
+import 'package:firebase_messaging/firebase_messaging.dart'; // 🔹 إضافة
 import '../../../../../common/helper/src/app_varibles.dart';
 import '../../../../../common/helper/src/helper_func.dart';
 import '../../../../../core/di/injection.dart';
@@ -33,7 +34,7 @@ class LoginCubit extends Cubit<LoginState> {
         message: failure.message,
       ));
       },
-      (response) {
+      (response) async {
         print('success');
 
         if (response.token != null && response.user != null) {
@@ -50,6 +51,14 @@ class LoginCubit extends Cubit<LoginState> {
           AppVariables.role = response.role;
           sl<BaseApi>().resetHeader();
 
+          // 🔹 الحصول على رمز FCM وإرساله إلى الخادم
+          final fcmToken = await FirebaseMessaging.instance.getToken();
+          if (fcmToken != null) {
+            await repository.updateFCMToken(fcmToken);
+            print("FCM Token updated: $fcmToken");
+          } else {
+            print("FCM Token is null, cannot update.");
+          }
 
         } else {
           // هذا الجزء يتعامل مع حالة الفشل حيث يعود response ولكنه null token/user
@@ -62,74 +71,11 @@ class LoginCubit extends Cubit<LoginState> {
     );
   }
 
-  // Future<void> register({
-  //   required String username,
-  //   required String password,
-  //   required String email,
-  //   required String fullName,
-  //   String role = 'employee',
-  // }) async
-  // {
-  //   emit(state.copyWith(status: LoginStatus.loading));
-  //
-  //   final result = await repository.register(
-  //     username: username,
-  //     password: password,
-  //     email: email,
-  //     fullName: fullName,
-  //     role: role,
-  //   );
-  //
-  //   result.fold(
-  //     (failure) => emit(state.copyWith(
-  //       status: LoginStatus.failure,
-  //       message: failure.message,
-  //     )),
-  //     (response) {
-  //       if (response.token != null && response.user != null) {
-  //         emit(state.copyWith(
-  //           status: LoginStatus.success,
-  //           user: response.user,
-  //           message: 'تم إنشاء الحساب بنجاح',
-  //         ));
-  //       } else {
-  //         emit(state.copyWith(
-  //           status: LoginStatus.failure,
-  //           message: 'فشل إنشاء الحساب',
-  //         ));
-  //       }
-  //     },
-  //   );
-  // }
-
-  // Future<void> checkAuthStatus() async {
-  //   final token = await repository.getToken();
-  //   if (token == null) {
-  //     emit(const LoginState.initial());
-  //     return;
-  //   }
-  //
-  //   emit(state.copyWith(status: LoginStatus.loading));
-  //   final isLoggedIn = await repository.isLoggedIn();
-  //
-  //   if (isLoggedIn) {
-  //     final user = await repository.getCurrentUser();
-  //     if (user != null) {
-  //       emit(state.copyWith(
-  //         status: LoginStatus.success,
-  //         user: user,
-  //         message: 'مرحباً بك مجدداً',
-  //       ));
-  //     } else {
-  //       emit(const LoginState.initial());
-  //     }
-  //   } else {
-  //     await repository.logout();
-  //     emit(const LoginState.initial());
-  //   }
-  // }
-
   Future<void> logout() async {
+    // 🔹 حذف رمز FCM من الخادم عند تسجيل الخروج
+    await repository.deleteFCMToken();
+    print("FCM Token deleted from backend.");
+
     await repository.logout();
     emit(const LoginState.initial());
     HelperFunc.logout();

@@ -1,9 +1,11 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:injectable/injectable.dart';
 import '../../../domain/usecases/get_online_employees.dart';
 import '../../../domain/usecases/get_all_employees.dart';
 import 'admin_dashboard_event.dart';
 import 'admin_dashboard_state.dart';
 
+@injectable
 class AdminDashboardBloc extends Bloc<AdminDashboardEvent, AdminDashboardState> {
   final GetOnlineEmployeesUseCase getOnlineEmployeesUseCase;
   final GetAllEmployeesUseCase getAllEmployeesUseCase; // 🔹 إضافة جلب الكل للحسابات

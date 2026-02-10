@@ -1,8 +1,10 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:injectable/injectable.dart';
 import '../../../domain/entities/admin_profile_entity.dart';
 
 // الأحداث (Events)
+
 abstract class AdminProfileEvent extends Equatable {
   @override
   List<Object?> get props => [];
@@ -28,6 +30,7 @@ class AdminProfileError extends AdminProfileState {
 }
 
 // الـ Bloc
+@injectable
 class AdminProfileBloc extends Bloc<AdminProfileEvent, AdminProfileState> {
   AdminProfileBloc() : super(AdminProfileInitial()) {
     on<LoadAdminProfileEvent>((event, emit) async {

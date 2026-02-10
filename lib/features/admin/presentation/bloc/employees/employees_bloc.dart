@@ -1,11 +1,12 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:injectable/injectable.dart';
 import '../../../domain/entities/employee_entity.dart';
 import '../../../domain/usecases/add_employee.dart';
 import '../../../domain/usecases/get_all_employees.dart';
 import '../../../domain/usecases/toggle_employee_archive.dart';
 import 'employees_event.dart';
 import 'employees_state.dart';
-
+@injectable
 class EmployeesBloc extends Bloc<EmployeesEvent, EmployeesState> {
   final GetAllEmployeesUseCase getAllEmployeesUseCase;
   final AddEmployeeUseCase addEmployeeUseCase;

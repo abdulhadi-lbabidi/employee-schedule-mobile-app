@@ -6,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart'; // 🔹 إضافة
 import 'package:untitled8/common/helper/src/app_varibles.dart';
 import 'package:untitled8/core/services/notification_service.dart';
 import 'package:untitled8/core/theme/App%20theme/bloc/theme_bloc.dart';
@@ -30,24 +31,56 @@ import 'features/admin/presentation/bloc/employee_details/employee_details_bloc.
 import 'features/admin/presentation/bloc/workshops/workshops_bloc.dart';
 import 'features/loan/presentation/bloc/loan_bloc.dart';
 
-// 🔹 إضافة مفتاح الملاحة العالمي للتحكم في التنقل بدون Context
+// 🔹 معالج رسائل الخلفية لـ Firebase Messaging
+@pragma('vm:entry-point')
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  await Firebase.initializeApp();
+  // يمكنك معالجة الإشعارات الواردة في الخلفية هنا
+  // NotificationService().showNotification(title: message.notification?.title ?? 'Notification', body: message.notification?.body ?? 'You have a new notification.');
+  debugPrint("Handling a background message: ${message.messageId}");
+}
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-
-  // Hive.registerAdapter(AttendanceRecordAdapter());
-  // sl<SyncService>().init();
 
   await configureInjection();
 
   try {
     await Firebase.initializeApp();
+    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler); // 🔹 تعيين معالج الخلفية
   } catch (e) {
     debugPrint("Firebase Initialize Error: $e");
   }
 
-  await NotificationService().init();
+  // 🔹 تهيئة Firebase Messaging والأذونات
+  final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
+  NotificationSettings settings = await _firebaseMessaging.requestPermission(
+    alert: true,
+    announcement: false,
+    badge: true,
+    carPlay: false,
+    criticalAlert: false,
+    provisional: false,
+    sound: true,
+  );
+
+  debugPrint('User granted permission: ${settings.authorizationStatus}');
+
+  // 🔹 معالجة الرسائل الواردة أثناء وجود التطبيق في المقدمة
+  FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+    debugPrint('Got a message whilst in the foreground!');
+    debugPrint('Message data: ${message.data}');
+
+    if (message.notification != null) {
+      debugPrint('Message also contained a notification: ${message.notification}');
+      NotificationService().showNotification(
+        title: message.notification?.title ?? 'إشعار جديد',
+        body: message.notification?.body ?? 'لديك إشعار جديد.',
+      );
+    }
+  });
+
+  await NotificationService().init(); // 🔹 تهيئة الإشعارات المحلية
 
   runApp(const MyApp());
 }
