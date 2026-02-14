@@ -20,7 +20,7 @@ class RewardAdminBloc extends Bloc<RewardAdminEvent, RewardAdminState> {
     required this.getAllEmployeesUseCase,
   }) : super(RewardAdminInitial()) {
     on<LoadAdminRewards>(_onLoadAdminRewards);
-    on<IssueNewReward>(_onIssueNewReward);
+    on<IssueRewardEvent>(_onIssueNewReward);
   }
 
   Future<void> _onLoadAdminRewards(
@@ -31,14 +31,14 @@ class RewardAdminBloc extends Bloc<RewardAdminEvent, RewardAdminState> {
     emit(RewardAdminLoading());
     try {
       final rewards = await getAdminRewardsUseCase();
-      emit(RewardAdminLoaded(rewards: rewards));
+      emit(RewardAdminLoaded(rewards: rewards.getOrElse(() => [])));
     } catch (e) {
       emit(RewardAdminError('فشل تحميل المكافآت: ${e.toString()}'));
     }
   }
 
   Future<void> _onIssueNewReward(
-    IssueNewReward event,
+      IssueRewardEvent event,
     Emitter<RewardAdminState> emit,
   )
   async {
@@ -49,9 +49,9 @@ class RewardAdminBloc extends Bloc<RewardAdminEvent, RewardAdminState> {
     try {
       await issueRewardUseCase(
         employeeId: event.employeeId,
-        employeeName: event.employeeName,
-        adminId: event.adminId,
-        adminName: event.adminName,
+        // employeeName: event.employeeName,
+        // adminId: event.adminId,
+        // adminName: event.adminName,
         amount: event.amount,
         reason: event.reason,
       );

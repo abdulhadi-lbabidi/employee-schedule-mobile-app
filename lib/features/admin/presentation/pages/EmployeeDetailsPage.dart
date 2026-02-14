@@ -819,7 +819,7 @@ class _WeeklyWorkSection extends StatelessWidget {
       final emp = state.employee;
       context.read<EmployeeDetailsBloc>().add(
         ConfirmPaymentEvent(
-          emp,
+            emp,
           weekNumber,
           amountPaid: amount,
           isFullPayment: isFull,
@@ -828,8 +828,8 @@ class _WeeklyWorkSection extends StatelessWidget {
       context.read<NotificationBloc>().add(
         AdminSendNotificationEvent(
           title: "دفع مالي",
-          body: "تم صرف ${amount.toInt()} ل.س للأسبوع $weekNumber",
-          targetEmployeeId: emp.user!.id.toString(),
+          body: "تم صرف ${amount.toInt()} \$ للأسبوع $weekNumber",
+          targetEmployeeId: emp.user!.id,
         ),
       );
     }

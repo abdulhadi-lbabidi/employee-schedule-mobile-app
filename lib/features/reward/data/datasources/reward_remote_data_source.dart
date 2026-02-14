@@ -12,7 +12,7 @@ class RewardRemoteDataSource with HandlingApiManager {
 
   Future<RewardResponse> getEmployeeRewards(int employeeId) async {
     return wrapHandlingApi(
-      tryCall: () => _baseApi.get(ApiVariables.getemPloyeeRewards(employeeId)),
+      tryCall: () => _baseApi.get(ApiVariables.employeeRewards(employeeId)),
       jsonConvert: (json) => RewardResponse.fromJson(json),
     );
   }
@@ -31,7 +31,7 @@ class RewardRemoteDataSource with HandlingApiManager {
   }) async {
     return wrapHandlingApi(
       tryCall: () => _baseApi.post(
-        ApiVariables.postRewards(),
+        ApiVariables.issueReward(),
         data: {
           'employee_id': employeeId,
           'amount': amount,

@@ -103,44 +103,39 @@ class ApiVariables {
   static Uri syncAttendance() => _mainUri('/api/attendances/sync');
 
   // --- Loans ---
+  static Uri postLoans() => _mainUri('/api/loans');
+
   static Uri adminLoans() => _mainUri('/api/loans');
 
   static Uri employeeLoans(int empId) => _mainUri('/api/loans/$empId');
 
-  static Uri updateLoanStatus(int loanId) => _mainUri('/api/loans/$loanId');
+  static Uri postRejectLoans(int id) => _mainUri('/api/loans/$id/reject');
 
-  static Uri archiveLoans(int loanId) => _mainUri('/api/loans/$loanId');
 
-  static Uri archiveRestoreLoans(String loanId) =>
-      _mainUri('/api/loans/$loanId/restore');
-
-  static Uri archiveDeleteLoans(String loanId) =>
-      _mainUri('/api/loans/$loanId');
-
-  static Uri getarchiveAllLoans() => _mainUri('/api/loans-archived');
-
-  static Uri recordPayment(String loanId) =>
-      _mainUri('/api/admin/loans/$loanId/payments');
-
-  static Uri addLoan() => _mainUri('/api/loans');
-
+  static Uri postApproveLoans(int id) => _mainUri('/api/loans/$id/approve');
   // دالتان إضافيتان مطلوبة من قبل الـ DataSource
   static Uri loanStatus(int id) => _mainUri('/api/loans/$id/status');
 
-  static Uri loanPayments(int id) => _mainUri('/api/loans/$id/payments');
+  static Uri postPayLoans(int id) => _mainUri('/api/loans/$id/pay');
+
+  static Uri loanPayments(int id) => _mainUri('/api/loans/$id/pay');
 
   // --- Rewards ---
-  static Uri adminRewards() => _mainUri('/api/rewards/admin');
+  static Uri adminRewards() => _mainUri(
+      '/api/rewards');
 
-  static Uri employeeRewards(String empId) =>
-      _mainUri('/api/rewards/employee/$empId');
+  static Uri employeeRewards(int empId) =>
+      _mainUri('/api/rewards/$empId');
 
-  static Uri issueReward() => _mainUri('/api/rewards/issue');
+  static Uri issueReward() => _mainUri(
+      '/api/rewards');
 
   // --- Notifications ---
-  static Uri notifications() => _mainUri('/api/notifications');
+  static Uri notifications() => _mainUri(
+      '/api/notifications');
 
-  static Uri sendNotification() => _mainUri('/api/notifications/send');
+  static Uri sendNotification() => _mainUri(
+      '/api/notifications/send');
 
   static Uri deleteNotification(String id) =>
       _mainUri('/api/notifications/$id');

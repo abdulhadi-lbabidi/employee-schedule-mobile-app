@@ -87,6 +87,16 @@ import '../../features/auth/data/datasource/authRemoteDataSourceImpl.dart'
 import '../../features/auth/data/repository/login_repo.dart' as _i675;
 import '../../features/auth/presentation/bloc/login_Cubit/login_cubit.dart'
     as _i424;
+import '../../features/employee/data/datasources/employee_summary_remote_data_source.dart'
+    as _i921;
+import '../../features/employee/data/repositories/employee_summary_repository_impl.dart'
+    as _i183;
+import '../../features/employee/domain/repositories/employee_summary_repository.dart'
+    as _i482;
+import '../../features/employee/domain/usecases/get_employee_summary_usecase.dart'
+    as _i443;
+import '../../features/employee/presentation/bloc/employee_summary/employee_summary_bloc.dart'
+    as _i390;
 import '../../features/home/presentation/bloc/cubit_active_unactive/active_unactive_cubit.dart'
     as _i36;
 import '../../features/home/presentation/bloc/Cubit_Button/button_cubit.dart'
@@ -105,12 +115,15 @@ import '../../features/loan/data/repositories/loan_repository_impl.dart'
     as _i609;
 import '../../features/loan/domain/repositories/loan_repository.dart' as _i415;
 import '../../features/loan/domain/usecases/add_loan_usecase.dart' as _i28;
+import '../../features/loan/domain/usecases/approve_loan_usecase.dart' as _i941;
 import '../../features/loan/domain/usecases/get_all_loans_usecase.dart'
     as _i150;
 import '../../features/loan/domain/usecases/get_employee_loans_usecase.dart'
     as _i363;
+import '../../features/loan/domain/usecases/pay_loan_usecase.dart' as _i560;
 import '../../features/loan/domain/usecases/record_payment_usecase.dart'
     as _i850;
+import '../../features/loan/domain/usecases/reject_loan_usecase.dart' as _i579;
 import '../../features/loan/domain/usecases/update_loan_status_usecase.dart'
     as _i226;
 import '../../features/loan/presentation/bloc/loan_bloc.dart' as _i408;
@@ -126,12 +139,22 @@ import '../../features/Notification/domain/usecases/get_notifications.dart'
     as _i585;
 import '../../features/Notification/presentation/bloc/notification_bloc.dart'
     as _i23;
+import '../../features/profile/data/datasources/update_password_remote_data_source.dart'
+    as _i138;
+import '../../features/profile/data/repositories/profile_repository_impl.dart'
+    as _i334;
+import '../../features/profile/domain/repositories/profile_repository.dart'
+    as _i894;
+import '../../features/profile/domain/usecases/update_password_usecase.dart'
+    as _i525;
+import '../../features/profile/domain/usecases/update_profile_info_usecase.dart'
+    as _i389;
 import '../../features/profile/presentation/bloc/Profile/_profile_bloc.dart'
     as _i207;
+import '../../features/reward/data/datasources/reward_remote_data_source.dart'
+    as _i777;
 import '../../features/reward/data/datasources/reward_remote_data_source_impl.dart'
     as _i22;
-import '../../features/reward/data/datasources/reward_remote_data_source_mock.dart'
-    as _i278;
 import '../../features/reward/data/repositories/reward_repository_impl.dart'
     as _i144;
 import '../../features/reward/domain/repositories/reward_repository.dart'
@@ -147,6 +170,7 @@ import '../../features/reward/presentation/bloc/reward_employee/reward_employee_
 import '../../features/SplashScreen/presentation/bloc/onboarding_bloc.dart'
     as _i653;
 import '../hive_service.dart' as _i351;
+import '../services/notification_service.dart' as _i941;
 import '../unified_api/base_api.dart' as _i893;
 import '../unified_api/logger_interceptor.dart' as _i424;
 import 'injection.dart' as _i464;
@@ -172,13 +196,11 @@ _i174.GetIt $initGetIt(
   gh.singleton<_i895.Connectivity>(() => injectableModule.connectivity);
   gh.singleton<_i558.FlutterSecureStorage>(
       () => injectableModule.secureStorage);
+  gh.lazySingleton<_i941.NotificationService>(
+      () => _i941.NotificationService());
   gh.lazySingleton<_i424.LoggerInterceptor>(() => _i424.LoggerInterceptor());
   gh.lazySingleton<_i1064.NotificationRemoteDataSourceMock>(
       () => _i1064.NotificationRemoteDataSourceMock());
-  gh.lazySingleton<_i278.RewardRemoteDataSourceMock>(
-      () => _i278.RewardRemoteDataSourceMock());
-  gh.lazySingleton<_i251.LoanLocalDataSource>(
-      () => _i251.LoanLocalDataSource(gh<_i460.SharedPreferences>()));
   gh.lazySingleton<_i184.AuditLogRepository>(
       () => _i184.AuditLogRepository(gh<_i460.SharedPreferences>()));
   gh.lazySingleton<_i803.RemoteDataSource>(() => _i803.RemoteDataSource(
@@ -189,6 +211,8 @@ _i174.GetIt $initGetIt(
       () => _i36.ActiveUnactiveCubit(gh<_i351.HiveService>()));
   gh.factory<_i492.ButtonCubit>(
       () => _i492.ButtonCubit(gh<_i351.HiveService>()));
+  gh.lazySingleton<_i251.LoanLocalDataSource>(
+      () => _i251.LoanLocalDataSource(gh<_i979.Box<Map<dynamic, dynamic>>>()));
   gh.lazySingleton<_i18.LocalDataSource>(
       () => _i18.LocalDataSource(hiveService: gh<_i351.HiveService>()));
   gh.lazySingleton<_i893.BaseApi>(() => _i893.BaseApi(
@@ -208,13 +232,22 @@ _i174.GetIt $initGetIt(
   gh.lazySingleton<_i241.AttendanceLocaleDataSource>(() =>
       _i241.AttendanceLocaleDataSource(
           sharedPreferences: gh<_i460.SharedPreferences>()));
-  gh.lazySingleton<_i180.RewardRepository>(() => _i144.RewardRepositoryImpl(
-      remoteDataSource: gh<_i22.RewardRemoteDataSourceImpl>()));
+  gh.lazySingleton<_i921.EmployeeSummaryRemoteDataSource>(
+      () => _i921.EmployeeSummaryRemoteDataSource(gh<_i893.BaseApi>()));
+  gh.lazySingleton<_i138.UpdatePasswordRemoteDataSource>(
+      () => _i138.UpdatePasswordRemoteDataSource(gh<_i893.BaseApi>()));
+  gh.lazySingleton<_i777.RewardRemoteDataSource>(
+      () => _i777.RewardRemoteDataSource(gh<_i893.BaseApi>()));
+  gh.lazySingleton<_i482.EmployeeSummaryRepository>(() =>
+      _i183.EmployeeSummaryRepositoryImpl(
+          remoteDataSource: gh<_i921.EmployeeSummaryRemoteDataSource>()));
   gh.lazySingleton<_i1057.AppRepository>(() => _i1057.AppRepository(
         remote: gh<_i803.RemoteDataSource>(),
         local: gh<_i18.LocalDataSource>(),
         connectivity: gh<_i895.Connectivity>(),
       ));
+  gh.lazySingleton<_i180.RewardRepository>(() => _i144.RewardRepositoryImpl(
+      remoteDataSource: gh<_i777.RewardRemoteDataSource>()));
   gh.lazySingleton<_i14.AdminRemoteDataSourceImpl>(
       () => _i14.AdminRemoteDataSourceImpl(baseApi: gh<_i893.BaseApi>()));
   gh.lazySingleton<_i1069.WorkshopRemoteDataSource>(
@@ -231,6 +264,12 @@ _i174.GetIt $initGetIt(
         remoteDataSource: gh<_i851.LoanRemoteDataSourceImpl>(),
         localDataSource: gh<_i251.LoanLocalDataSource>(),
       ));
+  gh.factory<_i941.ApproveLoanUseCase>(
+      () => _i941.ApproveLoanUseCase(gh<_i415.LoanRepository>()));
+  gh.factory<_i560.PayLoanUseCase>(
+      () => _i560.PayLoanUseCase(gh<_i415.LoanRepository>()));
+  gh.factory<_i579.RejectLoanUseCase>(
+      () => _i579.RejectLoanUseCase(gh<_i415.LoanRepository>()));
   gh.lazySingleton<_i28.AddLoanUseCase>(
       () => _i28.AddLoanUseCase(gh<_i415.LoanRepository>()));
   gh.lazySingleton<_i150.GetAllLoansUseCase>(
@@ -241,6 +280,10 @@ _i174.GetIt $initGetIt(
       () => _i850.RecordPaymentUseCase(gh<_i415.LoanRepository>()));
   gh.lazySingleton<_i226.UpdateLoanStatusUseCase>(
       () => _i226.UpdateLoanStatusUseCase(gh<_i415.LoanRepository>()));
+  gh.factory<_i443.GetEmployeeSummaryUseCase>(() =>
+      _i443.GetEmployeeSummaryUseCase(gh<_i482.EmployeeSummaryRepository>()));
+  gh.lazySingleton<_i894.ProfileRepository>(() =>
+      _i334.ProfileRepositoryImpl(gh<_i138.UpdatePasswordRemoteDataSource>()));
   gh.lazySingleton<_i240.AttendanceRepositories>(
       () => _i54.AttendanceRepositoryImpl(
             remote: gh<_i220.AttendanceRemoteData>(),
@@ -249,11 +292,11 @@ _i174.GetIt $initGetIt(
           ));
   gh.lazySingleton<_i583.AdminRepository>(
       () => _i335.AdminRepositoryImpl(gh<_i14.AdminRemoteDataSourceImpl>()));
-  gh.lazySingleton<_i1.GetAdminRewardsUseCase>(
+  gh.factory<_i1.GetAdminRewardsUseCase>(
       () => _i1.GetAdminRewardsUseCase(gh<_i180.RewardRepository>()));
-  gh.lazySingleton<_i1050.GetEmployeeRewardsUseCase>(
+  gh.factory<_i1050.GetEmployeeRewardsUseCase>(
       () => _i1050.GetEmployeeRewardsUseCase(gh<_i180.RewardRepository>()));
-  gh.lazySingleton<_i679.IssueRewardUseCase>(
+  gh.factory<_i679.IssueRewardUseCase>(
       () => _i679.IssueRewardUseCase(gh<_i180.RewardRepository>()));
   gh.lazySingleton<_i538.GetEmployeeAttendanceUseCase>(() =>
       _i538.GetEmployeeAttendanceUseCase(
@@ -271,26 +314,35 @@ _i174.GetIt $initGetIt(
       repositories: gh<_i240.AttendanceRepositories>()));
   gh.factory<_i467.RewardEmployeeBloc>(() => _i467.RewardEmployeeBloc(
       getEmployeeRewardsUseCase: gh<_i1050.GetEmployeeRewardsUseCase>()));
-  gh.lazySingleton<_i585.GetNotificationsUseCase>(
+  gh.factory<_i525.UpdatePasswordUseCase>(
+      () => _i525.UpdatePasswordUseCase(gh<_i894.ProfileRepository>()));
+  gh.factory<_i389.UpdateProfileInfoUseCase>(
+      () => _i389.UpdateProfileInfoUseCase(gh<_i894.ProfileRepository>()));
+  gh.factory<_i390.EmployeeSummaryBloc>(() => _i390.EmployeeSummaryBloc(
+      getEmployeeSummaryUseCase: gh<_i443.GetEmployeeSummaryUseCase>()));
+  gh.factory<_i207.ProfileBloc>(() => _i207.ProfileBloc(
+        gh<_i675.AuthRepository>(),
+        gh<_i525.UpdatePasswordUseCase>(),
+        gh<_i389.UpdateProfileInfoUseCase>(),
+      ));
+  gh.factory<_i585.GetNotificationsUseCase>(
       () => _i585.GetNotificationsUseCase(gh<_i697.NotificationRepository>()));
-  gh.lazySingleton<_i585.AddLocalNotificationUseCase>(() =>
-      _i585.AddLocalNotificationUseCase(gh<_i697.NotificationRepository>()));
-  gh.lazySingleton<_i585.SyncNotificationsUseCase>(
-      () => _i585.SyncNotificationsUseCase(gh<_i697.NotificationRepository>()));
-  gh.lazySingleton<_i585.SendNotificationUseCase>(
-      () => _i585.SendNotificationUseCase(gh<_i697.NotificationRepository>()));
-  gh.lazySingleton<_i585.DeleteNotificationUseCase>(() =>
-      _i585.DeleteNotificationUseCase(gh<_i697.NotificationRepository>()));
-  gh.lazySingleton<_i585.DeleteAllNotificationsUseCase>(() =>
-      _i585.DeleteAllNotificationsUseCase(gh<_i697.NotificationRepository>()));
-  gh.lazySingleton<_i585.MarkNotificationAsReadUseCase>(() =>
+  gh.factory<_i585.MarkNotificationAsReadUseCase>(() =>
       _i585.MarkNotificationAsReadUseCase(gh<_i697.NotificationRepository>()));
+  gh.factory<_i585.SendNotificationUseCase>(
+      () => _i585.SendNotificationUseCase(gh<_i697.NotificationRepository>()));
+  gh.factory<_i585.SyncNotificationsUseCase>(
+      () => _i585.SyncNotificationsUseCase(gh<_i697.NotificationRepository>()));
+  gh.factory<_i585.AddLocalNotificationUseCase>(() =>
+      _i585.AddLocalNotificationUseCase(gh<_i697.NotificationRepository>()));
+  gh.factory<_i585.DeleteNotificationUseCase>(() =>
+      _i585.DeleteNotificationUseCase(gh<_i697.NotificationRepository>()));
+  gh.factory<_i585.DeleteAllNotificationsUseCase>(() =>
+      _i585.DeleteAllNotificationsUseCase(gh<_i697.NotificationRepository>()));
   gh.lazySingleton<_i200.WorkshopRepository>(() => _i429.WorkshopRepositoryImpl(
         remoteDataSource: gh<_i1069.WorkshopRemoteDataSource>(),
         localeDataSource: gh<_i573.WorkshopLocaleDataSource>(),
       ));
-  gh.factory<_i207.ProfileBloc>(
-      () => _i207.ProfileBloc(gh<_i675.AuthRepository>()));
   gh.lazySingleton<_i345.GetAllEmployeesUseCase>(
       () => _i345.GetAllEmployeesUseCase(gh<_i583.AdminRepository>()));
   gh.lazySingleton<_i541.AddEmployeeUseCase>(
@@ -355,14 +407,6 @@ _i174.GetIt $initGetIt(
             gh<_i585.DeleteAllNotificationsUseCase>(),
         markAsReadUseCase: gh<_i585.MarkNotificationAsReadUseCase>(),
       ));
-  gh.factory<_i408.LoanBloc>(() => _i408.LoanBloc(
-        gh<_i150.GetAllLoansUseCase>(),
-        gh<_i363.GetEmployeeLoansUseCase>(),
-        gh<_i28.AddLoanUseCase>(),
-        gh<_i226.UpdateLoanStatusUseCase>(),
-        gh<_i850.RecordPaymentUseCase>(),
-        gh<_i23.NotificationBloc>(),
-      ));
   gh.factory<_i125.EmployeeDetailsBloc>(() => _i125.EmployeeDetailsBloc(
         gh<_i253.GetEmployeeDetailsUseCase>(),
         gh<_i547.UpdateHourlyRateUseCase>(),
@@ -377,6 +421,15 @@ _i174.GetIt $initGetIt(
         gh<_i345.GetAllEmployeesUseCase>(),
         gh<_i541.AddEmployeeUseCase>(),
         gh<_i368.ToggleEmployeeArchiveUseCase>(),
+      ));
+  gh.factory<_i408.LoanBloc>(() => _i408.LoanBloc(
+        gh<_i150.GetAllLoansUseCase>(),
+        gh<_i363.GetEmployeeLoansUseCase>(),
+        gh<_i28.AddLoanUseCase>(),
+        gh<_i941.ApproveLoanUseCase>(),
+        gh<_i579.RejectLoanUseCase>(),
+        gh<_i560.PayLoanUseCase>(),
+        gh<_i23.NotificationBloc>(),
       ));
   return getIt;
 }

@@ -83,8 +83,7 @@ class _AdminRewardsPageState extends State<AdminRewardsPage> {
     showDialog(
       context: context,
       builder: (context) => const IssueRewardDialog(
-        employeeId: 1, // استبدل بـ ID الموظف المختار
-        employeeName: "اسم الموظف", // استبدل باسم الموظف المختار
+         adminId: '1', adminName: "اسم الموظف", // استبدل باسم الموظف المختار
       ),
     );
   }
