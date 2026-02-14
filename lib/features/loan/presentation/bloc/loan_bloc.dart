@@ -5,13 +5,13 @@ import '../../../../core/data_state_model.dart';
 import '../../domain/usecases/add_loan_usecase.dart';
 import '../../domain/usecases/get_all_loans_usecase.dart';
 import '../../domain/usecases/get_employee_loans_usecase.dart';
-import '../../domain/usecases/update_loan_status_usecase.dart';
-import '../../domain/usecases/record_payment_usecase.dart';
+import '../../domain/usecases/approve_loan_usecase.dart';
+import '../../domain/usecases/reject_loan_usecase.dart';
+import '../../domain/usecases/pay_loan_usecase.dart';
 import '../../../Notification/presentation/bloc/notification_bloc.dart';
 import 'package:injectable/injectable.dart';
 
 part 'loan_event.dart';
-
 part 'loan_state.dart';
 
 @injectable
@@ -19,133 +19,68 @@ class LoanBloc extends Bloc<LoanEvent, LoanState> {
   final GetAllLoansUseCase getAllLoansUseCase;
   final GetEmployeeLoansUseCase getEmployeeLoansUseCase;
   final AddLoanUseCase addLoanUseCase;
-  final UpdateLoanStatusUseCase updateLoanStatusUseCase;
-  final RecordPaymentUseCase recordPaymentUseCase;
+  final ApproveLoanUseCase approveLoanUseCase;
+  final RejectLoanUseCase rejectLoanUseCase;
+  final PayLoanUseCase payLoanUseCase;
   final NotificationBloc notificationBloc;
 
   LoanBloc(
     this.getAllLoansUseCase,
     this.getEmployeeLoansUseCase,
     this.addLoanUseCase,
-    this.updateLoanStatusUseCase,
-    this.recordPaymentUseCase,
+    this.approveLoanUseCase,
+    this.rejectLoanUseCase,
+    this.payLoanUseCase,
     this.notificationBloc,
   ) : super(LoanState()) {
     on<GetAllLoansEvent>(_getAllLoan);
-    // on<GetAllEmployeeLoansEvent>(_onLoadEmployeeLoans);
-    // on<AddLoanEvent>(_onAddLoan);
-    // on<UpdateLoanStatusEvent>(_onUpdateLoanStatus);
-    // on<RecordPaymentEvent>(_onRecordPayment);
+    on<ApproveLoanEvent>(_onApproveLoan);
+    on<RejectLoanEvent>(_onRejectLoan);
+    on<PayLoanEvent>(_onPayLoan);
+    on<AddLoanEvent>(_onAddLoan); // تفعيل حدث الإضافة
   }
 
-  FutureOr<void> _getAllLoan(
-    GetAllLoansEvent event,
-    Emitter<LoanState> emit,
-  )
-  async {
+  FutureOr<void> _getAllLoan(GetAllLoansEvent event, Emitter<LoanState> emit) async {
     emit(state.copyWith(getAllLoansData: state.getAllLoansData.setLoading()));
-
     final val = await getAllLoansUseCase();
-
     val.fold(
-      (l) {
-        emit(
-          state.copyWith(
-            getAllLoansData: state.getAllLoansData.setFaild(
-              errorMessage: l.message,
-            ),
-          ),
-        );
-      },
+      (l) => emit(state.copyWith(getAllLoansData: state.getAllLoansData.setFaild(errorMessage: l.message))),
+      (r) => emit(state.copyWith(getAllLoansData: state.getAllLoansData.setSuccess(data: r))),
+    );
+  }
+
+  FutureOr<void> _onAddLoan(AddLoanEvent event, Emitter<LoanState> emit) async {
+    // يمكننا إضافة حالة تحميل هنا إذا أردت
+    final result = await addLoanUseCase(event.params);
+    result.fold(
+      (l) => null, // تعامل مع الخطأ هنا إذا أردت إظهار Snackbar بالخطأ
       (r) {
-        emit(
-          state.copyWith(
-            getAllLoansData: state.getAllLoansData.setSuccess(data: r),
-          ),
-        );
+        add(GetAllLoansEvent()); // تحديث القائمة فوراً بعد النجاح
       },
     );
   }
 
-  // Future<void> _onLoadEmployeeLoans(
-  //   LoadEmployeeLoans event,
-  //   Emitter<LoanState> emit,
-  // )
-  // async {
-  //   emit(LoanLoading());
-  //   try {
-  //     final loans = await getEmployeeLoansUseCase(event.employeeId);
-  //     emit(LoansLoaded(loans));
-  //   } catch (e) {
-  //     emit(LoanError(e.toString()));
-  //   }
-  // }
-  //
-  // Future<void> _onAddLoan(AddLoan event, Emitter<LoanState> emit)
-  // async {
-  //   try {
-  //     await addLoanUseCase(event.loan);
-  //
-  //     // إرسال إشعار للموظف
-  //     notificationBloc.add(
-  //       AdminSendNotificationEvent(
-  //         title: "سلفة جديدة",
-  //         body:
-  //             "تم إضافة سلفة جديدة لك بقيمة ${event.loan.amount.toStringAsFixed(0)} ل.س",
-  //         targetWorkshop: null, // أو تحديد الورشة إذا لزم الأمر
-  //       ),
-  //     );
-  //
-  //     add(LoadAllLoans());
-  //   } catch (e) {
-  //     emit(LoanError(e.toString()));
-  //   }
-  // }
-  //
-  // Future<void> _onUpdateLoanStatus(
-  //   UpdateLoanStatus event,
-  //   Emitter<LoanState> emit,
-  // )
-  // async {
-  //   try {
-  //     await updateLoanStatusUseCase(event.loanId, event.status);
-  //
-  //     String statusText =
-  //         event.status == LoanStatus.fullyPaid ? "مسددة بالكامل" : "محدثة";
-  //     notificationBloc.add(
-  //       AdminSendNotificationEvent(
-  //         title: "تحديث حالة السلفة",
-  //         body: "تم تغيير حالة سلفك إلى $statusText",
-  //         targetWorkshop: null,
-  //       ),
-  //     );
-  //
-  //     add(LoadAllLoans());
-  //   } catch (e) {
-  //     emit(LoanError(e.toString()));
-  //   }
-  // }
-  //
-  // Future<void> _onRecordPayment(
-  //   RecordPayment event,
-  //   Emitter<LoanState> emit,
-  // )
-  // async {
-  //   try {
-  //     await recordPaymentUseCase(event.loanId, event.amount);
-  //
-  //     notificationBloc.add(
-  //       AdminSendNotificationEvent(
-  //         title: "تسديد سلفة",
-  //         body:
-  //             "تم تسجيل عملية تسديد بقيمة ${event.amount.toStringAsFixed(0)} ل.س",
-  //         targetWorkshop: null,
-  //       ),
-  //     );
-  //
-  //     add(LoadAllLoans());
-  //   } catch (e) {
-  //     emit(LoanError(e.toString()));
-  //   }
-  // }
+  FutureOr<void> _onApproveLoan(ApproveLoanEvent event, Emitter<LoanState> emit) async {
+    final result = await approveLoanUseCase(event.loanId);
+    result.fold(
+      (l) => null,
+      (r) => add(GetAllLoansEvent()),
+    );
+  }
+
+  FutureOr<void> _onRejectLoan(RejectLoanEvent event, Emitter<LoanState> emit) async {
+    final result = await rejectLoanUseCase(event.loanId);
+    result.fold(
+      (l) => null,
+      (r) => add(GetAllLoansEvent()),
+    );
+  }
+
+  FutureOr<void> _onPayLoan(PayLoanEvent event, Emitter<LoanState> emit) async {
+    final result = await payLoanUseCase(event.loanId, event.amount);
+    result.fold(
+      (l) => null,
+      (r) => add(GetAllLoansEvent()),
+    );
+  }
 }

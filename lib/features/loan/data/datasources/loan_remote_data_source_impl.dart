@@ -27,30 +27,44 @@ class LoanRemoteDataSourceImpl with HandlingApiManager {
 
   Future<void> addLoan(AddLoanParams loan) async {
     return wrapHandlingApi(
-      tryCall:
-          () => _baseApi.post(ApiVariables.adminLoans(), data: loan.getBody()),
+      tryCall: () => _baseApi.post(ApiVariables.postLoans(), data: loan.getBody()),
       jsonConvert: (_) {},
     );
   }
 
+  Future<void> approveLoan(int loanId) async {
+    return wrapHandlingApi(
+      tryCall: () => _baseApi.post(ApiVariables.postApproveLoans(loanId)),
+      jsonConvert: (_) {},
+    );
+  }
+
+  Future<void> rejectLoan(int loanId) async {
+    return wrapHandlingApi(
+      tryCall: () => _baseApi.post(ApiVariables.postRejectLoans(loanId)),
+      jsonConvert: (_) {},
+    );
+  }
+
+  Future<void> payLoan(int loanId, double amount) async {
+    return wrapHandlingApi(
+      tryCall: () => _baseApi.post(ApiVariables.postPayLoans(loanId), data: {'amount': amount}),
+      jsonConvert: (_) {},
+    );
+  }
+
+  @Deprecated('Use approveLoan or rejectLoan')
   Future<void> updateLoanStatus(int loanId, int amount) async {
     return wrapHandlingApi(
-      tryCall:
-          () => _baseApi.put(
-            ApiVariables.loanStatus(loanId),
-            data: {'amount': amount},
-          ),
+      tryCall: () => _baseApi.put(ApiVariables.loanStatus(loanId), data: {'amount': amount}),
       jsonConvert: (_) {},
     );
   }
 
+  @Deprecated('Use payLoan')
   Future<void> recordPayment(int loanId, double amount) async {
     return wrapHandlingApi(
-      tryCall:
-          () => _baseApi.post(
-            ApiVariables.loanPayments(loanId),
-            data: {'amount': amount},
-          ),
+      tryCall: () => _baseApi.post(ApiVariables.loanPayments(loanId), data: {'amount': amount}),
       jsonConvert: (_) {},
     );
   }

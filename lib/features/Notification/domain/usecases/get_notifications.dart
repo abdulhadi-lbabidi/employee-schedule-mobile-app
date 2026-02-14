@@ -1,50 +1,39 @@
 import 'package:injectable/injectable.dart';
-import '../../data/model/notification_model.dart';
-import '../entities/notification_entity.dart';
 import '../repositories/notification_repository.dart';
-@lazySingleton
+import '../../data/model/notification_model.dart';
+
+@injectable
 class GetNotificationsUseCase {
   final NotificationRepository repository;
-
   GetNotificationsUseCase(this.repository);
 
-  Future<List<NotificationEntity>> call() async {
-    return repository.getNotifications();
+  Future<List<NotificationModel>> call() async { // تم التغيير من NotificationEntity إلى NotificationModel
+    return await repository.getNotifications();
   }
 }
-@lazySingleton
-class AddLocalNotificationUseCase {
+
+@injectable
+class MarkNotificationAsReadUseCase {
   final NotificationRepository repository;
+  MarkNotificationAsReadUseCase(this.repository);
 
-  AddLocalNotificationUseCase(this.repository);
-
-  Future<void> call(NotificationModel notification) async {
-    await repository.addLocalNotification(notification);
+  Future<void> call(String id) async {
+    return await repository.markNotificationAsRead(id);
   }
 }
-@lazySingleton
-class SyncNotificationsUseCase {
-  final NotificationRepository repository;
 
-  SyncNotificationsUseCase(this.repository);
-
-  Future<void> call() async {
-    await repository.syncNotifications();
-  }
-}
-@lazySingleton
+@injectable
 class SendNotificationUseCase {
   final NotificationRepository repository;
-
   SendNotificationUseCase(this.repository);
 
   Future<void> call({
     required String title,
     required String body,
     String? targetWorkshop,
-    String? targetEmployeeId,
+    int? targetEmployeeId, // هذا النوع أصبح صحيحاً الآن
   }) async {
-    await repository.sendNotification(
+    return await repository.sendNotification(
       title: title,
       body: body,
       targetWorkshop: targetWorkshop,
@@ -52,33 +41,43 @@ class SendNotificationUseCase {
     );
   }
 }
-@lazySingleton
+
+@injectable
+class SyncNotificationsUseCase {
+  final NotificationRepository repository;
+  SyncNotificationsUseCase(this.repository);
+
+  Future<void> call() async {
+    return await repository.syncNotifications();
+  }
+}
+
+@injectable
+class AddLocalNotificationUseCase {
+  final NotificationRepository repository;
+  AddLocalNotificationUseCase(this.repository);
+
+  Future<void> call(NotificationModel notification) async {
+    return await repository.addLocalNotification(notification);
+  }
+}
+
+@injectable
 class DeleteNotificationUseCase {
   final NotificationRepository repository;
-
   DeleteNotificationUseCase(this.repository);
 
   Future<void> call(String id) async {
-    await repository.deleteNotification(id);
+    return await repository.deleteNotification(id);
   }
 }
-@lazySingleton
+
+@injectable
 class DeleteAllNotificationsUseCase {
   final NotificationRepository repository;
-
   DeleteAllNotificationsUseCase(this.repository);
 
   Future<void> call() async {
-    await repository.deleteAllNotifications();
-  }
-}
-@lazySingleton
-class MarkNotificationAsReadUseCase {
-  final NotificationRepository repository;
-
-  MarkNotificationAsReadUseCase(this.repository);
-
-  Future<void> call(String id) async {
-    await repository.markAsRead(id);
+    return await repository.deleteAllNotifications();
   }
 }

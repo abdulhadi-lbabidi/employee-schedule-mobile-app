@@ -32,7 +32,7 @@ class NotificationRemoteDataSourceImpl with HandlingApiManager{
     required String title, 
     required String body, 
     String? targetWorkshop,
-    String? targetEmployeeId,
+    int? targetEmployeeId, // تم التعديل من String? إلى int?
   })
   async {
 
@@ -44,7 +44,7 @@ class NotificationRemoteDataSourceImpl with HandlingApiManager{
                 'title': title,
                 'body': body,
                 'workshop': targetWorkshop,
-                'employee_id': targetEmployeeId,
+                'employee_id': targetEmployeeId, // هذا سيقوم الآن بتمرير int? بشكل صحيح
               }
       ),
       jsonConvert: (data){

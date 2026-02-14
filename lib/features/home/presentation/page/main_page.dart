@@ -4,11 +4,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:untitled8/common/helper/src/app_varibles.dart';
+import 'package:untitled8/core/widgets/cached_network_image_with_auth.dart';
 import '../../../../core/di/injection.dart';
 import '../../../../core/theme/App theme/bloc/theme_bloc.dart';
 import '../../../Attendance/presentation/page/attrndance_page.dart';
 import '../../../Notification/presentation/pages/notifications_page.dart';
 import '../../../admin/presentation/bloc/workshops/workshops_bloc.dart';
+import '../../../employee/presentation/pages/EmployeeSummaryPage.dart';
 import '../../../loan/presentation/pages/employee_loan_page.dart';
 import '../../../profile/presentation/bloc/Profile/_profile_bloc.dart';
 import '../../../profile/presentation/bloc/Profile/_profile_event.dart';
@@ -17,7 +19,6 @@ import '../../../profile/presentation/pages/profie_page.dart';
 
 import '../bloc/Cubit_Navigation/navigation_cubit.dart';
 import 'home_page.dart';
-import 'EmployeeFinancePage.dart';
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
@@ -27,18 +28,19 @@ class MainPage extends StatefulWidget {
 }
 
 class _HomePageState extends State<MainPage> {
-  final List<Widget> pages = [
-    const HomePage(),
-    const AttendanceHistoryPage(),
-    const NotificationsPage(),
-    const EmployeeFinancePage(),
-    const EmployeeLoanPage(),
-  ];
+
+  late final List<Widget> pages;
 
   @override
   void initState() {
-
     super.initState();
+    pages = [
+      const HomePage(),
+      const AttendanceHistoryPage(),
+      const NotificationsPage(),
+      EmployeeSummaryPage(employeeId: AppVariables.user?.userableId.toString() ?? ''),
+      const EmployeeLoanPage(),
+    ];
     // context.read<ProfileBloc>().add(LoadProfile());
   }
 
@@ -103,7 +105,7 @@ class _HomePageState extends State<MainPage> {
                   color: Colors.blueAccent,
                   size: 22.sp,
                 )
-                    : Image.network( AppVariables.user!.profileImageUrl),
+                    : CachedNetworkImageWithAuth(imageUrl: AppVariables.user!.profileImageUrl),
               ),
             ),
           ).animate().fadeIn(duration: 500.ms).scale(delay: 100.ms),

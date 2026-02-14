@@ -2,104 +2,89 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
-import '../../../../core/di/injection.dart';
-import '../../../reward/presentation/bloc/reward_admin/reward_admin_bloc.dart';
-import '../../../reward/presentation/bloc/reward_admin/reward_admin_event.dart';
-import '../../../reward/presentation/bloc/reward_admin/reward_admin_state.dart';
+import 'package:untitled8/features/reward/presentation/bloc/reward_admin/reward_admin_bloc.dart';
+import 'package:untitled8/features/reward/presentation/bloc/reward_admin/reward_admin_event.dart';
+import 'package:untitled8/features/reward/presentation/bloc/reward_admin/reward_admin_state.dart';
 import '../widgets/issue_reward_dialog.dart';
 
-class AdminRewardsPage extends StatelessWidget {
+class AdminRewardsPage extends StatefulWidget {
   const AdminRewardsPage({super.key});
 
   @override
+  State<AdminRewardsPage> createState() => _AdminRewardsPageState();
+}
+
+class _AdminRewardsPageState extends State<AdminRewardsPage> {
+  @override
+  void initState() {
+    super.initState();
+    context.read<RewardAdminBloc>().add(LoadAdminRewards());
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => sl<RewardAdminBloc>()..add(LoadAdminRewards()),
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text("سجل المكافآت الصادرة", style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold)),
-          centerTitle: true,
-        ),
-        body: BlocListener<RewardAdminBloc, RewardAdminState>(
-          listener: (context, state) {
-            if (state is RewardAdminActionSuccess) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(state.message), backgroundColor: Colors.green),
-              );
-            } else if (state is RewardAdminError) {
-              ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(state.message), backgroundColor: Colors.red),
-              );
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("سجل المكافآت", style: TextStyle(fontWeight: FontWeight.bold)),
+        actions: [
+          IconButton(
+            onPressed: () => context.read<RewardAdminBloc>().add(LoadAdminRewards()),
+            icon: const Icon(Icons.refresh),
+          )
+        ],
+      ),
+      body: BlocBuilder<RewardAdminBloc, RewardAdminState>(
+        builder: (context, state) {
+          if (state is RewardAdminLoading) {
+            return const Center(child: CircularProgressIndicator());
+          } else if (state is RewardAdminLoaded) {
+            final rewards = state.rewards;
+            if (rewards.isEmpty) {
+              return const Center(child: Text("لا يوجد سجل مكافآت حالياً"));
             }
-          },
-          child: BlocBuilder<RewardAdminBloc, RewardAdminState>(
-            builder: (context, state) {
-              if (state is RewardAdminLoading) {
-                return const Center(child: CircularProgressIndicator());
-              } else if (state is RewardAdminLoaded) {
-                if (state.rewards.isEmpty) {
-                  return Center(
-                    child: Column(
+            return ListView.builder(
+              itemCount: rewards.length,
+              itemBuilder: (context, index) {
+                final reward = rewards[index];
+                return Card(
+                  margin: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+                  child: ListTile(
+                    leading: CircleAvatar(child: Text(reward.employeeName[0])),
+                    title: Text(reward.employeeName),
+                    subtitle: Text(reward.reason),
+                    trailing: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        Icon(Icons.card_giftcard, size: 80.sp, color: Colors.grey.shade300),
-                        SizedBox(height: 16.h),
-                        Text("لا يوجد مكافآت مسجلة حالياً", style: TextStyle(color: Colors.grey, fontSize: 14.sp)),
+                        Text("${reward.amount} \$", style: const TextStyle(color: Colors.green, fontWeight: FontWeight.bold)),
+                        Text(DateFormat('yyyy-MM-dd').format(reward.dateIssued), style: TextStyle(fontSize: 10.sp)),
                       ],
                     ),
-                  );
-                }
-                return ListView.builder(
-                  padding: EdgeInsets.all(16.w),
-                  itemCount: state.rewards.length,
-                  itemBuilder: (context, index) {
-                    final reward = state.rewards[index];
-                    return Card(
-                      margin: EdgeInsets.only(bottom: 12.h),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
-                      child: ListTile(
-                        leading: CircleAvatar(
-                          backgroundColor: Colors.amber.shade100,
-                          child: Icon(Icons.star, color: Colors.amber.shade800),
-                        ),
-                        title: Text(reward.employeeName, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14.sp)),
-                        subtitle: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(reward.reason, style: TextStyle(fontSize: 12.sp)),
-                            Text(DateFormat('yyyy/MM/dd - hh:mm a').format(reward.dateIssued), 
-                                 style: TextStyle(fontSize: 10.sp, color: Colors.grey)),
-                          ],
-                        ),
-                        trailing: Text("${reward.amount.toStringAsFixed(0)} ل.س", 
-                          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.green, fontSize: 15.sp)),
-                      ),
-                    );
-                  },
-                );
-              }
-              return const SizedBox.shrink();
-            },
-          ),
-        ),
-        floatingActionButton: Builder(
-          builder: (context) => FloatingActionButton.extended(
-            onPressed: () {
-              showDialog(
-                context: context,
-                builder: (dContext) => BlocProvider.value(
-                  value: context.read<RewardAdminBloc>(),
-                  child: const IssueRewardDialog(
-                    adminId: "admin_1", // يمكن جلبها من AuthCubit لاحقاً
-                    adminName: "المدير العام",
                   ),
-                ),
-              );
-            },
-            label: const Text("صرف مكافأة",style: TextStyle(color: Colors.white,fontSize: 16),),
-            icon: const Icon(Icons.add,color: Colors.white,),
-            backgroundColor: Colors.indigo,
-          ),
-        ),
+                );
+              },
+            );
+          } else if (state is RewardAdminError) {
+            return Center(child: Text(state.message));
+          }
+          return const SizedBox();
+        },
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => _showAddRewardDialog(context),
+        child: const Icon(Icons.add),
+      ),
+    );
+  }
+
+  void _showAddRewardDialog(BuildContext context) {
+    // هذه الصفحة غالباً ما تُفتح من قائمة الموظفين لاختيار موظف معين
+    // للتجربة سأفتح الـ Dialog بموظف افتراضي أو يفضل اختيار موظف من القائمة أولاً
+    showDialog(
+      context: context,
+      builder: (context) => const IssueRewardDialog(
+        employeeId: 1, // استبدل بـ ID الموظف المختار
+        employeeName: "اسم الموظف", // استبدل باسم الموظف المختار
       ),
     );
   }

@@ -1,25 +1,21 @@
-import 'package:untitled8/features/reward/domain/repositories/reward_repository.dart';
+import 'package:dartz/dartz.dart';
 import 'package:injectable/injectable.dart';
+import '../../../../core/unified_api/failures.dart';
+import '../repositories/reward_repository.dart';
 
-@lazySingleton
+@injectable
 class IssueRewardUseCase {
   final RewardRepository repository;
 
   IssueRewardUseCase(this.repository);
 
-  Future<void> call({
-    required String employeeId,
-    required String employeeName,
-    required String adminId,
-    required String adminName,
+  Future<Either<Failure, void>> call({
+    required int employeeId,
     required double amount,
     required String reason,
   }) async {
-    await repository.issueReward(
+    return await repository.issueReward(
       employeeId: employeeId,
-      employeeName: employeeName,
-      adminId: adminId,
-      adminName: adminName,
       amount: amount,
       reason: reason,
     );

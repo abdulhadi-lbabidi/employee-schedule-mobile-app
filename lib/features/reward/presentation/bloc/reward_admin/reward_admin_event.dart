@@ -9,23 +9,19 @@ abstract class RewardAdminEvent extends Equatable {
 
 class LoadAdminRewards extends RewardAdminEvent {}
 
-class IssueNewReward extends RewardAdminEvent {
-  final String employeeId;
+class IssueRewardEvent extends RewardAdminEvent {
+  final int employeeId;
   final String employeeName;
-  final String adminId;
-  final String adminName;
   final double amount;
   final String reason;
 
-  const IssueNewReward({
+  const IssueRewardEvent({
     required this.employeeId,
     required this.employeeName,
-    required this.adminId,
-    required this.adminName,
     required this.amount,
     required this.reason,
   });
 
   @override
-  List<Object> get props => [employeeId, employeeName, adminId, adminName, amount, reason];
+  List<Object> get props => [employeeId, employeeName, amount, reason];
 }

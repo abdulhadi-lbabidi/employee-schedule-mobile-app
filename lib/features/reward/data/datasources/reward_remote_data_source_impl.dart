@@ -12,7 +12,7 @@ class RewardRemoteDataSourceImpl {
 
   Future<List<RewardModel>> getAdminRewards() async {
     try {
-      final response = await dio.getUri(ApiVariables.adminRewards());
+      final response = await dio.getUri(ApiVariables.getRewards());
       if (response.statusCode == 200) {
         return (response.data['data'] as List)
             .map((json) => RewardModel.fromJson(json))

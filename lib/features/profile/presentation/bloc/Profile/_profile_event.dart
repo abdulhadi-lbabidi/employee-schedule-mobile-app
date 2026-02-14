@@ -9,6 +9,7 @@ abstract class ProfileEvent extends Equatable {
 
 class LoadProfile extends ProfileEvent {}
 class LogOutEvent extends ProfileEvent {}
+class ResetUpdateStatus extends ProfileEvent {}
 
 class UpdateProfileInfo extends ProfileEvent {
   final String name;
@@ -27,4 +28,19 @@ class UpdateProfileImage extends ProfileEvent {
 
   @override
   List<Object?> get props => [imagePath];
+}
+
+class UpdatePasswordEvent extends ProfileEvent {
+  final String oldPassword;
+  final String newPassword;
+  final String confirmPassword;
+
+  UpdatePasswordEvent({
+    required this.oldPassword,
+    required this.newPassword,
+    required this.confirmPassword,
+  });
+
+  @override
+  List<Object?> get props => [oldPassword, newPassword, confirmPassword];
 }

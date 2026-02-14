@@ -4,6 +4,7 @@ import 'package:injectable/injectable.dart';
 import '../../../domain/entities/admin_profile_entity.dart';
 
 // الأحداث (Events)
+
 abstract class AdminProfileEvent extends Equatable {
   @override
   List<Object?> get props => [];

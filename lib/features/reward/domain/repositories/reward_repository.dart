@@ -1,13 +1,12 @@
-import 'package:untitled8/features/reward/domain/entities/reward_entity.dart';
+import 'package:dartz/dartz.dart';
+import '../../../../core/unified_api/failures.dart';
+import '../entities/reward_entity.dart';
 
 abstract class RewardRepository {
-  Future<List<RewardEntity>> getAdminRewards();
-  Future<List<RewardEntity>> getEmployeeRewards(String employeeId);
-  Future<void> issueReward({
-    required String employeeId,
-    required String employeeName,
-    required String adminId,
-    required String adminName,
+  Future<Either<Failure, List<RewardEntity>>> getEmployeeRewards(int employeeId);
+  Future<Either<Failure, List<RewardEntity>>> getAdminRewards();
+  Future<Either<Failure, void>> issueReward({
+    required int employeeId,
     required double amount,
     required String reason,
   });

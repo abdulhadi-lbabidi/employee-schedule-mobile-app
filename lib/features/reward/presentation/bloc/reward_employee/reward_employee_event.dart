@@ -8,7 +8,7 @@ abstract class RewardEmployeeEvent extends Equatable {
 }
 
 class LoadEmployeeRewards extends RewardEmployeeEvent {
-  final String employeeId;
+  final int employeeId; // Changed from String to int
 
   const LoadEmployeeRewards(this.employeeId);
 

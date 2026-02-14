@@ -1,124 +1,61 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
-import '../../domain/entities/notification_entity.dart';
-import 'notificationIcon.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import '../../data/model/notification_model.dart';
 
 class NotificationItem extends StatelessWidget {
-  final NotificationEntity notification;
+  final NotificationModel notification; // تم التغيير من NotificationEntity إلى NotificationModel
   final VoidCallback onTap;
 
   const NotificationItem({
+    super.key,
     required this.notification,
     required this.onTap,
   });
 
-  String _formatDateTime(DateTime dateTime) {
-    final now = DateTime.now();
-    bool isToday = dateTime.day == now.day && 
-                   dateTime.month == now.month && 
-                   dateTime.year == now.year;
-
-    if (isToday) {
-      return "${DateFormat('EEEE', 'ar').format(dateTime)}، ${DateFormat('hh:mm a', 'ar').format(dateTime)}";
-    } else if (now.difference(dateTime).inDays == 1) {
-      return "أمس، ${DateFormat('hh:mm a', 'ar').format(dateTime)}";
-    } else {
-      return DateFormat('yyyy/MM/dd').format(dateTime);
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
-    // التحقق من وجود فاصل | في النص
-    final bool hasSeparator = notification.body.contains('|');
-    String username = '';
-    String message = notification.body;
-
-    if (hasSeparator) {
-      final parts = notification.body.split('|').map((p) => p.trim()).toList();
-      username = parts[0];
-      message = parts.length > 1 ? parts.sublist(1).join(" | ") : '';
-    }
-
-    return Material(
-      color: notification.isRead
-          ? Colors.white
-          : Colors.white,
-      borderRadius: BorderRadius.circular(12),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(12),
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              NotificationIcon(type: notification.type),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(
-                          child: Text(
-                            notification.title,
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold,
-                              color: notification.isRead
-                                  ? Colors.black87
-                                  : Colors.blue.shade900,
-                            ),
-                          ),
-                        ),
-                        Text(
-                          _formatDateTime(notification.createdAt),
-                          style: TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.w500,
-                            color: Colors.blueGrey.shade400,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 4),
-                    RichText(
-                      text: TextSpan(
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: Colors.grey.shade700,
-                        ),
-                        children: [
-                          if (hasSeparator && username.isNotEmpty)
-                            TextSpan(
-                              text: "$username: ",
-                              style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.black87),
-                            ),
-                          TextSpan(
-                            text: message,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              if (!notification.isRead)
-                Container(
-                  margin: const EdgeInsets.only(top: 6, right: 8),
-                  width: 7,
-                  height: 7,
-                  decoration: const BoxDecoration(
-                    color: Colors.redAccent,
-                    shape: BoxShape.circle,
+    final theme = Theme.of(context);
+    return InkWell(
+      onTap: onTap,
+      child: Container(
+        padding: EdgeInsets.all(16.w),
+        decoration: BoxDecoration(
+          color: theme.cardColor,
+          borderRadius: BorderRadius.circular(15.r),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            CircleAvatar(
+              backgroundColor: theme.primaryColor.withOpacity(0.1),
+              child: Icon(Icons.notifications_active_outlined, color: theme.primaryColor),
+            ),
+            SizedBox(width: 15.w),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    notification.title ?? "بدون عنوان",
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14.sp),
                   ),
-                ),
-            ],
-          ),
+                  SizedBox(height: 5.h),
+                  Text(
+                    notification.body ?? "",
+                    style: TextStyle(color: theme.disabledColor, fontSize: 12.sp),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );
