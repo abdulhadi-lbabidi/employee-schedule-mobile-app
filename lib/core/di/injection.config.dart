@@ -201,6 +201,8 @@ _i174.GetIt $initGetIt(
   gh.lazySingleton<_i424.LoggerInterceptor>(() => _i424.LoggerInterceptor());
   gh.lazySingleton<_i1064.NotificationRemoteDataSourceMock>(
       () => _i1064.NotificationRemoteDataSourceMock());
+  gh.lazySingleton<_i251.LoanLocalDataSource>(
+      () => _i251.LoanLocalDataSource(gh<_i460.SharedPreferences>()));
   gh.lazySingleton<_i184.AuditLogRepository>(
       () => _i184.AuditLogRepository(gh<_i460.SharedPreferences>()));
   gh.lazySingleton<_i803.RemoteDataSource>(() => _i803.RemoteDataSource(
@@ -211,8 +213,6 @@ _i174.GetIt $initGetIt(
       () => _i36.ActiveUnactiveCubit(gh<_i351.HiveService>()));
   gh.factory<_i492.ButtonCubit>(
       () => _i492.ButtonCubit(gh<_i351.HiveService>()));
-  gh.lazySingleton<_i251.LoanLocalDataSource>(
-      () => _i251.LoanLocalDataSource(gh<_i979.Box<Map<dynamic, dynamic>>>()));
   gh.lazySingleton<_i18.LocalDataSource>(
       () => _i18.LocalDataSource(hiveService: gh<_i351.HiveService>()));
   gh.lazySingleton<_i893.BaseApi>(() => _i893.BaseApi(
@@ -294,10 +294,10 @@ _i174.GetIt $initGetIt(
       () => _i335.AdminRepositoryImpl(gh<_i14.AdminRemoteDataSourceImpl>()));
   gh.factory<_i1.GetAdminRewardsUseCase>(
       () => _i1.GetAdminRewardsUseCase(gh<_i180.RewardRepository>()));
-  gh.factory<_i1050.GetEmployeeRewardsUseCase>(
-      () => _i1050.GetEmployeeRewardsUseCase(gh<_i180.RewardRepository>()));
   gh.factory<_i679.IssueRewardUseCase>(
       () => _i679.IssueRewardUseCase(gh<_i180.RewardRepository>()));
+  gh.lazySingleton<_i1050.GetEmployeeRewardsUseCase>(
+      () => _i1050.GetEmployeeRewardsUseCase(gh<_i180.RewardRepository>()));
   gh.lazySingleton<_i538.GetEmployeeAttendanceUseCase>(() =>
       _i538.GetEmployeeAttendanceUseCase(
           authRepositories: gh<_i240.AttendanceRepositories>()));
