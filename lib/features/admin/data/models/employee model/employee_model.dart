@@ -3,102 +3,190 @@ import 'dart:convert';
 
 import '../workshop_model.dart';
 
-class Datum {
-  final int id;
-  final String position;
-  final String department;
-  final double hourlyRate;
-  final double overtimeRate;
-  final bool isOnline;
-  final String currentLocation;
-  final UserModel user;
-  final List<WorkshopModel> workshops;
 
-  Datum({
-    required this.id,
-    required this.position,
-    required this.department,
-    required this.hourlyRate,
-    required this.overtimeRate,
-    required this.isOnline,
-    required this.currentLocation,
-    required this.user,
-    required this.workshops,
+GetAllEmployeeResponse getAllEmployeeResponseFromJson( str) => GetAllEmployeeResponse.fromJson(str);
+
+
+class GetAllEmployeeResponse {
+  final List<EmployeeModel>? data;
+
+  GetAllEmployeeResponse({
+    this.data,
   });
 
-  factory Datum.fromJson(Map<String, dynamic> json) {
-    return Datum(
-      id: json['id'],
-      position: json['position'] ?? 'Unknown',
-      department: json['department'] ?? 'Unknown',
+  GetAllEmployeeResponse copyWith({
+    List<EmployeeModel>? data,
+  }) =>
+      GetAllEmployeeResponse(
+        data: data ?? this.data,
+      );
 
-      hourlyRate: json['hourly_rate']?.toDouble() ?? 0.0,
-      overtimeRate: json['overtime_rate']?.toDouble() ?? 0.0,
-      isOnline: json['is_online'],
-      currentLocation: json['current_location'],
-      user: UserModel.fromJson(json['user']),
-      workshops: (json['workshops'] as List? ?? [])
-          .map((e) => WorkshopModel.fromJson(e))
-          .toList(),
-    );
-  }
+  factory GetAllEmployeeResponse.fromJson(Map<String, dynamic> json) => GetAllEmployeeResponse(
+    data: json["data"] == null ? [] : List<EmployeeModel>.from(json["data"]!.map((x) => EmployeeModel.fromJson(x))),
+  );
+
+  Map<String, dynamic> toJson() => {
+    "data": data == null ? [] : List<dynamic>.from(data!.map((x) => x.toJson())),
+  };
+}
+class EmployeeModel {
+  final int? id;
+  final String? position;
+  final String? department;
+  final double? hourlyRate;
+  final double? overtimeRate;
+  final bool? isOnline;
+  final String? currentLocation;
+  final User? user;
+  final List<Workshop>? workshops;
+
+  EmployeeModel({
+    this.id,
+    this.position,
+    this.department,
+    this.hourlyRate,
+    this.overtimeRate,
+    this.isOnline=false,
+    this.currentLocation,
+    this.user,
+    this.workshops,
+  });
+
+  EmployeeModel copyWith({
+    int? id,
+    String? position,
+    String? department,
+    double? hourlyRate,
+    double? overtimeRate,
+    bool? isOnline,
+    String? currentLocation,
+    User? user,
+    List<Workshop>? workshops,
+  }) =>
+      EmployeeModel(
+        id: id ?? this.id,
+        position: position ?? this.position,
+        department: department ?? this.department,
+        hourlyRate: hourlyRate ?? this.hourlyRate,
+        overtimeRate: overtimeRate ?? this.overtimeRate,
+        isOnline: isOnline ?? this.isOnline,
+        currentLocation: currentLocation ?? this.currentLocation,
+        user: user ?? this.user,
+        workshops: workshops ?? this.workshops,
+      );
+
+  factory EmployeeModel.fromJson(Map<String, dynamic> json) => EmployeeModel(
+    id: json["id"],
+    position: json["position"],
+    department: json["department"],
+    hourlyRate: json["hourly_rate"] == null
+        ? null
+        : (json["hourly_rate"] as num).toDouble(),
+    overtimeRate: json["overtime_rate"] == null
+        ? null
+        : (json["overtime_rate"] as num).toDouble(),
+    isOnline: json["is_online"],
+    currentLocation: json["current_location"],
+    user: json["user"] == null ? null : User.fromJson(json["user"]),
+    workshops: json["workshops"] == null
+        ? []
+        : List<Workshop>.from(
+        json["workshops"]!.map((x) => Workshop.fromJson(x))),
+  );
+
+  Map<String, dynamic> toJson() => {
+    "id": id,
+    "position": position,
+    "department": department,
+    "hourly_rate": hourlyRate,
+    "overtime_rate": overtimeRate,
+    "is_online": isOnline,
+    "current_location": currentLocation,
+    "user": user?.toJson(),
+    "workshops": workshops == null
+        ? []
+        : List<dynamic>.from(workshops!.map((x) => x.toJson())),
+  };
 }
 
-class UserModel {
-  final int id;
-  final String fullName;
-  final String phoneNumber;
-  final String email;
-  final String? profileImageUrl;
+class User {
+  final int? id;
+  final String? fullName;
+  final String? phoneNumber;
+  final String? email;
+  final dynamic profileImageUrl;
 
-  UserModel({
-    required this.id,
-    required this.fullName,
-    required this.phoneNumber,
-    required this.email,
+  User({
+    this.id,
+    this.fullName,
+    this.phoneNumber,
+    this.email,
     this.profileImageUrl,
   });
 
-  factory UserModel.fromJson(Map<String, dynamic> json) {
-    return UserModel(
-      id: json['id'],
-      fullName: json['full_name'] ?? '',
-      phoneNumber: json['phone_number'] ?? '',
-      email: json['email'] ?? '',
-      profileImageUrl: json['profile_image_url'] ?? '',
-    );
-  }
+  User copyWith({
+    int? id,
+    String? fullName,
+    String? phoneNumber,
+    String? email,
+    dynamic profileImageUrl,
+  }) =>
+      User(
+        id: id ?? this.id,
+        fullName: fullName ?? this.fullName,
+        phoneNumber: phoneNumber ?? this.phoneNumber,
+        email: email ?? this.email,
+        profileImageUrl: profileImageUrl ?? this.profileImageUrl,
+      );
+
+  factory User.fromJson(Map<String, dynamic> json) => User(
+    id: json["id"],
+    fullName: json["full_name"],
+    phoneNumber: json["phone_number"],
+    email: json["email"],
+    profileImageUrl: json["profile_image_url"],
+  );
+
+  Map<String, dynamic> toJson() => {
+    "id": id,
+    "full_name": fullName,
+    "phone_number": phoneNumber,
+    "email": email,
+    "profile_image_url": profileImageUrl,
+  };
 }
 
-//
-// class User {
-//   final int? id;
-//   final String? fullName;
-//   final String? phoneNumber;
-//   final String? email;
-//
-//   User({
-//     this.id,
-//     this.fullName,
-//     this.phoneNumber,
-//     this.email,
-//   });
-//
-//   factory User.fromJson(Map<String, dynamic> json) =>
-//       User(
-//         id: json["id"],
-//         fullName: json["full_name"] ?? '',
-//         phoneNumber: json["phone_number"] ?? '',
-//         email: json["email"] ?? '',
-//       );
-//
-//   Map<String, dynamic> toJson() =>
-//       {
-//         'id': id,
-//         'fullName': fullName,
-//         'phoneNumber': phoneNumber,
-//         'email': email,
-//
-//
-//       };
-// }
+class Workshop {
+  final int? id;
+  final String? name;
+  final String? location;
+
+  Workshop({
+    this.id,
+    this.name,
+    this.location,
+  });
+
+  Workshop copyWith({
+    int? id,
+    String? name,
+    String? location,
+  }) =>
+      Workshop(
+        id: id ?? this.id,
+        name: name ?? this.name,
+        location: location ?? this.location,
+      );
+
+  factory Workshop.fromJson(Map<String, dynamic> json) => Workshop(
+    id: json["id"],
+    name: json["name"],
+    location: json["location"],
+  );
+
+  Map<String, dynamic> toJson() => {
+    "id": id,
+    "name": name,
+    "location": location,
+  };
+}

@@ -2,18 +2,19 @@ import 'package:injectable/injectable.dart';
 import '../../../../common/helper/src/typedef.dart';
 import '../../../../core/unified_api/use_case.dart';
 import '../../data/models/get_attendance_response.dart';
+import '../../data/models/sync_attendance_response.dart';
 import '../repositories/attendance_repositories.dart';
 
 @lazySingleton
 class SyncAttendanceUseCase
-    implements UseCase<GetAttendanceResponse, SyncAttendanceParams> {
+    implements UseCase<SyncAttendanceResponse, SyncAttendanceParams> {
   final AttendanceRepositories _repositories;
 
   SyncAttendanceUseCase({required AttendanceRepositories repositories})
     : _repositories = repositories;
 
   @override
-  DataResponse<GetAttendanceResponse> call(SyncAttendanceParams params) async {
+  DataResponse<SyncAttendanceResponse> call(SyncAttendanceParams params) async {
     return _repositories.syncAttendance(params);
   }
 }
@@ -36,8 +37,8 @@ class AttendanceBody {
   final String? checkIn;
   final String? checkOut;
   final int? weekNumber;
-  final int? regularHours;
-  final int? overtimeHours;
+  final double? regularHours;
+  final double? overtimeHours;
   final String? note;
   final String? status;
 

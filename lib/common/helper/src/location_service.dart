@@ -1,6 +1,6 @@
 import 'package:location/location.dart';
 
-class LocationService {
+class LocationServiceMain {
   static Future<LocationData?> getUserLocation() async {
     Location location = Location();
 

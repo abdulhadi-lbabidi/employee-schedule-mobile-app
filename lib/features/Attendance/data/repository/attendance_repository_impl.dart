@@ -5,8 +5,10 @@ import 'package:untitled8/core/unified_api/error_handler.dart';
 import 'package:untitled8/features/Attendance/data/data_source/attendance_locale_data_source.dart';
 import 'package:untitled8/features/Attendance/data/data_source/attendance_remote_data.dart';
 import 'package:untitled8/features/Attendance/data/models/get_attendance_response.dart';
+import 'package:untitled8/features/Attendance/data/models/sync_attendance_response.dart';
 import 'package:untitled8/features/Attendance/domin/use_cases/sync_attendance_use_case.dart';
 import '../../domin/repositories/attendance_repositories.dart';
+import '../../domin/use_cases/get_employee_attendance_use_case.dart';
 
 @LazySingleton(as: AttendanceRepositories)
 class AttendanceRepositoryImpl
@@ -23,13 +25,15 @@ class AttendanceRepositoryImpl
   });
 
   @override
-  DataResponse<GetAttendanceResponse> getEmployeeAttendance() async =>
-      wrapHandlingException(tryCall: () => remote.getEmployeeAttendance(),
-        otherCall: ()=>local.getAttendance()
-      );
+  DataResponse<List<GetAttendanceResponse>> getEmployeeAttendance(
+    GetEmployeeAttendanceParams params,
+  ) async => wrapHandlingException(
+    tryCall: () => remote.getEmployeeAttendance(params),
+    otherCall: () => local.getAttendance(month: params.month),
+  );
 
   @override
-  DataResponse<GetAttendanceResponse> syncAttendance(
+  DataResponse<SyncAttendanceResponse> syncAttendance(
     SyncAttendanceParams params,
   ) async =>
       wrapHandlingException(tryCall: () => remote.syncAttendance(params));

@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:untitled8/features/admin/data/models/employee%20model/employee_model.dart';
 import '../../domain/entities/employee_entity.dart';
 
 class EmployeeStatusCard extends StatelessWidget {
-  final EmployeeEntity employee;
+  final EmployeeModel employee;
 
   const EmployeeStatusCard({super.key, required this.employee});
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return Container(
       margin: EdgeInsets.only(bottom: 12.h),
       padding: EdgeInsets.all(12.w),
@@ -22,7 +23,7 @@ class EmployeeStatusCard extends StatelessWidget {
             color: Colors.black.withOpacity(0.03),
             blurRadius: 10,
             offset: const Offset(0, 4),
-          )
+          ),
         ],
         border: Border.all(color: theme.dividerColor.withOpacity(0.05)),
       ),
@@ -33,12 +34,18 @@ class EmployeeStatusCard extends StatelessWidget {
               CircleAvatar(
                 radius: 28.r,
                 backgroundColor: theme.primaryColor.withOpacity(0.1),
-                backgroundImage: employee.imageUrl != null && employee.imageUrl!.isNotEmpty
-                    ? NetworkImage(employee.imageUrl!)
-                    : null,
-                child: (employee.imageUrl == null || employee.imageUrl!.isEmpty)
-                    ? Icon(Icons.person, color: theme.primaryColor, size: 30.sp) 
-                    : null,
+                backgroundImage:
+                    employee.user?.profileImageUrl != null
+                        ? NetworkImage(employee.user!.profileImageUrl!)
+                        : null,
+                child:
+                    (employee.user?.profileImageUrl == null)
+                        ? Icon(
+                          Icons.person,
+                          color: theme.primaryColor,
+                          size: 30.sp,
+                        )
+                        : null,
               ),
               Positioned(
                 right: 2,
@@ -47,7 +54,12 @@ class EmployeeStatusCard extends StatelessWidget {
                   width: 14.w,
                   height: 14.w,
                   decoration: BoxDecoration(
-                    color: employee.isOnline ? Colors.green : Colors.grey,
+                    color:
+                        employee.isOnline == null
+                            ? Colors.grey
+                            : employee.isOnline != null
+                            ? Colors.green
+                            : Colors.grey,
                     shape: BoxShape.circle,
                     border: Border.all(color: theme.cardColor, width: 2),
                   ),
@@ -61,18 +73,25 @@ class EmployeeStatusCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  employee.name ?? 'N/A', // ✅ Null safety
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15.sp),
+                  employee.user?.fullName ?? 'N/A', // ✅ Null safety
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 15.sp,
+                  ),
                 ),
                 SizedBox(height: 4.h),
                 Row(
                   children: [
-                    Icon(Icons.location_on_outlined, size: 12.sp, color: Colors.grey),
-                    SizedBox(width: 4.w),
-                    Text(
-                      employee.workshopName ?? 'N/A', // ✅ Null safety
-                      style: TextStyle(fontSize: 11.sp, color: Colors.grey),
+                    Icon(
+                      Icons.location_on_outlined,
+                      size: 12.sp,
+                      color: Colors.grey,
                     ),
+                    SizedBox(width: 4.w),
+                    // Text(
+                    //   employee.workshopName ?? 'N/A', // ✅ Null safety
+                    //   style: TextStyle(fontSize: 11.sp, color: Colors.grey),
+                    // ),
                   ],
                 ),
               ],
@@ -81,17 +100,20 @@ class EmployeeStatusCard extends StatelessWidget {
           Container(
             padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 6.h),
             decoration: BoxDecoration(
-              color: employee.isOnline 
-                  ? Colors.green.withOpacity(0.1) 
-                  : Colors.grey.withOpacity(0.1),
+              color:
+                  employee.isOnline == null
+                      ? Colors.grey.withOpacity(0.1)
+                      : employee.isOnline!
+                      ? Colors.green.withOpacity(0.1)
+                      : Colors.grey.withOpacity(0.1),
               borderRadius: BorderRadius.circular(12.r),
             ),
             child: Text(
-              employee.isOnline ? "نشط" : "خامل",
+              employee.isOnline! ? "نشط" : "خامل",
               style: TextStyle(
-                fontSize: 10.sp, 
+                fontSize: 10.sp,
                 fontWeight: FontWeight.bold,
-                color: employee.isOnline ? Colors.green : Colors.grey,
+                color: employee.isOnline! ? Colors.green : Colors.grey,
               ),
             ),
           ),

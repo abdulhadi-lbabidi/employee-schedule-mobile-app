@@ -1,26 +1,30 @@
-import '../entities/employee_entity.dart';
+import 'package:untitled8/common/helper/src/typedef.dart';
+
+import 'package:untitled8/features/admin/data/models/employee%20model/employee_model.dart';
+import 'package:untitled8/features/admin/data/models/employee%20model/get_employee_response.dart';
 import '../entities/workshop_entity.dart';
+import '../usecases/add_employee.dart';
 
 abstract class AdminRepository {
-  Future<List<EmployeeEntity>> getOnlineEmployees();
-  Future<List<EmployeeEntity>> getAllEmployees();
+  DataResponse<GetAllEmployeeResponse> getOnlineEmployees();
+  DataResponse<GetAllEmployeeResponse> getAllEmployees();
 
-  Future<void> updateHourlyRate({required String employeeId, required double newRate});
-  Future<void> updateOvertimeRate({required String employeeId, required double newRate});
-  Future<void> confirmPayment({required String employeeId, required int weekNumber});
-  Future<void> addEmployee(EmployeeEntity employee);
-  Future<EmployeeEntity> getEmployeeDetails(String id);
-  Future<void> deleteEmployee(String id);
-  Future<void> toggleEmployeeArchive(String id, bool isArchived); // 🔹 أرشفة الموظف
+  DataResponse<void> updateHourlyRate({required String employeeId, required double newRate});
+  DataResponse<void> updateOvertimeRate({required String employeeId, required double newRate});
+  DataResponse<void> confirmPayment({required String employeeId, required int weekNumber});
+  DataResponse<void> addEmployee(AddEmployeeParams employee);
+  DataResponse<GetEmployeeResponse> getEmployeeDetails(String id);
+  DataResponse<void> deleteEmployee(String id);
+  DataResponse<void> toggleEmployeeArchive(String id, bool isArchived); // 🔹 أرشفة الموظف
   
   // 🔹 إدارة الورشات
-  Future<List<WorkshopEntity>> getWorkshops();
-  Future<void> addWorkshop({
+  DataResponse<List<WorkshopEntity>> getWorkshops();
+  DataResponse<void> addWorkshop({
     required String name,
     double? latitude,
     double? longitude,
     double radius = 200,
   });
-  Future<void> deleteWorkshop(int id);
-  Future<void> toggleWorkshopArchive(String id, bool isArchived);
+  DataResponse<void> deleteWorkshop(int id);
+  DataResponse<void> toggleWorkshopArchive(String id, bool isArchived);
 }

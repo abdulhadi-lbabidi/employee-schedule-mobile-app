@@ -1,3 +1,5 @@
+import 'package:untitled8/features/admin/data/models/employee%20model/employee_model.dart';
+
 import '../../../domain/entities/employee_entity.dart';
 
 abstract class AdminDashboardState {}
@@ -7,8 +9,8 @@ class DashboardInitial extends AdminDashboardState {}
 class DashboardLoading extends AdminDashboardState {}
 
 class DashboardLoaded extends AdminDashboardState {
-  final List<EmployeeEntity> onlineEmployees;
-  final List<EmployeeEntity> offlineEmployees;
+  final List<EmployeeModel> onlineEmployees;
+  final List<EmployeeModel> offlineEmployees;
   
   // 🔹 إضافة حقول الإحصائيات البيانية
   final Map<String, double> workshopExpenses; // لتوزيع المصاريف

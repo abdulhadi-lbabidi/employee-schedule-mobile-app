@@ -1,9 +1,12 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:injectable/injectable.dart';
 
 import '../../../../admin/data/datasources/admin_remote_data_source.dart';
 import '../../../../admin/data/repositories/audit_log_repository.dart';
+import '../../../data/datasources/admin_remote_data_source_impl.dart';
 import '../../../data/mappers/employee_to_datum_mapper.dart';
+import '../../../data/models/employee model/employee_model.dart';
 import '../../../domain/entities/employee_entity.dart';
 import '../../../domain/usecases/confirm_payment.dart';
 import '../../../domain/usecases/delete_employee.dart';
@@ -14,6 +17,7 @@ import '../../../domain/usecases/toggle_employee_archive.dart';
 import 'employee_details_event.dart';
 import 'employee_details_state.dart';
 
+@injectable
 class EmployeeDetailsBloc
     extends Bloc<EmployeeDetailsEvent, EmployeeDetailsState> {
   final GetEmployeeDetailsUseCase getEmployeeDetailsUseCase;
@@ -22,21 +26,21 @@ class EmployeeDetailsBloc
   final ConfirmPaymentUseCase confirmPaymentUseCase;
   final DeleteEmployeeUseCase deleteEmployeeUseCase;
   final ToggleEmployeeArchiveUseCase toggleEmployeeArchiveUseCase;
-  final AdminRemoteDataSource remoteDataSource;
+  final AdminRemoteDataSourceImpl remoteDataSource;
   final AuditLogRepository auditLogRepository;
 
-  EmployeeEntity? _employee;
+  EmployeeModel? _employee;
 
   EmployeeDetailsBloc(
-      this.getEmployeeDetailsUseCase,
-      this.updateHourlyRateUseCase,
-      this.updateOvertimeRateUseCase,
-      this.confirmPaymentUseCase,
-      this.deleteEmployeeUseCase,
-      this.toggleEmployeeArchiveUseCase,
-      this.remoteDataSource,
-      this.auditLogRepository,
-      ) : super(EmployeeDetailsInitial()) {
+    this.getEmployeeDetailsUseCase,
+    this.updateHourlyRateUseCase,
+    this.updateOvertimeRateUseCase,
+    this.confirmPaymentUseCase,
+    this.deleteEmployeeUseCase,
+    this.toggleEmployeeArchiveUseCase,
+    this.remoteDataSource,
+    this.auditLogRepository,
+  ) : super(EmployeeDetailsInitial()) {
     on<LoadEmployeeDetailsEvent>(_onLoadDetails);
     on<UpdateHourlyRateEvent>(_onUpdateHourlyRate);
     on<UpdateOvertimeRateEvent>(_onUpdateOvertimeRate);
@@ -47,35 +51,39 @@ class EmployeeDetailsBloc
   }
 
   Future<void> _onLoadDetails(
-      LoadEmployeeDetailsEvent event,
-      Emitter<EmployeeDetailsState> emit,
-      ) async {
+    LoadEmployeeDetailsEvent event,
+    Emitter<EmployeeDetailsState> emit,
+  ) async {
     emit(EmployeeDetailsLoading());
-    try {
-      _employee = await getEmployeeDetailsUseCase(event.employeeId);
-      emit(EmployeeDetailsLoaded(_employee!));
-    } catch (e) {
-      debugPrint('Error loading employee details: $e');
-      emit(EmployeeDetailsError('فشل تحميل بيانات الموظف'));
-    }
+
+    final val = await getEmployeeDetailsUseCase(event.employeeId);
+    val.fold(
+      (l) {
+        emit(EmployeeDetailsError(l.message));
+      },
+      (r) {
+        _employee = r.data;
+        emit(EmployeeDetailsLoaded(_employee!));
+      },
+    );
   }
 
   Future<void> _onToggleArchiveEmployee(
-      ToggleArchiveEmployeeDetailEvent event,
-      Emitter<EmployeeDetailsState> emit,
-      ) async {
+    ToggleArchiveEmployeeDetailEvent event,
+    Emitter<EmployeeDetailsState> emit,
+  ) async {
     if (_employee == null) return;
     try {
       await toggleEmployeeArchiveUseCase(event.employeeId, event.isArchived);
-      _employee = _employee!.copyWith(isArchived: event.isArchived);
+      //_employee = _employee!.copyWith(isArchived: event.isArchived);
+      _employee = _employee!;
       emit(EmployeeDetailsLoaded(_employee!));
 
       await auditLogRepository.logAction(
         actionType: event.isArchived ? "أرشفة موظف" : "إلغاء أرشفة موظف",
-        targetName: _employee!.name,
-        details: event.isArchived
-            ? "تمت أرشفة الموظف"
-            : "تمت إعادة تنشيط الموظف",
+        targetName: _employee!.user!.fullName!,
+        details:
+            event.isArchived ? "تمت أرشفة الموظف" : "تمت إعادة تنشيط الموظف",
       );
     } catch (e) {
       debugPrint('Error toggling employee archive: $e');
@@ -84,51 +92,52 @@ class EmployeeDetailsBloc
   }
 
   Future<void> _onConfirmPayment(
-      ConfirmPaymentEvent event,
-      Emitter<EmployeeDetailsState> emit,
-      ) async {
+    ConfirmPaymentEvent event,
+    Emitter<EmployeeDetailsState> emit,
+  ) async {
     try {
       final currentEmp = event.employee;
       emit(HourlyRateUpdating(currentEmp));
 
       if (event.isFullPayment) {
         await confirmPaymentUseCase(
-          employeeId: currentEmp.id,
+          employeeId: currentEmp.id.toString(),
           weekNumber: event.weekNumber,
         );
       }
 
       await auditLogRepository.logAction(
-        actionType: event.isFullPayment
-            ? "تأكيد صرف رواتب كاملة"
-            : "صرف دفعة جزئية",
-        targetName: currentEmp.name,
-        details: event.isFullPayment
-            ? "دفع مستحقات الأسبوع ${event.weekNumber} بالكامل"
-            : "دفع مبلغ ${event.amountPaid} ل.س من مستحقات الأسبوع ${event.weekNumber}",
+        actionType:
+            event.isFullPayment ? "تأكيد صرف رواتب كاملة" : "صرف دفعة جزئية",
+        targetName: currentEmp.user!.fullName!,
+        details:
+            event.isFullPayment
+                ? "دفع مستحقات الأسبوع ${event.weekNumber} بالكامل"
+                : "دفع مبلغ ${event.amountPaid} ل.س من مستحقات الأسبوع ${event.weekNumber}",
       );
 
-      final updatedHistory = currentEmp.weeklyHistory.map((week) {
-        if (week.weekNumber == event.weekNumber) {
-          double newAmountPaid = week.amountPaid + event.amountPaid;
-          return WeeklyWorkHistory(
-            weekNumber: week.weekNumber,
-            month: week.month,
-            year: week.year,
-            workshops: week.workshops,
-            isPaid: event.isFullPayment,
-            amountPaid: newAmountPaid,
-          );
-        }
-        return week;
-      }).toList();
-
-      final updatedEmployee = currentEmp.copyWith(
-        weeklyHistory: updatedHistory,
-      );
-
-      _employee = updatedEmployee;
-      emit(EmployeeDetailsLoaded(updatedEmployee));
+      // final updatedHistory =
+      //     currentEmp.weeklyHistory.map((week) {
+      //       if (week.weekNumber == event.weekNumber) {
+      //         double newAmountPaid = week.amountPaid + event.amountPaid;
+      //         return WeeklyWorkHistory(
+      //           weekNumber: week.weekNumber,
+      //           month: week.month,
+      //           year: week.year,
+      //           workshops: week.workshops,
+      //           isPaid: event.isFullPayment,
+      //           amountPaid: newAmountPaid,
+      //         );
+      //       }
+      //       return week;
+      //     }).toList();
+      //
+      // final updatedEmployee = currentEmp.copyWith(
+      //   weeklyHistory: updatedHistory,
+      // );
+      //
+      // _employee = updatedEmployee;
+      // emit(EmployeeDetailsLoaded(updatedEmployee));
     } catch (e) {
       debugPrint('Error confirming payment: $e');
       emit(EmployeeDetailsError('فشل العملية: ${e.toString()}'));
@@ -136,9 +145,9 @@ class EmployeeDetailsBloc
   }
 
   Future<void> _onUpdateFullEmployee(
-      UpdateEmployeeFullEvent event,
-      Emitter<EmployeeDetailsState> emit,
-      ) async {
+    UpdateEmployeeFullEvent event,
+    Emitter<EmployeeDetailsState> emit,
+  ) async {
     if (_employee == null) return;
 
     emit(EmployeeDetailsLoading());
@@ -147,23 +156,23 @@ class EmployeeDetailsBloc
       final oldEmployee = _employee!;
 
       final updatedEmployee = _employee!.copyWith(
-        name: event.name,
-        phoneNumber: event.phoneNumber,
-        workshopName: event.workshop,
+        user:User(fullName: event.name,phoneNumber:event.phoneNumber ) ,
+        // phoneNumber: ,
+        // workshopName: event.workshop,
         hourlyRate: event.hourlyRate,
         overtimeRate: event.overtimeRate,
       );
+      //
+      // // ✅ التصحيح: استخدام toDatumModel() كـ Extension
+      // final updatedDatum = updatedEmployee.toDatumModel();
 
-      // ✅ التصحيح: استخدام toDatumModel() كـ Extension
-      final updatedDatum = updatedEmployee.toDatumModel();
-
-      await remoteDataSource.updateEmployee(updatedDatum);
+      await remoteDataSource.updateEmployee(updatedEmployee);
 
       _employee = updatedEmployee;
 
       await auditLogRepository.logAction(
         actionType: "تحديث بيانات الموظف",
-        targetName: _employee!.name,
+        targetName: _employee!.user!.fullName!,
         details: _buildUpdateDetails(oldEmployee, event),
       );
 
@@ -174,11 +183,10 @@ class EmployeeDetailsBloc
     }
   }
 
-
   Future<void> _onDeleteEmployee(
-      DeleteEmployeeEvent event,
-      Emitter<EmployeeDetailsState> emit,
-      ) async {
+    DeleteEmployeeEvent event,
+    Emitter<EmployeeDetailsState> emit,
+  ) async {
     emit(EmployeeDetailsLoading());
     try {
       await deleteEmployeeUseCase(event.employeeId);
@@ -187,7 +195,7 @@ class EmployeeDetailsBloc
       if (_employee != null) {
         await auditLogRepository.logAction(
           actionType: "حذف موظف",
-          targetName: _employee!.name,
+          targetName: _employee!.user!.fullName!,
           details: "تم حذف الموظف بنجاح",
         );
       }
@@ -200,14 +208,14 @@ class EmployeeDetailsBloc
   }
 
   Future<void> _onUpdateHourlyRate(
-      UpdateHourlyRateEvent event,
-      Emitter<EmployeeDetailsState> emit,
-      ) async {
+    UpdateHourlyRateEvent event,
+    Emitter<EmployeeDetailsState> emit,
+  ) async {
     if (_employee == null) return;
     try {
       emit(HourlyRateUpdating(_employee!));
       await updateHourlyRateUseCase(
-        employeeId: _employee!.id,
+        employeeId: _employee!.id.toString(),
         newRate: event.newRate,
       );
 
@@ -217,7 +225,7 @@ class EmployeeDetailsBloc
       // Log audit action for hourly rate update
       await auditLogRepository.logAction(
         actionType: "تحديث الراتب الساعي",
-        targetName: _employee!.name,
+        targetName: _employee!.user!.fullName!,
         details: "تم تحديث الراتب الساعي من $oldRate إلى ${event.newRate}",
       );
 
@@ -229,14 +237,14 @@ class EmployeeDetailsBloc
   }
 
   Future<void> _onUpdateOvertimeRate(
-      UpdateOvertimeRateEvent event,
-      Emitter<EmployeeDetailsState> emit,
-      ) async {
+    UpdateOvertimeRateEvent event,
+    Emitter<EmployeeDetailsState> emit,
+  ) async {
     if (_employee == null) return;
     try {
       emit(HourlyRateUpdating(_employee!));
       await updateOvertimeRateUseCase(
-        employeeId: _employee!.id,
+        employeeId: _employee!.user!.id.toString(),
         newRate: event.newRate,
       );
 
@@ -246,7 +254,7 @@ class EmployeeDetailsBloc
       // Log audit action for overtime rate update
       await auditLogRepository.logAction(
         actionType: "تحديث معدل الإضافي",
-        targetName: _employee!.name,
+        targetName: _employee!.user!.fullName!,
         details: "تم تحديث معدل الإضافي من $oldRate إلى ${event.newRate}",
       );
 
@@ -259,24 +267,26 @@ class EmployeeDetailsBloc
 
   /// بناء رسالة تفصيلية لتسجيل التعديلات
   String _buildUpdateDetails(
-      EmployeeEntity oldEmployee,
-      UpdateEmployeeFullEvent event,
-      ) {
+    EmployeeModel oldEmployee,
+    UpdateEmployeeFullEvent event,
+  ) {
     final changes = <String>[];
 
-    if (oldEmployee.name != event.name) {
-      changes.add('الاسم: من "${oldEmployee.name}" إلى "${event.name}"');
-    }
-    if (oldEmployee.phoneNumber != event.phoneNumber) {
+    if (oldEmployee.user!.fullName != event.name) {
       changes.add(
-        'رقم الهاتف: من "${oldEmployee.phoneNumber}" إلى "${event.phoneNumber}"',
+        'الاسم: من "${oldEmployee.user!.fullName}" إلى "${event.name}"',
       );
     }
-    if (oldEmployee.workshopName != event.workshop) {
+    if (oldEmployee.user!.phoneNumber != event.phoneNumber) {
       changes.add(
-        'ورشة العمل: من "${oldEmployee.workshopName}" إلى "${event.workshop}"',
+        'رقم الهاتف: من "${oldEmployee.user!.phoneNumber}" إلى "${event.phoneNumber}"',
       );
     }
+    // if (oldEmployee.workshopName != event.workshop) {
+    //   changes.add(
+    //     'ورشة العمل: من "${oldEmployee.workshopName}" إلى "${event.workshop}"',
+    //   );
+    // }
     if (oldEmployee.hourlyRate != event.hourlyRate) {
       changes.add(
         'الراتب الساعي: من ${oldEmployee.hourlyRate} إلى ${event.hourlyRate}',

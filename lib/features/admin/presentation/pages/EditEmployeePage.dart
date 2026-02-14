@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:untitled8/features/admin/data/models/employee%20model/employee_model.dart';
 import '../bloc/employee_details/employee_details_bloc.dart';
 import '../bloc/employee_details/employee_details_event.dart';
 import '../../domain/entities/employee_entity.dart';
 
 class EditEmployeePage extends StatefulWidget {
-  final EmployeeEntity employee;
+  final EmployeeModel employee;
 
   const EditEmployeePage({super.key, required this.employee});
 
@@ -26,11 +27,11 @@ class _EditEmployeePageState extends State<EditEmployeePage> {
   @override
   void initState() {
     super.initState();
-    nameController = TextEditingController(text: widget.employee.name);
-    phoneController = TextEditingController(text: widget.employee.phoneNumber);
+    nameController = TextEditingController(text: widget.employee.user?.fullName??'');
+    phoneController = TextEditingController(text: widget.employee.user?.phoneNumber??'');
     hourlyRateController = TextEditingController(text: widget.employee.hourlyRate.toString());
     overtimeRateController = TextEditingController(text: widget.employee.overtimeRate.toString());
-    selectedWorkshop = widget.employee.workshopName;
+    // selectedWorkshop = widget.employee.workshopName;
   }
 
   @override

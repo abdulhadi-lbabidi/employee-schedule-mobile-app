@@ -1,7 +1,8 @@
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
-import 'package:untitled8/core/unified_api/use_case.dart';
+import 'package:untitled8/common/helper/src/app_varibles.dart';
+import 'package:untitled8/features/Attendance/data/models/sync_attendance_response.dart';
 import '../../../../core/data_state_model.dart';
 import '../../../../core/di/injection.dart';
 import '../../data/data_source/attendance_locale_data_source.dart';
@@ -19,10 +20,8 @@ class AttendanceBloc extends Bloc<AttendanceEvent, AttendanceState> {
   final GetEmployeeAttendanceUseCase _getEmployeeAttendanceUseCase;
   final SyncAttendanceUseCase _syncAttendanceUseCase;
 
-  AttendanceBloc(
-    this._getEmployeeAttendanceUseCase,
-    this._syncAttendanceUseCase,
-  ) : super(AttendanceState()) {
+  AttendanceBloc(this._getEmployeeAttendanceUseCase,
+      this._syncAttendanceUseCase,) : super(AttendanceState()) {
     on<GetAllAttendanceEvent>(_getAllAttendance);
     on<SyncAttendanceEvent>(_syncAttendance);
     on<GetLocaleAttendanceEvent>(_getLocale);
@@ -31,102 +30,97 @@ class AttendanceBloc extends Bloc<AttendanceEvent, AttendanceState> {
     on<InitLocaleAttendanceEvent>(_initLocale);
   }
 
+// دالة مساعدة لجلب الحضور اليومي
+  Future<List<AttendanceModel>> getTodayAttendances() async {
+    final now = DateTime.now();
+    final list = await sl<AttendanceLocaleDataSource>().getAttendance();
+    final week = list.firstWhere(
+          (w) => w.containsDate(now),
+      orElse: () => GetAttendanceResponse(attendances: []),
+    );
+    return week.attendances ?? [];
+  }
+
+// ====================== الأحداث ======================
   FutureOr<void> _initLocale(
-    InitLocaleAttendanceEvent event,
-    Emitter<AttendanceState> emit,
-  )
+      InitLocaleAttendanceEvent event,
+      Emitter<AttendanceState> emit,
+      )
   async {
     final list = await sl<AttendanceLocaleDataSource>().getAttendance();
+    final todayList = await getTodayAttendances();
 
-    final listToday =
-        list.data!.where((e) => e.date?.day == DateTime.now().day).toList();
     emit(
       state.copyWith(
-        localeAttendanceList: list.data,
-        localeTodayAttendanceList: listToday,
+        localeAttendanceList: list,
+        localeTodayAttendanceList: todayList,
       ),
     );
   }
 
   FutureOr<void> _getLocale(
-    GetLocaleAttendanceEvent event,
-    Emitter<AttendanceState> emit,
-  )
+      GetLocaleAttendanceEvent event,
+      Emitter<AttendanceState> emit,
+      )
   async {
     final list = await sl<AttendanceLocaleDataSource>().getAttendance();
-    final val = list.data;
-    if (val!.isNotEmpty) {
-      final List<AttendanceModel> todayList = List.from(
-        val..removeWhere((e) => e.date?.day != DateTime.now().day),
-      );
-      emit(
-        state.copyWith(
-          localeAttendanceList: val,
-          localeTodayAttendanceList: todayList,
-        ),
-      );
-    }
+    final todayList = await getTodayAttendances();
+
+    emit(
+      state.copyWith(
+        localeAttendanceList: list,
+        localeTodayAttendanceList: todayList,
+      ),
+    );
   }
 
   FutureOr<void> _addTooLocale(
-    AddToLocaleAttendanceEvent event,
-    Emitter<AttendanceState> emit,
-  )
+      AddToLocaleAttendanceEvent event,
+      Emitter<AttendanceState> emit,
+      )
   async {
-    sl<AttendanceLocaleDataSource>().addAttendance(event.attendanceModel);
+    // أضف attendance في الـ SharedPreferences
+    await sl<AttendanceLocaleDataSource>().addAttendance(
+      attendance: event.attendanceModel,
+    );
+
+    // استرجع القائمة الكاملة بعد الإضافة
+    final list = await sl<AttendanceLocaleDataSource>().getAttendance();
+    final todayList = await getTodayAttendances();
+
     emit(
       state.copyWith(
-        localeAttendanceList: [
-          ...state.localeAttendanceList,
-          event.attendanceModel,
-        ],
-        localeTodayAttendanceList: [
-          ...state.localeTodayAttendanceList,
-          event.attendanceModel,
-        ],
+        localeAttendanceList: list,
+        localeTodayAttendanceList: todayList,
       ),
     );
   }
 
   FutureOr<void> _patchLocale(
-    PatchLocaleAttendanceEvent event,
-    Emitter<AttendanceState> emit,
-  )
+      PatchLocaleAttendanceEvent event,
+      Emitter<AttendanceState> emit,
+      )
   async {
+    // حدث الـ SharedPreferences
     await sl<AttendanceLocaleDataSource>().patchAttendance(
-      event.attendanceModel,
+      attendance: event.attendanceModel,
     );
+
+    final list = await sl<AttendanceLocaleDataSource>().getAttendance();
+    final todayList = await getTodayAttendances();
 
     emit(
       state.copyWith(
-        localeAttendanceList: List.of(
-          state.localeAttendanceList
-              .map(
-                (e) =>
-                    e.id == event.attendanceModel.id
-                        ? event.attendanceModel
-                        : e,
-              )
-              .toList(),
-        ),
-        localeTodayAttendanceList: List.of(
-          state.localeTodayAttendanceList
-              .map(
-                (e) =>
-                    e.id == event.attendanceModel.id
-                        ? event.attendanceModel
-                        : e,
-              )
-              .toList(),
-        ),
+        localeAttendanceList: list,
+        localeTodayAttendanceList: todayList,
       ),
     );
   }
 
   FutureOr<void> _getAllAttendance(
-    GetAllAttendanceEvent event,
-    Emitter<AttendanceState> emit,
-  )
+      GetAllAttendanceEvent event,
+      Emitter<AttendanceState> emit,
+      )
   async {
     emit(
       state.copyWith(
@@ -134,10 +128,10 @@ class AttendanceBloc extends Bloc<AttendanceEvent, AttendanceState> {
       ),
     );
 
-    final val = await _getEmployeeAttendanceUseCase(NoParams());
+    final val = await _getEmployeeAttendanceUseCase(event.params);
 
-    val.fold(
-      (l) {
+    await val.fold(
+          (l) async {
         emit(
           state.copyWith(
             getAllAttendanceData: state.getAllAttendanceData.setFaild(
@@ -146,73 +140,152 @@ class AttendanceBloc extends Bloc<AttendanceEvent, AttendanceState> {
           ),
         );
       },
-      (r) {
-        if(event.isAfterSync){
-          sl<AttendanceLocaleDataSource>().clearAttendance();
-          sl<AttendanceLocaleDataSource>().setLocaleAttendance(r);
-          emit(state.copyWith(
-            localeTodayAttendanceList: [],
-            localeAttendanceList: []
-          ));
+          (r) async {
+        final localeDataSource = sl<AttendanceLocaleDataSource>();
+
+        // ================= حالة بعد المزامنة =================
+        if (event.isAfterSync) {
+          await localeDataSource.clearAttendance();
+          await localeDataSource.setLocaleAttendance(r ?? []);
+
+          final mergedList = r ?? [];
+          final todayList = getTodayAttendancesFromList(mergedList);
+
+          emit(
+            state.copyWith(
+              getAllAttendanceData:
+              state.getAllAttendanceData.setSuccess(data: r),
+              localeAttendanceList: mergedList,
+              localeTodayAttendanceList: todayList,
+            ),
+          );
+          return;
         }
-        final Map<int, AttendanceModel> map = {
-          // أولاً القديمة
-          for (final item in state.localeAttendanceList)
-            item.id: item,
 
-          // ثم الجديدة (تستبدل القديمة إذا نفس id)
-          for (final item in r.data!)
-            item.id: item,
-        };
+        // ================= الحالة العادية =================
+        // دمج القديم مع الجديد حسب الأسبوع
+        final oldList = await localeDataSource.getAttendance();
+        final newList = r ?? [];
 
-        final List<AttendanceModel> list = map.values.toList();
+        final Map<String, GetAttendanceResponse> weekMap = {};
+        String weekKey(GetAttendanceResponse w) =>
+            "${w.startDate?.toIso8601String()}_${w.endDate?.toIso8601String()}";
+
+        // أضف الأسابيع القديمة أولاً
+        // for (final week in oldList) {
+        //   weekMap[weekKey(week)] = week;
+        // }
+
+        // دمج الأسابيع الجديدة من الباك
+        for (final week in newList) {
+          final key = weekKey(week);
+          if (weekMap.containsKey(key)) {
+            final oldWeek = weekMap[key]!;
+
+            // دمج attendances: المحلي + الجديد من الباك
+            final Map<int, AttendanceModel> attendancesMap = {
+              for (final a in oldWeek.attendances ?? []) a.id!: a,
+              for (final a in week.attendances ?? []) a.id!: a,
+            };
+
+            weekMap[key] =
+                oldWeek.copyWith(attendances: attendancesMap.values.toList());
+          } else {
+            weekMap[key] = week;
+          }
+        }
+
+        final mergedList = weekMap.values.toList();
+// قائمة اليوم من المدموج
+            final todayList = getTodayAttendancesFromList(mergedList);
+
+// مجموع الرواتب
+            double totalSalery = 0;
+            mergedList.forEach((e) {
+              totalSalery +=
+              ((e.totalRegularHours! / 8) * AppVariables.user!.userable!.hourlyRate!) +
+                  (e.totalOvertimeHours! * AppVariables.user!.userable!.overtimeRate!);
+
+            });
+
+// مجموع الساعات
+            double totalHours = 0;
+            mergedList.forEach((e) {
+              e.attendances?.forEach((g) {
+                totalHours += (g.regularHours ?? 0) + (g.overtimeHours ?? 0);
+              });
+            });
+
+            print('Total:');
+            print(totalSalery);
+            print(totalHours);
 
         emit(
           state.copyWith(
-            getAllAttendanceData: state.getAllAttendanceData.setSuccess(
-              data: r.copyWith(data: list),
-            ),
+            getAllAttendanceData:
+            state.getAllAttendanceData.setSuccess(data: mergedList),
+            localeAttendanceList: mergedList,
+            localeTodayAttendanceList: todayList,
+            totalHours: totalHours,
+            totalSalery:totalSalery
           ),
         );
       },
     );
   }
 
+// دالة مساعدة
+  List<AttendanceModel> getTodayAttendancesFromList(
+      List<GetAttendanceResponse> list) {
+    final now = DateTime.now();
+    final week = list.firstWhere(
+          (w) => w.containsDate(now),
+      orElse: () => GetAttendanceResponse(attendances: []),
+    );
+    return week.attendances ?? [];
+  }
+
+
   FutureOr<void> _syncAttendance(
-    SyncAttendanceEvent event,
-    Emitter<AttendanceState> emit,
-  )
-  async {
+      SyncAttendanceEvent event,
+      Emitter<AttendanceState> emit,
+      ) async {
     emit(
-      state.copyWith(syncAttendanceData: state.syncAttendanceData.setLoading()),
+      state.copyWith(
+        syncAttendanceData: state.syncAttendanceData.setLoading(),
+      ),
     );
 
-    final List<AttendanceModel> pendingList =
-        state.getAllAttendanceData.data!.data!
-            .where((e) => e.status == 'pending')
-            .toList();
+    // احصل على الحضور المعلق
+    final List<AttendanceModel> pendingList = state.getAllAttendanceData.data
+        ?.expand<AttendanceModel>((week) => week.attendances ?? [])
+        .where((e) => e.status == 'pending')
+        .toList() ??
+        [];
 
-    final List<AttendanceBody> sendList =
-        pendingList.map((e) => AttendanceBody(
-          status: e.status,
-          checkOut: e.checkOut,
-          employeeId:e.employeeId,
-          note: e.note,
-          checkIn: e.checkIn,
-          date: e.date.toString(),
-          overtimeHours: 0,
-          regularHours:8,
-          weekNumber:5,
-          workshopId: e.employeeId,
+    // جهّز للإرسال
+    final List<AttendanceBody> sendList = pendingList.map((e) {
+      return AttendanceBody(
+        employeeId: AppVariables.user!.userableId,
+        workshopId: e.workshop!.id,
+        date: e.date?.toIso8601String() ?? '',
+        checkIn: e.checkIn,
+        checkOut: e.checkOut,
+        weekNumber: e.weekNumber,
+        regularHours: e.regularHours ?? 8,
+        overtimeHours: e.overtimeHours ?? 0,
+        status: e.status,
+        note: e.note,
 
+      );
+    }).toList();
 
-        )).toList();
-    final SyncAttendanceParams p = SyncAttendanceParams(attendanceBody: sendList);
+    final params = SyncAttendanceParams(attendanceBody: sendList);
 
-    final val = await _syncAttendanceUseCase(p);
+    final val = await _syncAttendanceUseCase(params);
 
     val.fold(
-      (l) {
+          (l) {
         emit(
           state.copyWith(
             syncAttendanceData: state.syncAttendanceData.setFaild(
@@ -221,14 +294,15 @@ class AttendanceBloc extends Bloc<AttendanceEvent, AttendanceState> {
           ),
         );
       },
-      (r) {
+          (r) {
         emit(
           state.copyWith(
             syncAttendanceData: state.syncAttendanceData.setSuccess(data: r),
           ),
         );
-        add(GetAllAttendanceEvent(isAfterSync: true));
+        add(GetAllAttendanceEvent(isAfterSync: true,params: GetEmployeeAttendanceParams(month: DateTime.now().month)));
       },
     );
   }
+
 }

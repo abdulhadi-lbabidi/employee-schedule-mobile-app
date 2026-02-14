@@ -1,4 +1,3 @@
-import 'package:injectable/injectable.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 import '../features/Attendance/data/models/attendance_record.dart';
@@ -37,7 +36,7 @@ class HiveService {
     if (!Hive.isAdapterRegistered(0)) Hive.registerAdapter(AttendanceRecordAdapter());
     if (!Hive.isAdapterRegistered(1)) Hive.registerAdapter(WorkshopModelAdapter());
     if (!Hive.isAdapterRegistered(2)) Hive.registerAdapter(NotificationModelAdapter());
-    if (!Hive.isAdapterRegistered(3)) Hive.registerAdapter(AuditLogModelAdapter());
+  //  if (!Hive.isAdapterRegistered(3)) Hive.registerAdapter(AuditLogModelAdapter());
   }
 
   Future<Box<T>> openBox<T>(String name) async {

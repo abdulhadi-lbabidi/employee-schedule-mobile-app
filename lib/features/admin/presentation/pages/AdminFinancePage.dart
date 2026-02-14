@@ -38,68 +38,68 @@ class AdminFinancePage extends StatelessWidget {
           title: Text("الرقابة المالية", 
             style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18.sp, color: theme.primaryColor)),
           centerTitle: true,
-          actions: [
-            BlocBuilder<EmployeesBloc, EmployeesState>(
-              builder: (context, state) {
-                if (state is EmployeesLoaded) {
-                  final stats = _calculateDetailedStats(state.employees);
-                  return IconButton(
-                    icon: Icon(Icons.picture_as_pdf_rounded, color: theme.primaryColor, size: 24.sp),
-                    onPressed: () {
-                      PdfReportService.generateFinanceReport(
-                        employees: state.employees,
-                        totalDue: stats['totalDue'],
-                      );
-                    },
-                    tooltip: "استخراج كشف PDF",
-                  );
-                }
-                return const SizedBox.shrink();
-              },
-            ),
-            SizedBox(width: 8.w),
-          ],
+          // actions: [
+          //   BlocBuilder<EmployeesBloc, EmployeesState>(
+          //     builder: (context, state) {
+          //       if (state is EmployeesLoaded) {
+          //         final stats = _calculateDetailedStats(state.employees);
+          //         return IconButton(
+          //           icon: Icon(Icons.picture_as_pdf_rounded, color: theme.primaryColor, size: 24.sp),
+          //           onPressed: () {
+          //             PdfReportService.generateFinanceReport(
+          //               employees: state.employees,
+          //               totalDue: stats['totalDue'],
+          //             );
+          //           },
+          //           tooltip: "استخراج كشف PDF",
+          //         );
+          //       }
+          //       return const SizedBox.shrink();
+          //     },
+          //   ),
+          //   SizedBox(width: 8.w),
+          // ],
         ),
-        body: BlocBuilder<EmployeesBloc, EmployeesState>(
-          builder: (context, state) {
-            if (state is EmployeesLoading) return const Center(child: CircularProgressIndicator());
-            if (state is! EmployeesLoaded) return Center(child: Text("لا توجد بيانات متاحة", style: TextStyle(fontSize: 14.sp)));
-
-            final stats = _calculateDetailedStats(state.employees);
-            final unpaidEmployees = state.employees.where((e) => e.unpaidBalance > 0).toList();
-
-            return ListView(
-              padding: EdgeInsets.all(16.w),
-              physics: const BouncingScrollPhysics(),
-              children: [
-                _buildMainFinancialOverview(stats['totalDue'], theme)
-                    .animate().fadeIn(duration: 800.ms).scale(curve: Curves.easeOutBack),
-                
-                SizedBox(height: 24.h),
-                
-                _buildEnhancedExpenseChart(stats['workshopData'], theme)
-                    .animate().fadeIn(delay: 300.ms, duration: 500.ms).slideY(begin: 0.1, end: 0),
-                
-                SizedBox(height: 28.h),
-                
-                _buildSectionTitle("كشف مستحقات العمال", theme)
-                    .animate().fadeIn(delay: 500.ms),
-                
-                SizedBox(height: 12.h),
-                
-                if (unpaidEmployees.isEmpty)
-                  _buildAllPaidState(theme).animate().fadeIn(delay: 600.ms)
-                else
-                  ...unpaidEmployees.asMap().entries.map((entry) => 
-                    _buildEmployeeFinTile(context, entry.value, theme)
-                        .animate()
-                        .fadeIn(delay: (600 + (entry.key * 100)).ms, duration: 400.ms)
-                        .slideX(begin: 0.05, end: 0)
-                  ),
-              ],
-            );
-          },
-        ),
+        // body: BlocBuilder<EmployeesBloc, EmployeesState>(
+        //   builder: (context, state) {
+        //     if (state is EmployeesLoading) return const Center(child: CircularProgressIndicator());
+        //     if (state is! EmployeesLoaded) return Center(child: Text("لا توجد بيانات متاحة", style: TextStyle(fontSize: 14.sp)));
+        //
+        //     final stats = _calculateDetailedStats(state.employees);
+        //     // final unpaidEmployees = state.employees.where((e) => e.unpaidBalance > 0).toList();
+        //
+        //     return ListView(
+        //       padding: EdgeInsets.all(16.w),
+        //       physics: const BouncingScrollPhysics(),
+        //       children: [
+        //         _buildMainFinancialOverview(stats['totalDue'], theme)
+        //             .animate().fadeIn(duration: 800.ms).scale(curve: Curves.easeOutBack),
+        //
+        //         SizedBox(height: 24.h),
+        //
+        //         _buildEnhancedExpenseChart(stats['workshopData'], theme)
+        //             .animate().fadeIn(delay: 300.ms, duration: 500.ms).slideY(begin: 0.1, end: 0),
+        //
+        //         SizedBox(height: 28.h),
+        //
+        //         _buildSectionTitle("كشف مستحقات العمال", theme)
+        //             .animate().fadeIn(delay: 500.ms),
+        //
+        //         SizedBox(height: 12.h),
+        //
+        //         // if (unpaidEmployees.isEmpty)
+        //         //   _buildAllPaidState(theme).animate().fadeIn(delay: 600.ms)
+        //         // else
+        //         //   ...unpaidEmployees.asMap().entries.map((entry) =>
+        //         //     _buildEmployeeFinTile(context, entry.value, theme)
+        //         //         .animate()
+        //         //         .fadeIn(delay: (600 + (entry.key * 100)).ms, duration: 400.ms)
+        //         //         .slideX(begin: 0.05, end: 0)
+        //         //   ),
+        //       ],
+        //     );
+        //   },
+        // ),
       ),
     );
   }
@@ -111,7 +111,7 @@ class AdminFinancePage extends StatelessWidget {
     for (var emp in employees) {
       double empUnpaid = emp.unpaidBalance;
       totalDue += empUnpaid;
-      
+
       for (var week in emp.weeklyHistory) {
         if (!week.isPaid) {
           for (var ws in week.workshops) {

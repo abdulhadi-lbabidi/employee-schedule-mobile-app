@@ -1,11 +1,17 @@
 import 'package:hive/hive.dart';
 import '../models/audit_log_model.dart';
 import 'package:injectable/injectable.dart';
+import 'dart:convert';
+import 'package:injectable/injectable.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 @lazySingleton
 class AuditLogRepository {
-  final Box<AuditLogModel> _box;
+  static const String _logsKey = "audit_logs";
 
-  AuditLogRepository(this._box);
+  final SharedPreferences _prefs;
+
+  AuditLogRepository(this._prefs);
 
   /// 🔹 تسجيل نشاط جديد في السجل
   Future<void> logAction({
@@ -15,22 +21,51 @@ class AuditLogRepository {
   }) async {
     final log = AuditLogModel(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
-      adminName: "المدير العام", // يمكن جلب الاسم الحقيقي من الـ Profile مستقبلاً
+      adminName: "المدير العام",
       actionType: actionType,
       targetName: targetName,
       details: details,
       timestamp: DateTime.now(),
     );
-    await _box.add(log);
+
+    final logs = await _getStoredLogs();
+    logs.add(log);
+
+    await _saveLogs(logs);
   }
 
   /// 🔹 جلب كافة النشاطات مرتبة من الأحدث
   List<AuditLogModel> getLogs() {
-    return _box.values.toList()..sort((a, b) => b.timestamp.compareTo(a.timestamp));
+    final logsJson = _prefs.getStringList(_logsKey) ?? [];
+
+    final logs = logsJson
+        .map((e) => AuditLogModel.fromJson(jsonDecode(e)))
+        .toList();
+
+    logs.sort((a, b) => b.timestamp.compareTo(a.timestamp));
+
+    return logs;
   }
 
   /// 🔹 مسح السجل (إجراء إداري علوي)
   Future<void> clearLogs() async {
-    await _box.clear();
+    await _prefs.remove(_logsKey);
+  }
+
+  /// ================== Private Helpers ==================
+
+  Future<List<AuditLogModel>> _getStoredLogs() async {
+    final logsJson = _prefs.getStringList(_logsKey) ?? [];
+
+    return logsJson
+        .map((e) => AuditLogModel.fromJson(jsonDecode(e)))
+        .toList();
+  }
+
+  Future<void> _saveLogs(List<AuditLogModel> logs) async {
+    final encodedLogs =
+    logs.map((e) => jsonEncode(e.toJson())).toList();
+
+    await _prefs.setStringList(_logsKey, encodedLogs);
   }
 }

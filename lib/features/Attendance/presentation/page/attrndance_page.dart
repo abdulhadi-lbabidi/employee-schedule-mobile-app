@@ -2,13 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:intl/intl.dart';
 import 'package:untitled8/common/helper/src/app_varibles.dart';
 import 'package:untitled8/core/data_state_model.dart';
 import 'package:untitled8/core/utils/date_helper.dart';
 import 'package:untitled8/features/Attendance/data/models/attendance_model.dart';
+import 'package:untitled8/features/Attendance/domin/use_cases/get_employee_attendance_use_case.dart';
 import 'package:untitled8/features/Attendance/presentation/bloc/attendance_bloc.dart';
 import '../../../admin/presentation/bloc/workshops/workshops_bloc.dart';
 import '../../../admin/presentation/bloc/workshops/workshops_state.dart';
+import '../../data/models/get_attendance_response.dart';
 
 class PricingConfig {
   static const double BASIC_HOURS = 8.0;
@@ -109,7 +112,11 @@ class _AttendanceHistoryPageState extends State<AttendanceHistoryPage> {
   void initState() {
     super.initState();
     Future.microtask(() {
-      context.read<AttendanceBloc>().add(GetAllAttendanceEvent());
+      context.read<AttendanceBloc>().add(
+        GetAllAttendanceEvent(
+          params: GetEmployeeAttendanceParams(month: selectedMonth),
+        ),
+      );
       // context.read<AttendanceCubit>().loadAllRecords();
     });
   }
@@ -138,8 +145,15 @@ class _AttendanceHistoryPageState extends State<AttendanceHistoryPage> {
               return state.syncAttendanceData.status == BlocStatus.init
                   ? TextButton.icon(
                     onPressed: () {
-                      final isEnable = state.getAllAttendanceData.data!.data!
-                          .any((e) => e.status == "pending");
+                      final isEnable =
+                          state.getAllAttendanceData.data?.any(
+                            (week) =>
+                                week.attendances?.any(
+                                  (e) => e.status?.toLowerCase() == "pending",
+                                ) ??
+                                false,
+                          ) ??
+                          false;
                       print(AppVariables.localeAttendance?.toJson());
                       final isNotEnd = AppVariables.localeAttendance != null;
                       if ((isNotEnd && isEnable)) {
@@ -178,9 +192,15 @@ class _AttendanceHistoryPageState extends State<AttendanceHistoryPage> {
                     onSuccess: (_) {
                       return TextButton.icon(
                         onPressed: () {
-                          if (state.getAllAttendanceData.data!.data!.any(
-                            (e) => e.status == "pending",
-                          )) {
+                          if (state.getAllAttendanceData.data?.any(
+                                (week) =>
+                                    week.attendances?.any(
+                                      (e) =>
+                                          e.status?.toLowerCase() == "pending",
+                                    ) ??
+                                    false,
+                              ) ??
+                              false) {
                             context.read<AttendanceBloc>().add(
                               SyncAttendanceEvent(),
                             );
@@ -266,21 +286,22 @@ class _AttendanceHistoryPageState extends State<AttendanceHistoryPage> {
               Expanded(
                 child: state.getAllAttendanceData.builder(
                   onSuccess: (_) {
-                    final filteredRecords =
-                        state.getAllAttendanceData.data!.data!.where((record) {
-                          final date =
-                              record.date ??
-                              DateTime.now(); // 🔹 تم استخدام Getter
-                          return date.year == selectedYear &&
-                              date.month == selectedMonth;
-                        }).toList();
 
-                    return filteredRecords.isEmpty
+                    return state.getAllAttendanceData.data!.isEmpty
                         ? _buildEmptyState(theme)
-                        : _buildRecordsList(filteredRecords, theme);
+                        : _buildRecordsList(
+                          state.getAllAttendanceData.data!,
+                          theme,
+                        );
                   },
                   onTapRetry: () {
-                    context.read<AttendanceBloc>().add(GetAllAttendanceEvent());
+                    context.read<AttendanceBloc>().add(
+                      GetAllAttendanceEvent(
+                        params: GetEmployeeAttendanceParams(
+                          month: selectedMonth,
+                        ),
+                      ),
+                    );
                   },
                 ),
               ),
@@ -325,10 +346,18 @@ class _AttendanceHistoryPageState extends State<AttendanceHistoryPage> {
               items: List.generate(12, (index) => index + 1),
               itemLabel: (m) => DateHelper.getMonthName(m),
               onChanged:
-                  (val) => setState(() {
+                  (val) {
+                    setState(() {
                     selectedMonth = val!;
                     expandedWeeks.clear();
-                  }),
+                  });
+
+                    context.read<AttendanceBloc>().add(
+                      GetAllAttendanceEvent(
+                        params: GetEmployeeAttendanceParams(month: selectedMonth),
+                      ),
+                    );
+                  },
               label: "الشهر",
             ),
           ),
@@ -382,18 +411,17 @@ class _AttendanceHistoryPageState extends State<AttendanceHistoryPage> {
     );
   }
 
-  Widget _buildRecordsList(List<AttendanceModel> records, ThemeData theme) {
-    final weeklyResult = _groupRecordsByWeeks(records);
-    final weeklyData = weeklyResult.grouped;
-    final sortedWeeks =
-        weeklyData.keys.toList()..sort((a, b) => b.compareTo(a));
+  Widget _buildRecordsList(
+    List<GetAttendanceResponse> records,
+    ThemeData theme,
+  ) {
 
     return SingleChildScrollView(
       padding: EdgeInsets.all(16.w),
       physics: const BouncingScrollPhysics(),
       child: Column(
         children: [
-          _buildQuickStats(records, theme)
+          _buildQuickStats(theme)
               .animate()
               .fadeIn(duration: 600.ms)
               .scale(
@@ -403,20 +431,11 @@ class _AttendanceHistoryPageState extends State<AttendanceHistoryPage> {
               ),
 
           SizedBox(height: 20.h),
-          ...sortedWeeks.asMap().entries.map((entry) {
-            final index = entry.key;
-            final weekNumber = entry.value;
-            final weekRecords = weeklyData[weekNumber]!;
-            weekRecords.sort(
-              (a, b) =>
-                  (b.date ?? DateTime(0)).compareTo(a.date ?? DateTime(0)),
-            ); // 🔹 استخدام Getter
 
-            return _buildWeekSection(context, weekNumber, weekRecords, theme)
-                .animate()
-                .fadeIn(delay: (200 + (index * 100)).ms, duration: 500.ms)
-                .slideX(begin: 0.1, end: 0, curve: Curves.easeOutCubic);
-          }).toList(),
+          ...records.map(
+            (e) => _buildWeekSection(context, e.weekOfMonth ?? 1, e, theme),
+
+          ),
         ],
       ),
     );
@@ -456,10 +475,8 @@ class _AttendanceHistoryPageState extends State<AttendanceHistoryPage> {
     ).animate().fadeIn();
   }
 
-  Widget _buildQuickStats(List<AttendanceModel> records, ThemeData theme) {
-    Duration totalHours = Duration.zero;
-    double totalEarnings = 0;
 
+  Widget _buildQuickStats(ThemeData theme) {
     return Container(
       padding: EdgeInsets.all(20.w),
       decoration: BoxDecoration(
@@ -477,22 +494,27 @@ class _AttendanceHistoryPageState extends State<AttendanceHistoryPage> {
           ),
         ],
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          _statItem(
-            "الساعات المنجزة",
-            "${totalHours.inHours}:${(totalHours.inMinutes % 60).toString().padLeft(2, '0')}",
-            Icons.timer_outlined,
-            theme,
-          ),
-          _statItem(
-            "إجمالي المستحقات",
-            "\$${totalEarnings.toStringAsFixed(2)}",
-            Icons.account_balance_wallet_outlined,
-            theme,
-          ),
-        ],
+      child: BlocBuilder<AttendanceBloc, AttendanceState>(
+        builder: (context, state) {
+          return Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              _statItem(
+                "الساعات المنجزة",
+                state.totalHours == null ? '0' : state.totalHours.toString(),
+                Icons.timer_outlined,
+                theme,
+              ),
+              _statItem(
+                "إجمالي المستحقات",
+                state.totalSalery == null ? '0' : state.totalSalery.toString(),
+
+                Icons.account_balance_wallet_outlined,
+                theme,
+              ),
+            ],
+          );
+        },
       ),
     );
   }
@@ -527,11 +549,10 @@ class _AttendanceHistoryPageState extends State<AttendanceHistoryPage> {
   Widget _buildWeekSection(
     BuildContext context,
     int weekNumber,
-    List<AttendanceModel> records,
+    GetAttendanceResponse records,
     ThemeData theme,
   ) {
     final isExpanded = expandedWeeks[weekNumber] ?? false;
-    double weeklyEarnings = 0;
 
     return Container(
       margin: EdgeInsets.only(bottom: 16.h),
@@ -573,7 +594,7 @@ class _AttendanceHistoryPageState extends State<AttendanceHistoryPage> {
               ),
             ),
             subtitle: Text(
-              "${DateHelper.getMonthName(selectedMonth)} - $selectedYear",
+              formatWeek(records.startDate!, records.endDate!),
               style: TextStyle(
                 color: theme.disabledColor,
                 fontSize: 11.sp,
@@ -581,7 +602,7 @@ class _AttendanceHistoryPageState extends State<AttendanceHistoryPage> {
               ),
             ),
             trailing: Text(
-              "\$${weeklyEarnings.toStringAsFixed(2)}",
+              "\$${getWeekSallery(totalWeekExtraHours: records.totalRegularHours!, totalWeekHours: records.totalOvertimeHours!)}",
               style: TextStyle(
                 color: Colors.green,
                 fontWeight: FontWeight.w900,
@@ -593,7 +614,7 @@ class _AttendanceHistoryPageState extends State<AttendanceHistoryPage> {
             Padding(
               padding: EdgeInsets.fromLTRB(12.w, 0, 12.w, 16.h),
               child: _buildAttendanceTable(
-                records,
+                records.attendances!,
                 theme,
               ).animate().fadeIn(duration: 300.ms).slideY(begin: 0.05, end: 0),
             ),
@@ -895,4 +916,18 @@ void _showSnackBar(BuildContext context, String msg, Color color) {
       backgroundColor: color,
     ),
   );
+}
+
+String formatWeek(DateTime start, DateTime end) {
+  final formatter = DateFormat('M/d'); // يوم/شهر
+  return '${formatter.format(start)} إلى ${formatter.format(end)}';
+}
+
+double getWeekSallery({
+  required int totalWeekHours,
+  required int totalWeekExtraHours,
+}) {
+  return ((totalWeekHours / 8) * AppVariables.user!.userable!.hourlyRate!) +
+      (totalWeekExtraHours * AppVariables.user!.userable!.overtimeRate!);
+
 }

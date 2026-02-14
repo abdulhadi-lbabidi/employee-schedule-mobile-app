@@ -7,6 +7,8 @@ import 'package:untitled8/common/helper/src/app_varibles.dart';
 import 'package:untitled8/features/Attendance/presentation/bloc/attendance_bloc.dart';
 import 'package:untitled8/features/home/presentation/bloc/Cubit_dropdown/dropdown_cubit.dart';
 
+import '../../../../../common/helper/src/location_service.dart';
+import '../../../../../core/services/location_checker.dart';
 import '../../../../Attendance/data/models/attendance_model.dart';
 import '../../bloc/Cubit_dropdown/dropdown_state.dart';
 
@@ -30,31 +32,40 @@ class _ButtonOnInState extends State<ButtonOnIn> {
           onTap:
               isEnable
                   ? () async {
-                    final val =
-                        context.read<DropdownCubit>().state.selectedValue;
-                    if (val == null) {
-                      _showSnackBar(
-                        context,
-                        'يرجى اختيار الورشة أولاً',
-                        Colors.orange,
-                      );
-                      return;
-                    }
-                    AttendanceModel attendanceModel = AttendanceModel(
+                final val =
+                    context.read<DropdownCubit>().state.selectedValue;
+                if (val == null) {
+                  _showSnackBar(
+                    context,
+                    'يرجى اختيار الورشة أولاً',
+                    Colors.orange,
+                  );
+                  return;
+                }
+                LocationChecker.checkUserProximity(
+                  context: context,
+                  workshop: val,
+                  onWithinRange: () {
+
+
+                    AttendanceModel attendanceModel =
+                    AttendanceModel(
                       id: DateTime.now().millisecondsSinceEpoch * 1000 + Random().nextInt(1000),
-                      workshopId: val.id,
-                      workshop: AttendanceWorkshop(
+                      workshop: Workshop(
                         id: val.id!,
                         name: val.name!,
+
+
                       ),
                       date: DateTime.now(),
                       checkIn: DateTime.now().toString(),
                       regularHours: AppVariables.user!.userable!.hourlyRate!,
                       overtimeHours: AppVariables.user!.userable!.overtimeRate!,
-                      employeeId: AppVariables.user!.id,
+                      employee:Employee(
+                          id:  AppVariables.user!.userableId
+                      ),
                       status: "pending",
-
-
+                      weekNumber: getWeekOfMonth(DateTime.now()),
                     );
                     context.read<DropdownCubit>().changeAttendance(
                       newValue: attendanceModel,
@@ -62,7 +73,9 @@ class _ButtonOnInState extends State<ButtonOnIn> {
                     );
                     context.read<AttendanceBloc>().add(
                       AddToLocaleAttendanceEvent(
-                        attendanceModel: attendanceModel,
+                          attendanceModel: attendanceModel,
+                          weekNumber:  getWeekOfMonth(DateTime.now()).toString()
+
                       ),
                     );
 
@@ -71,6 +84,10 @@ class _ButtonOnInState extends State<ButtonOnIn> {
                       'تم تسجيل الحضور بنجاح',
                       Colors.green,
                     );
+                  },
+                );
+
+
                   }
                   : null,
           child: AnimatedContainer(
@@ -203,4 +220,18 @@ void _showSnackBar(BuildContext context, String msg, Color color) {
       backgroundColor: color,
     ),
   );
+}
+
+int getWeekOfMonth(DateTime date) {
+  // اليوم الأول من الشهر
+  final firstDayOfMonth = DateTime(date.year, date.month, 1);
+
+  // رقم اليوم في الأسبوع للأول من الشهر (1=الإثنين, 7=الأحد)
+  final firstWeekday = firstDayOfMonth.weekday;
+
+  // عدد الأيام التي مرت منذ بداية الشهر
+  final dayOfMonth = date.day;
+
+  // الأسبوع = الأيام المنقسمة على 7 + 1
+  return ((dayOfMonth + firstWeekday - 2) ~/ 7) + 1;
 }

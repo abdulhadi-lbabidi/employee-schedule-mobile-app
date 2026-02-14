@@ -1,179 +1,155 @@
 import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
+import 'package:untitled8/core/unified_api/base_api.dart';
+import 'package:untitled8/core/unified_api/handling_api_manager.dart';
+import 'package:untitled8/features/admin/data/models/employee%20model/get_employee_response.dart';
 import '../../../../core/unified_api/api_variables.dart';
 
+import '../../domain/entities/employee_entity.dart';
+import '../../domain/entities/workshop_entity.dart';
+import '../../domain/usecases/add_employee.dart';
 import '../models/employee model/employee_model.dart';
 import '../models/workshop_model.dart';
 import 'admin_remote_data_source.dart';
 
-@LazySingleton(as: AdminRemoteDataSource)
-class AdminRemoteDataSourceImpl implements AdminRemoteDataSource {
-  final Dio dio;
+@lazySingleton
+class AdminRemoteDataSourceImpl with HandlingApiManager {
+  final BaseApi _baseApi;
 
-  AdminRemoteDataSourceImpl(this.dio);
+  AdminRemoteDataSourceImpl({required BaseApi baseApi}) : _baseApi = baseApi;
 
-  @override
-  Future<List<Datum>> getOnlineEmployees() async {
-    final response = await dio.getUri(ApiVariables.employees());
-
-    final list = response.data['data'] as List;
-    return list
-        .map((e) => Datum.fromJson(e as Map<String, dynamic>))
-        .toList();
+  Future<GetAllEmployeeResponse> getOnlineEmployees() async {
+    return wrapHandlingApi(
+      tryCall: () => _baseApi.get(ApiVariables.employees()),
+      jsonConvert: getAllEmployeeResponseFromJson,
+    );
   }
 
+  Future<GetAllEmployeeResponse> getAllEmployees() async => wrapHandlingApi(
+    tryCall: () => _baseApi.get(ApiVariables.employees()),
+    jsonConvert: getAllEmployeeResponseFromJson,
+  );
 
-  @override
-  Future<List<Datum>> getAllEmployees() async {
-    final response = await dio.getUri(ApiVariables.employees());
+  Future<GetEmployeeResponse> getEmployeeDetails(String id) async =>
+      wrapHandlingApi(
+        tryCall: () => _baseApi.get(ApiVariables.employeeDetails(id)),
+        jsonConvert: getEmployeeResponseFromJson,
+      );
 
-    if (response.statusCode == 200) {
-      final list = response.data['data'] as List;
-      // طباعة القائمة للتحقق من محتواها وشكلها
-      print('✅ تم استقبال ${list.length} موظف');
-
-      return list
-          .map((e) {
-        print('قبل التحويل: $e');
-        try {
-          final datum = Datum.fromJson(e as Map<String, dynamic>);
-          print('✅ نجح: ${datum.user?.fullName}');
-          return datum;
-        } catch (error) {
-          print('❌ خطأ: $error');
-          rethrow;
-        }
-      })
-          .toList();
-    } else {
-      throw Exception('Failed to load employees: ${response.statusCode}');
-    }
-  }
-
-
-
-  @override
-  Future<Datum> getEmployeeDetails(String id) async {
-    final response = await dio.getUri(ApiVariables.employeeDetails(id));
-    return Datum.fromJson(response.data['data']);
-  }
-
-  @override
   Future<void> updateHourlyRate(String id, double rate) async {
-    final response = await dio.putUri(
-      ApiVariables.updateHourlyRate(id),
-      data: {'hourly_rate': rate},
+    return wrapHandlingApi(
+      tryCall:
+          () => _baseApi.put(
+            ApiVariables.updateHourlyRate(id),
+            data: {'hourly_rate': rate},
+          ),
+      jsonConvert: (_) {},
     );
-
-    if (response.statusCode! >= 400) {
-      throw Exception('Failed to update hourly rate: ${response.statusCode}');
-    }
   }
 
-  @override
   Future<void> updateOvertimeRate(String id, double rate) async {
-    final response = await dio.putUri(
-      ApiVariables.employeeUpdate(id),
-      data: {'overtime_rate': rate},
-    );
+    return wrapHandlingApi(
+      tryCall:
+          () => _baseApi.put(
+            ApiVariables.employeeUpdate(id),
+            data: {'overtime_rate': rate},
+          ),
 
-    if (response.statusCode! >= 400) {
-      throw Exception('Failed to update overtime rate: ${response.statusCode}');
-    }
+      jsonConvert: (_) {},
+    );
   }
 
-  @override
   Future<void> confirmPayment(String id, int weekNumber) async {
-    final response = await dio.postUri(
-      ApiVariables.employeeUpdate(id),
-      data: {'week_number': weekNumber},
-    );
+    return wrapHandlingApi(
+      tryCall:
+          () => _baseApi.post(
+            ApiVariables.employeeUpdate(id),
+            data: {'week_number': weekNumber},
+          ),
 
-    if (response.statusCode! >= 400) {
-      throw Exception('Failed to confirm payment: ${response.statusCode}');
-    }
-  }
-
-
-  @override
-  Future<void> addEmployee(Datum employee) async {
-    await dio.postUri(
-      ApiVariables.addEmployee(),
-      data: {
-        'name': employee.user?.fullName ?? '',
-        'phone_number': employee.user?.phoneNumber ?? '',
-        'password': '123456',
-        'hourly_rate': employee.hourlyRate ?? 0,
-        'overtime_rate': employee.overtimeRate ?? 0,
-      },
+      jsonConvert: (_) {},
     );
   }
 
+  Future<void> addEmployee(AddEmployeeParams employee) async {
+    return wrapHandlingApi(
+      tryCall:
+          () => _baseApi.post(
+            ApiVariables.addEmployee(),
+            data: employee.getBody(),
+          ),
 
+      jsonConvert: (_) {},
+    );
+  }
 
-  @override
   Future<void> deleteEmployee(String id) async {
-    final response = await dio.deleteUri(ApiVariables.employeeDetails(id));
+    return wrapHandlingApi(
+      tryCall: () => _baseApi.delete(ApiVariables.employeeDetails(id)),
 
-    if (response.statusCode! >= 400) {
-      throw Exception('Failed to delete employee: ${response.statusCode}');
-    }
+      jsonConvert: (_) {},
+    );
   }
 
-  @override
   Future<void> toggleEmployeeArchive(String id, bool isArchived) async {
-    final response = await dio.putUri(
-      ApiVariables.archiveEmployee(id),
-      data: {'is_archived': isArchived},
-    );
 
-    if (response.statusCode! >= 400) {
-      throw Exception('Failed to toggle employee archive: ${response.statusCode}');
-    }
-  }
+    return wrapHandlingApi(
+      tryCall: () => _baseApi.put(
+        ApiVariables.archiveEmployee(id),
+        data: {'is_archived': isArchived},
+      ),
 
-  @override
-  Future<void> updateEmployee(Datum employee) async {
-    await dio.putUri(
-      ApiVariables.employeeDetails(employee.id.toString()),
-      data: {
-        'hourly_rate': employee.hourlyRate ?? 0,
-        'overtime_rate': employee.overtimeRate ?? 0,
-      },
+      jsonConvert: (_) {},
     );
   }
 
+  Future<void> updateEmployee(EmployeeModel employee) async {
 
+    return wrapHandlingApi(
+      tryCall: () =>  _baseApi.put(
+        ApiVariables.employeeDetails(employee.id.toString()),
+        data: {
+          'hourly_rate': employee.hourlyRate ?? 0,
+          'overtime_rate': employee.overtimeRate ?? 0,
+        },
+      ),
 
-    @override
-  Future<List<WorkshopModel>> getWorkshops() async {
-    final response = await dio.getUri(ApiVariables.workshops());
+      jsonConvert: (_) {},
+    );
+
+  }
+
+  Future<List<WorkshopEntity>> getWorkshops() async {
+    final response = await _baseApi.get(ApiVariables.workshops());
 
     if (response.statusCode == 200) {
       // ✅ تحقق من شكل البيانات
       if (response.data is List) {
         // لو البيانات list مباشرة
         final list = response.data as List;
-        return list.map((e) => WorkshopModel.fromJson(e as Map<String, dynamic>)).toList();
+        return list
+            .map((e) => WorkshopEntity.fromJson(e as Map<String, dynamic>))
+            .toList();
       } else if (response.data is Map) {
         // لو البيانات wrapped في {data: [...]}
         final data = response.data as Map<String, dynamic>;
         final list = data['data'] as List? ?? [];
-        return list.map((e) => WorkshopModel.fromJson(e as Map<String, dynamic>)).toList();
+        return list
+            .map((e) => WorkshopEntity.fromJson(e as Map<String, dynamic>))
+            .toList();
       }
     }
 
     throw Exception('Failed to load workshops: ${response.statusCode}');
   }
 
-  @override
   Future<void> addWorkshop({
     required String name,
     double? latitude,
     double? longitude,
     double radius = 200,
   }) async {
-    final response = await dio.postUri(
+    final response = await _baseApi.post(
       ApiVariables.addWorkshop(),
       data: {
         'name': name,
@@ -188,24 +164,24 @@ class AdminRemoteDataSourceImpl implements AdminRemoteDataSource {
     }
   }
 
-  @override
   Future<void> deleteWorkshop(int id) async {
-    final response = await dio.deleteUri(ApiVariables.workshopDetails(id));
+    final response = await _baseApi.delete(ApiVariables.workshopDetails(id));
 
     if (response.statusCode! >= 400) {
       throw Exception('Failed to delete workshop: ${response.statusCode}');
     }
   }
 
-  @override
   Future<void> toggleWorkshopArchive(String id, bool isArchived) async {
-    final response = await dio.putUri(
+    final response = await _baseApi.put(
       ApiVariables.archiveWorkshop(id),
       data: {'is_archived': isArchived},
     );
 
     if (response.statusCode! >= 400) {
-      throw Exception('Failed to toggle workshop archive: ${response.statusCode}');
+      throw Exception(
+        'Failed to toggle workshop archive: ${response.statusCode}',
+      );
     }
   }
 }

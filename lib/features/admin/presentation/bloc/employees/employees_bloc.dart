@@ -1,4 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:injectable/injectable.dart';
+import 'package:untitled8/features/admin/data/models/employee%20model/employee_model.dart';
 import '../../../domain/entities/employee_entity.dart';
 import '../../../domain/usecases/add_employee.dart';
 import '../../../domain/usecases/get_all_employees.dart';
@@ -6,18 +8,18 @@ import '../../../domain/usecases/toggle_employee_archive.dart';
 import 'employees_event.dart';
 import 'employees_state.dart';
 
+@injectable
 class EmployeesBloc extends Bloc<EmployeesEvent, EmployeesState> {
   final GetAllEmployeesUseCase getAllEmployeesUseCase;
   final AddEmployeeUseCase addEmployeeUseCase;
   final ToggleEmployeeArchiveUseCase toggleEmployeeArchiveUseCase;
   
-  List<EmployeeEntity> _allEmployees = [];
-
-  EmployeesBloc({
-    required this.getAllEmployeesUseCase,
-    required this.addEmployeeUseCase,
-    required this.toggleEmployeeArchiveUseCase,
-  }) : super(EmployeesInitial()) {
+ List<EmployeeModel>  _allEmployees=[];
+  EmployeesBloc(
+     this.getAllEmployeesUseCase,
+     this.addEmployeeUseCase,
+     this.toggleEmployeeArchiveUseCase,
+  ) : super(EmployeesInitial()) {
     on<LoadEmployeesEvent>(_onLoadEmployees);
     on<RefreshEmployeesEvent>(_onLoadEmployees);
     on<SearchEmployeesEvent>(_onSearchEmployees);
@@ -28,29 +30,28 @@ class EmployeesBloc extends Bloc<EmployeesEvent, EmployeesState> {
   Future<void> _onLoadEmployees(
     EmployeesEvent event,
     Emitter<EmployeesState> emit,
-  ) async {
+  )
+  async {
     emit(EmployeesLoading());
+    final val = await getAllEmployeesUseCase();
 
-    try {
-      final employees = await getAllEmployeesUseCase();
-      _allEmployees = employees;
-      print('Loaded employees: $_allEmployees');
+    val.fold((l){
+      emit(EmployeesError(l.message));
 
 
-      if (employees.isEmpty) {
-        emit(EmployeesEmpty());
-      } else {
-        emit(EmployeesLoaded(employees));
-      }
-    } catch (e) {
-      emit(EmployeesError('حدث خطأ أثناء تحميل الموظفين'));
-    }
+    }, (r){
+
+      emit(EmployeesLoaded(r.data!));
+
+    });
+
   }
 
   Future<void> _onAddEmployee(
     AddEmployeeEvent event,
     Emitter<EmployeesState> emit,
-  ) async {
+  )
+  async {
     try {
       await addEmployeeUseCase(event.employee);
       add(LoadEmployeesEvent());
@@ -62,7 +63,8 @@ class EmployeesBloc extends Bloc<EmployeesEvent, EmployeesState> {
   Future<void> _onToggleArchiveEmployee(
     ToggleArchiveEmployeeEvent event,
     Emitter<EmployeesState> emit,
-  ) async {
+  )
+  async {
     try {
       await toggleEmployeeArchiveUseCase(event.id, event.isArchived);
       add(LoadEmployeesEvent());
@@ -82,8 +84,8 @@ class EmployeesBloc extends Bloc<EmployeesEvent, EmployeesState> {
 
     final filteredEmployees = _allEmployees
         .where((employee) =>
-            employee.name.toLowerCase().contains(event.query.toLowerCase()) ||
-            employee.phoneNumber.contains(event.query))
+            employee.user!.fullName!.toLowerCase().contains(event.query.toLowerCase()) ||
+            employee.user!.phoneNumber!.contains(event.query))
         .toList();
 
     if (filteredEmployees.isEmpty) {

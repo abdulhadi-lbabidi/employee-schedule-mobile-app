@@ -1,3 +1,4 @@
+import '../../../data/models/employee model/employee_model.dart';
 import '../../../domain/entities/employee_entity.dart';
 
 abstract class EmployeeDetailsState {}
@@ -7,17 +8,17 @@ class EmployeeDetailsInitial extends EmployeeDetailsState {}
 class EmployeeDetailsLoading extends EmployeeDetailsState {}
 
 class EmployeeDetailsLoaded extends EmployeeDetailsState {
-  final EmployeeEntity employee;
+  final EmployeeModel employee;
   EmployeeDetailsLoaded(this.employee);
 }
 
 class HourlyRateUpdating extends EmployeeDetailsState {
-  final EmployeeEntity employee;
+  final EmployeeModel employee;
   HourlyRateUpdating(this.employee);
 }
 
 class HourlyRateUpdated extends EmployeeDetailsState {
-  final EmployeeEntity employee;
+  final EmployeeModel employee;
   HourlyRateUpdated(this.employee);
 }
 

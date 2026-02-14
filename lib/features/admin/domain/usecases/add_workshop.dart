@@ -1,4 +1,5 @@
 import 'package:injectable/injectable.dart';
+import 'package:untitled8/common/helper/src/typedef.dart';
 
 import '../repositories/admin_repository.dart';
 @lazySingleton
@@ -7,7 +8,7 @@ class AddWorkshopUseCase {
 
   AddWorkshopUseCase(this.repository);
 
-  Future<void> call({
+  DataResponse<void> call({
     required String name,
     double? latitude,
     double? longitude,

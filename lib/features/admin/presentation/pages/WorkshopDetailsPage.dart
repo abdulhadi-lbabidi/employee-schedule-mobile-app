@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:latlong2/latlong.dart' as latlong;
 import 'package:intl/intl.dart';
+import 'package:untitled8/features/admin/data/models/employee%20model/employee_model.dart';
 import '../../../../core/services/pdf_report_service.dart';
 import '../../../Attendance/presentation/bloc/Cubit_Attendance/attendance_cubit.dart';
 import '../bloc/employees/employees_bloc.dart';
@@ -12,8 +13,7 @@ import '../bloc/employees/employees_state.dart';
 import '../bloc/workshops/workshops_bloc.dart';
 import '../bloc/workshops/workshops_event.dart';
 import '../../domain/entities/workshop_entity.dart';
-import '../../domain/entities/employee_entity.dart';
-import '../widgets/map_picker_widget.dart'; 
+import '../widgets/map_picker_widget.dart';
 import 'EmployeeDetailsPage.dart';
 
 class WorkshopDetailsPage extends StatelessWidget {
@@ -35,53 +35,54 @@ class WorkshopDetailsPage extends StatelessWidget {
             SliverToBoxAdapter(
               child: BlocBuilder<EmployeesBloc, EmployeesState>(
                 builder: (context, state) {
-                  if (state is EmployeesLoading)
+                  if (state is EmployeesLoading) {
                     return const Center(
                       child: Padding(
                         padding: EdgeInsets.all(80),
                         child: CircularProgressIndicator(),
                       ),
                     );
+                  }
                   if (state is EmployeesLoaded) {
                     final workshopEmployees = state.employees
-                        .where((emp) => emp.workshopName == workshop.name)
+                        .where((emp) => emp.workshops!.any((ws) => ws.name== workshop.name) )
                         .toList();
                     final onlineCount = workshopEmployees
-                        .where((e) => e.isOnline)
+                        .where((e) => e.isOnline!)
                         .length;
 
                     double totalBasicHours = 0;
                     double totalOTHours = 0;
                     double totalFinancialCost = 0;
-
-                    for (var emp in workshopEmployees) {
-                      for (var week in emp.weeklyHistory) {
-                        for (var ws in week.workshops) {
-                          if (ws.workshopName == workshop.name) {
-                            totalBasicHours += ws.regularHours;
-                            totalOTHours += ws.overtimeHours;
-                            totalFinancialCost += ws.calculateValue(
-                              emp.hourlyRate,
-                              emp.overtimeRate,
-                            );
-                          }
-                        }
-                      }
-                    }
+                    //
+                    // for (var emp in workshopEmployees) {
+                    //     for (var week in emp.weeklyHistory!) {
+                    //     for (var ws in week.workshops) {
+                    //       if (ws.workshopName == workshop.name) {
+                    //         totalBasicHours += ws.regularHours;
+                    //         totalOTHours += ws.overtimeHours;
+                    //         totalFinancialCost += ws.calculateValue(
+                    //           emp.hourlyRate,
+                    //           emp.overtimeRate,
+                    //         );
+                    //       }
+                    //     }
+                    //   }
+                    // }
 
                     return Padding(
                       padding: EdgeInsets.all(20.w),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          _buildFinancialAndWorkStats(
-                            context,
-                            totalBasicHours,
-                            totalOTHours,
-                            totalFinancialCost,
-                            onlineCount,
-                            theme,
-                          ),
+                          // _buildFinancialAndWorkStats(
+                          //   context,
+                          //   totalBasicHours,
+                          //   totalOTHours,
+                          //   totalFinancialCost,
+                          //   onlineCount,
+                          //   theme,
+                          // ),
                           SizedBox(height: 30.h),
 
                           Row(
@@ -108,35 +109,35 @@ class WorkshopDetailsPage extends StatelessWidget {
                           SizedBox(height: 15.h),
 
                           if (workshopEmployees.isEmpty)
-                            _buildEmptyState(theme)
-                          else
-                            ListView.builder(
-                              padding: EdgeInsets.zero,
-                              shrinkWrap: true,
-                              physics: const NeverScrollableScrollPhysics(),
-                              itemCount: workshopEmployees.length,
-                              itemBuilder: (context, index) {
-                                final emp = workshopEmployees[index];
-                                double regHours = 0;
-                                double otHours = 0;
-                                for (var w in emp.weeklyHistory) {
-                                  for (var ws in w.workshops) {
-                                    if (ws.workshopName == workshop.name) {
-                                      regHours += ws.regularHours;
-                                      otHours += ws.overtimeHours;
-                                    }
-                                  }
-                                }
-                                return _buildEmployeeCard(
-                                  context,
-                                  emp,
-                                  regHours,
-                                  otHours,
-                                  index,
-                                  theme,
-                                );
-                              },
-                            ),
+                            _buildEmptyState(theme),
+                          // else
+                          //   ListView.builder(
+                          //     padding: EdgeInsets.zero,
+                          //     shrinkWrap: true,
+                          //     physics: const NeverScrollableScrollPhysics(),
+                          //     itemCount: workshopEmployees.length,
+                          //     itemBuilder: (context, index) {
+                          //       final emp = workshopEmployees[index];
+                          //       double regHours = 0;
+                          //       double otHours = 0;
+                          //       for (var w in emp.weeklyHistory!) {
+                          //         for (var ws in w.workshops) {
+                          //           if (ws.workshopName == workshop.name) {
+                          //             regHours += ws.regularHours;
+                          //             otHours += ws.overtimeHours;
+                          //           }
+                          //         }
+                          //       }
+                          //       return _buildEmployeeCard(
+                          //         context,
+                          //         emp,
+                          //         regHours,
+                          //         otHours,
+                          //         index,
+                          //         theme,
+                          //       );
+                          //     },
+                          //   ),
                           SizedBox(height: 30.h),
                           _buildDeleteButton(context, theme),
                         ],
@@ -321,7 +322,7 @@ class WorkshopDetailsPage extends StatelessWidget {
 
   Widget _buildEmployeeCard(
     BuildContext context,
-    EmployeeEntity emp,
+    EmployeeModel emp,
     double regHours,
     double otHours,
     int index,
@@ -342,20 +343,20 @@ class WorkshopDetailsPage extends StatelessWidget {
         onTap: () => Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (_) => EmployeeDetailsPage(employeeId: emp.id),
+            builder: (_) => EmployeeDetailsPage(employeeId: emp.id.toString()),
           ),
         ),
         leading: CircleAvatar(
-          backgroundColor: emp.isOnline
+          backgroundColor: emp.isOnline!
               ? Colors.green.withOpacity(0.1)
               : theme.disabledColor.withOpacity(0.1),
           child: Icon(
             Icons.person_rounded,
-            color: emp.isOnline ? Colors.green : theme.disabledColor,
+            color: emp.isOnline! ? Colors.green : theme.disabledColor,
           ),
         ),
         title: Text(
-          emp.name,
+          emp.user?.fullName??'',
           style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14.sp, color: theme.textTheme.bodyLarge?.color),
         ),
         subtitle: Text(

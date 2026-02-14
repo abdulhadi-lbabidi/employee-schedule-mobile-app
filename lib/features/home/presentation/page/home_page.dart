@@ -1,32 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:intl/intl.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:untitled8/common/helper/src/app_varibles.dart';
-import 'package:untitled8/core/utils/date_helper.dart';
 import 'package:untitled8/features/Attendance/presentation/bloc/attendance_bloc.dart';
 import 'package:untitled8/features/home/presentation/page/widgets/CardAttendanceStatus.dart';
 import 'package:untitled8/features/home/presentation/page/widgets/Card_Tod_record.dart';
 import 'package:untitled8/features/home/presentation/page/widgets/Dropdown_example.dart';
 import 'package:untitled8/features/home/presentation/page/widgets/button_on.dart';
-import '../../../../core/di/injection.dart';
-import '../../../Attendance/data/models/attendance_model.dart';
-import '../../../Attendance/presentation/bloc/Cubit_Attendance/attendance_cubit.dart';
-import '../../../Attendance/presentation/bloc/Cubit_Attendance/attendance_state.dart'
-    hide AttendanceState;
 import '../../../admin/presentation/bloc/workshops/workshops_bloc.dart';
 import '../../../admin/presentation/bloc/workshops/workshops_event.dart';
-import '../../../admin/presentation/bloc/workshops/workshops_state.dart';
-import '../../../profile/presentation/bloc/Profile/_profile_bloc.dart';
-import '../../../profile/presentation/bloc/Profile/_profile_event.dart';
-import '../../../profile/presentation/bloc/Profile/_profile_state.dart';
 import '../bloc/Cubit_Button/button_cubit.dart';
 import '../bloc/Cubit_Button/button_state.dart';
 import '../bloc/Cubit_dropdown/dropdown_cubit.dart';
 import '../bloc/Cubit_dropdown/dropdown_state.dart';
-import '../bloc/cubit_active_unactive/active_unactive_cubit.dart';
-import '../bloc/cubit_active_unactive/active_unactive_state.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});

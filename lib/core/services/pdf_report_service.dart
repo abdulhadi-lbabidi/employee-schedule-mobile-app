@@ -2,15 +2,17 @@ import 'package:flutter/foundation.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
+import '../../features/admin/data/models/employee model/employee_model.dart';
 import '../../features/admin/domain/entities/employee_entity.dart';
 import '../../features/Attendance/data/models/attendance_record.dart';
 
 class PdfReportService {
   // 🔹 قالب 1: كشف المستحقات المالية
   static Future<void> generateFinanceReport({
-    required List<EmployeeEntity> employees,
+    required List<EmployeeModel> employees,
     required double totalDue,
-  }) async {
+  })
+  async {
     try {
       final pdf = pw.Document();
       final fontRegular = await PdfGoogleFonts.cairoRegular();
@@ -24,7 +26,7 @@ class PdfReportService {
           pw.SizedBox(height: 20),
           _buildSummary(totalDue, fontBold),
           pw.SizedBox(height: 20),
-          _buildFinanceTable(employees, fontBold),
+          // _buildFinanceTable(employees, fontBold),
           pw.SizedBox(height: 40),
           _buildFooter(),
         ],
@@ -38,8 +40,9 @@ class PdfReportService {
   static Future<void> generateAttendanceReport({
     required String workshopName,
     required List<AttendanceRecord> records,
-    required List<EmployeeEntity> allEmployees,
-  }) async {
+    required List<EmployeeModel> allEmployees,
+  })
+  async {
     try {
       final pdf = pw.Document();
       final fontRegular = await PdfGoogleFonts.cairoRegular();
@@ -81,23 +84,23 @@ class PdfReportService {
     );
   }
 
-  static pw.Widget _buildFinanceTable(List<EmployeeEntity> employees, pw.Font boldFont) {
-    final list = employees.where((e) => e.weeklyHistory.any((w) => !w.isPaid)).toList();
-    return pw.TableHelper.fromTextArray(
-      headers: ['الموظف', 'الساعات', 'المبلغ', 'الورشة'],
-      headerStyle: pw.TextStyle(font: boldFont, fontWeight: pw.FontWeight.bold, color: PdfColors.white),
-      headerDecoration: const pw.BoxDecoration(color: PdfColors.blueGrey900),
-      cellAlignment: pw.Alignment.center,
-      data: list.map((e) {
-        double due = 0; double hrs = 0;
-        for (var w in e.weeklyHistory) { if (!w.isPaid) { for (var ws in w.workshops) { due += ws.calculateValue(e.hourlyRate, e.overtimeRate); hrs += (ws.regularHours + ws.overtimeHours); } } }
-        return [e.name, hrs.toStringAsFixed(1), "${due.toStringAsFixed(0)} ل.س", e.workshopName];
-      }).toList(),
-    );
-  }
+  // static pw.Widget _buildFinanceTable(List<EmployeeModel> employees, pw.Font boldFont) {
+  //   final list = employees.where((e) => e.weeklyHistory.any((w) => !w.isPaid)).toList();
+  //   return pw.TableHelper.fromTextArray(
+  //     headers: ['الموظف', 'الساعات', 'المبلغ', 'الورشة'],
+  //     headerStyle: pw.TextStyle(font: boldFont, fontWeight: pw.FontWeight.bold, color: PdfColors.white),
+  //     headerDecoration: const pw.BoxDecoration(color: PdfColors.blueGrey900),
+  //     cellAlignment: pw.Alignment.center,
+  //     data: list.map((e) {
+  //       double due = 0; double hrs = 0;
+  //       for (var w in e.weeklyHistory) { if (!w.isPaid) { for (var ws in w.workshops) { due += ws.calculateValue(e.hourlyRate, e.overtimeRate); hrs += (ws.regularHours + ws.overtimeHours); } } }
+  //       return [e.name, hrs.toStringAsFixed(1), "${due.toStringAsFixed(0)} ل.س", e.workshopName];
+  //     }).toList(),
+  //   );
+  // }
 
   // 🔹 جدول حضور خاص بالورشات
-  static pw.Widget _buildAttendanceTable(List<AttendanceRecord> records, List<EmployeeEntity> employees, pw.Font boldFont) {
+  static pw.Widget _buildAttendanceTable(List<AttendanceRecord> records, List<EmployeeModel> employees, pw.Font boldFont) {
     return pw.TableHelper.fromTextArray(
       headers: ['العامل', 'التاريخ', 'دخول', 'خروج', 'الساعات'],
       headerStyle: pw.TextStyle(font: boldFont, fontWeight: pw.FontWeight.bold, color: PdfColors.white),

@@ -1,8 +1,19 @@
+import 'package:dartz/dartz.dart';
 import 'package:flutter/foundation.dart';
 import 'package:injectable/injectable.dart';
+import 'package:untitled8/common/helper/src/typedef.dart';
+import 'package:untitled8/core/unified_api/error_handler.dart';
+import 'package:untitled8/features/admin/data/datasources/admin_remote_data_source_impl.dart';
+import 'package:untitled8/features/admin/data/models/employee%20model/get_employee_response.dart';
+import 'package:untitled8/features/admin/data/models/employee%20model/get_employee_response.dart';
+import 'package:untitled8/features/admin/data/models/employee%20model/get_employee_response.dart';
+import 'package:untitled8/features/admin/data/models/employee%20model/get_employee_response.dart';
+import 'package:untitled8/features/admin/data/models/employee%20model/get_employee_response.dart';
+import 'package:untitled8/features/admin/data/models/employee%20model/get_employee_response.dart';
 import '../../domain/entities/employee_entity.dart';
 import '../../domain/entities/workshop_entity.dart';
 import '../../domain/repositories/admin_repository.dart';
+import '../../domain/usecases/add_employee.dart';
 import '../datasources/admin_remote_data_source.dart';
 import '../mappers/employee_mapper.dart';
 import '../mappers/employee_to_datum_mapper.dart';
@@ -10,145 +21,78 @@ import '../mappers/workshop_mapper.dart';
 import '../models/employee model/employee_model.dart';
 
 @LazySingleton(as: AdminRepository)
-class AdminRepositoryImpl implements AdminRepository {
-  final AdminRemoteDataSource remote;
+class AdminRepositoryImpl with HandlingException implements AdminRepository {
+  final AdminRemoteDataSourceImpl remote;
 
   AdminRepositoryImpl(this.remote);
 
-  /// تحويل Datum إلى EmployeeEntity باستخدام الـ EmployeeMapper
-  EmployeeEntity _datumToEntity(Datum datum) {
-    return DatumToEmployeeEntity(datum).toEntity();
-  }
+  @override
+  DataResponse<void> addEmployee(AddEmployeeParams employee) async =>
+      wrapHandlingException(tryCall: () => remote.addEmployee(employee));
 
   @override
-  Future<List<EmployeeEntity>> getOnlineEmployees() async {
-    final data = await remote.getOnlineEmployees();
-    return data.map((d) => _datumToEntity(d)).toList();
-  }
-
-
-  @override
-  Future<List<EmployeeEntity>> getAllEmployees() async {
-    print('🔹 getAllEmployees() called in Repository'); // تأكيد الوصول للدالة
-
-    final data = await remote.getAllEmployees();
-
-    print('🔹 RAW data count: ${data.length}'); // عدد العناصر الواردة
-    for (var i = 0; i < data.length; i++) {
-      print('🔹 Datum [$i]: ${data[i]}'); // محتوى كل عنصر Datum
-    }
-
-    final entities = <EmployeeEntity>[];
-    for (var i = 0; i < data.length; i++) {
-      try {
-        final e = data[i].toEntity(); // تحويل إلى Entity
-        entities.add(e);
-        print('✅ Converted Entity [$i]: ${e.name}'); // تأكيد التحويل
-      } catch (e, s) {
-        print('❌ Error converting Datum [$i]: $e');
-        print(s);
-      }
-    }
-
-    print('🔹 Total Entities returned: ${entities.length}');
-    return entities;
-  }
-
-
-  @override
-  Future<EmployeeEntity> getEmployeeDetails(String id) async {
-    final datum = await remote.getEmployeeDetails(id);
-    return _datumToEntity(datum);
-  }
-
-  @override
-  Future<void> updateHourlyRate({
-    required String employeeId,
-    required double newRate,
-  }) {
-    return remote.updateHourlyRate(employeeId, newRate);
-  }
-
-  @override
-  Future<void> updateOvertimeRate({
-    required String employeeId,
-    required double newRate,
-  }) {
-    return remote.updateOvertimeRate(employeeId, newRate);
-  }
-
-  @override
-  Future<void> confirmPayment({
-    required String employeeId,
-    required int weekNumber,
-  }) {
-    return remote.confirmPayment(employeeId, weekNumber);
-  }
-
-  @override
-  Future<void> addEmployee(EmployeeEntity employee) async {
-    try {
-      // ✅ التصحيح: استدعاء toDatumModel() كـ Extension
-      final datum = employee.toDatumModel();
-      return await remote.addEmployee(datum);
-    } catch (e) {
-      debugPrint('Error in addEmployee: $e');
-      rethrow;
-    }
-  }
-
-  @override
-  Future<void> deleteEmployee(String id) {
-    return remote.deleteEmployee(id);
-  }
-
-  @override
-  Future<void> toggleEmployeeArchive(String id, bool isArchived) {
-    return remote.toggleEmployeeArchive(id, isArchived);
-  }
-
-  @override
-  Future<void> updateEmployee(EmployeeEntity employee) async {
-    try {
-      // ✅ التصحيح: استدعاء toDatumModel() كـ Extension
-      final datum = employee.toDatumModel();
-      return await remote.updateEmployee(datum);
-    } catch (e) {
-      debugPrint('Error in updateEmployee: $e');
-      rethrow;
-    }
-  }
-
-
-
-  @override
-  Future<List<WorkshopEntity>> getWorkshops() async {
-    final models = await remote.getWorkshops();
-    return models.map(WorkshopMapper.toEntity).toList();
-  }
-
-  @override
-  Future<void> addWorkshop({
+  DataResponse<void> addWorkshop({
     required String name,
     double? latitude,
     double? longitude,
     double radius = 200,
-  }) {
-    return remote.addWorkshop(
-      name: name,
-      latitude: latitude,
-      longitude: longitude,
-      radius: radius,
-    );
-  }
+  }) async=> wrapHandlingException(tryCall: () => remote.addWorkshop(name: name));
 
   @override
-  Future<void> deleteWorkshop(int id) {
-    return remote.deleteWorkshop(id);
-  }
+  DataResponse<void> confirmPayment({
+    required String employeeId,
+    required int weekNumber,
+  }) async=> wrapHandlingException(
+    tryCall: () => remote.confirmPayment(employeeId, weekNumber),
+  );
 
   @override
-  Future<void> toggleWorkshopArchive(String id, bool isArchived) {
-    return remote.toggleWorkshopArchive(id, isArchived);
-  }
+  DataResponse<void> deleteEmployee(String id)async => wrapHandlingException(
+    tryCall: () => remote.deleteEmployee(id),
+  );
+  @override
+  DataResponse<void> deleteWorkshop(int id) async=>
+      wrapHandlingException(tryCall: () => remote.deleteWorkshop(id));
+
+  @override
+  DataResponse<GetAllEmployeeResponse> getAllEmployees()async =>
+      wrapHandlingException(tryCall: () => remote.getAllEmployees());
+
+  @override
+  DataResponse<GetEmployeeResponse> getEmployeeDetails(String id) async=>
+      wrapHandlingException(tryCall: () => remote.getEmployeeDetails(id));
+
+  @override
+  DataResponse<GetAllEmployeeResponse> getOnlineEmployees() async=>
+      wrapHandlingException(tryCall: () => remote.getOnlineEmployees());
+
+  @override
+  DataResponse<List<WorkshopEntity>> getWorkshops()async =>
+      wrapHandlingException(tryCall: () => remote.getWorkshops());
+
+
+  @override
+  DataResponse<void> toggleEmployeeArchive(String id, bool isArchived) async =>
+      wrapHandlingException(tryCall: () => remote.toggleEmployeeArchive(id, isArchived));
+
+
+  @override
+  DataResponse<void> toggleWorkshopArchive(String id, bool isArchived)async =>
+      wrapHandlingException(tryCall: () => remote.toggleWorkshopArchive(id, isArchived));
+
+  @override
+  DataResponse<void> updateHourlyRate({
+    required String employeeId,
+    required double newRate,
+  }) async=>
+      wrapHandlingException(tryCall: () => remote.updateHourlyRate(employeeId, newRate));
+
+
+  @override
+  DataResponse<void> updateOvertimeRate({
+    required String employeeId,
+    required double newRate,
+  })  async=>
+      wrapHandlingException(tryCall: () => remote.updateOvertimeRate(employeeId, newRate));
+
 }

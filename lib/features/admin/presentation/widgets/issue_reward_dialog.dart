@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:untitled8/features/admin/data/models/employee%20model/employee_model.dart';
 import 'package:untitled8/features/admin/domain/entities/employee_entity.dart';
 import 'package:untitled8/features/reward/presentation/bloc/reward_admin/reward_admin_bloc.dart';
 import 'package:untitled8/features/reward/presentation/bloc/reward_admin/reward_admin_event.dart';
@@ -23,8 +24,8 @@ class _IssueRewardDialogState extends State<IssueRewardDialog> {
   final _formKey = GlobalKey<FormState>();
   final _amountController = TextEditingController();
   final _reasonController = TextEditingController();
-  EmployeeEntity? _selectedEmployee;
-  List<EmployeeEntity> _employees = [];
+  EmployeeModel? _selectedEmployee;
+  List<EmployeeModel> _employees = [];
   bool _isLoadingEmployees = true;
 
   @override
@@ -34,10 +35,10 @@ class _IssueRewardDialogState extends State<IssueRewardDialog> {
   }
 
   Future<void> _loadEmployees() async {
-    final employees = await context.read<RewardAdminBloc>().fetchAllEmployees();
+   // final employees = await context.read<RewardAdminBloc>().fetchAllEmployees();
     if (mounted) {
       setState(() {
-        _employees = employees;
+        // _employees = employees;
         _isLoadingEmployees = false;
       });
     }
@@ -65,13 +66,13 @@ class _IssueRewardDialogState extends State<IssueRewardDialog> {
               else if (_employees.isEmpty)
                 const Text("لا يوجد موظفين متاحين")
               else
-                DropdownButtonFormField<EmployeeEntity>(
+                DropdownButtonFormField<EmployeeModel>(
                   value: _selectedEmployee,
                   hint: const Text("اختر الموظف"),
                   items: _employees.map((employee) {
                     return DropdownMenuItem(
                       value: employee,
-                      child: Text(employee.name),
+                      child: Text(employee.user?.fullName?? 'لا يوجد اسم'),
                     );
                   }).toList(),
                   onChanged: (value) {
@@ -121,8 +122,8 @@ class _IssueRewardDialogState extends State<IssueRewardDialog> {
           onPressed: () {
             if (_formKey.currentState!.validate() && _selectedEmployee != null) {
               context.read<RewardAdminBloc>().add(IssueNewReward(
-                employeeId: _selectedEmployee!.id,
-                employeeName: _selectedEmployee!.name,
+                employeeId: _selectedEmployee!.id.toString(),
+                employeeName: _selectedEmployee!.user!.fullName!,
                 adminId: widget.adminId,
                 adminName: widget.adminName,
                 amount: double.parse(_amountController.text),

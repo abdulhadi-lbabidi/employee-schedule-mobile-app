@@ -2,13 +2,17 @@ part of 'attendance_bloc.dart';
 
 
 class AttendanceState {
-  final DataStateModel<GetAttendanceResponse?> getAllAttendanceData;
-  final DataStateModel<GetAttendanceResponse?> syncAttendanceData;
-  final List<AttendanceModel> localeAttendanceList;
+  final DataStateModel<List<GetAttendanceResponse>?> getAllAttendanceData;
+  final DataStateModel<SyncAttendanceResponse?> syncAttendanceData;
+  final List<GetAttendanceResponse> localeAttendanceList;
   final List<AttendanceModel> localeTodayAttendanceList;
+  final double? totalHours;
+  final double? totalSalery;
 
 
   const AttendanceState({
+    this.totalHours=0,
+    this.totalSalery=0,
     this.getAllAttendanceData = const DataStateModel.setDefultValue(
       defultValue: null,
     ),
@@ -22,14 +26,17 @@ class AttendanceState {
   });
 
   AttendanceState copyWith({
-     DataStateModel<GetAttendanceResponse?>? getAllAttendanceData,
-     DataStateModel<GetAttendanceResponse?>? syncAttendanceData,
-     List<AttendanceModel>? localeAttendanceList,
+     DataStateModel<List<GetAttendanceResponse>?>? getAllAttendanceData,
+     DataStateModel<SyncAttendanceResponse?>? syncAttendanceData,
+    List<GetAttendanceResponse>? localeAttendanceList,
      List<AttendanceModel>? localeTodayAttendanceList,
-
+     double? totalHours,
+     double? totalSalery,
 
   }) {
     return AttendanceState(
+      totalHours:totalHours??this.totalHours,
+      totalSalery:totalSalery??this.totalSalery,
       getAllAttendanceData: getAllAttendanceData ?? this.getAllAttendanceData,
       syncAttendanceData: syncAttendanceData ?? this.syncAttendanceData,
       localeAttendanceList: localeAttendanceList ?? this.localeAttendanceList,

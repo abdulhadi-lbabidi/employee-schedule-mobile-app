@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:untitled8/features/admin/data/models/employee%20model/employee_model.dart';
 import 'package:untitled8/features/admin/domain/entities/employee_entity.dart';
 import 'package:untitled8/features/admin/domain/usecases/get_all_employees.dart';
 import 'package:untitled8/features/reward/domain/usecases/get_admin_rewards.dart';
@@ -25,7 +26,8 @@ class RewardAdminBloc extends Bloc<RewardAdminEvent, RewardAdminState> {
   Future<void> _onLoadAdminRewards(
     LoadAdminRewards event,
     Emitter<RewardAdminState> emit,
-  ) async {
+  )
+  async {
     emit(RewardAdminLoading());
     try {
       final rewards = await getAdminRewardsUseCase();
@@ -38,7 +40,8 @@ class RewardAdminBloc extends Bloc<RewardAdminEvent, RewardAdminState> {
   Future<void> _onIssueNewReward(
     IssueNewReward event,
     Emitter<RewardAdminState> emit,
-  ) async {
+  )
+  async {
     // Optionally, emit a loading state or keep the current loaded state while processing
     // If you want a loading indicator for the specific action:
     // emit(RewardAdminLoading()); // This would clear the loaded rewards
@@ -60,13 +63,18 @@ class RewardAdminBloc extends Bloc<RewardAdminEvent, RewardAdminState> {
     }
   }
 
-  // Helper to fetch all employees (might be used by the UI for dropdowns)
-  Future<List<EmployeeEntity>> fetchAllEmployees() async {
-    try {
-      return await getAllEmployeesUseCase();
-    } catch (e) {
-      print('Error fetching all employees: $e'); // Log the error
-      return [];
-    }
-  }
+  // Future<void> fetchAllEmployees(
+  //     IssueNewReward event,
+  //     Emitter<RewardAdminState> emit,
+  //     ) async {
+  //   try {
+  //    final result= await getAllEmployeesUseCase();
+  //
+  //     result.fold((l){}, (r){});
+  //     return ;
+  //   } catch (e) {
+  //     print('Error fetching all employees: $e'); // Log the error
+  //     return [];
+  //   }
+  // }
 }

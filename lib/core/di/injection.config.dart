@@ -19,15 +19,12 @@ import 'package:shared_preferences/shared_preferences.dart' as _i460;
 import '../../data/local/local_data_source.dart' as _i18;
 import '../../data/remote/remote_data_source.dart' as _i803;
 import '../../data/repository/app_repository.dart' as _i1057;
-import '../../features/admin/data/datasources/admin_remote_data_source.dart'
-    as _i517;
 import '../../features/admin/data/datasources/admin_remote_data_source_impl.dart'
     as _i14;
 import '../../features/admin/data/datasources/workshop_locale_data_source.dart'
     as _i573;
 import '../../features/admin/data/datasources/workshop_remote_data_source_impl.dart'
     as _i1069;
-import '../../features/admin/data/models/audit_log_model.dart' as _i254;
 import '../../features/admin/data/models/workshop_model.dart' as _i267;
 import '../../features/admin/data/repositories/admin_repository_impl.dart'
     as _i335;
@@ -57,6 +54,14 @@ import '../../features/admin/domain/usecases/toggle_workshop_archive.dart'
 import '../../features/admin/domain/usecases/update_hourly_rate.dart' as _i547;
 import '../../features/admin/domain/usecases/update_overtime_rate.dart'
     as _i949;
+import '../../features/admin/presentation/bloc/admin_dashboard/admin_dashboard_bloc.dart'
+    as _i371;
+import '../../features/admin/presentation/bloc/admin_profile/admin_profile_bloc.dart'
+    as _i1018;
+import '../../features/admin/presentation/bloc/employee_details/employee_details_bloc.dart'
+    as _i125;
+import '../../features/admin/presentation/bloc/employees/employees_bloc.dart'
+    as _i934;
 import '../../features/admin/presentation/bloc/workshops/workshops_bloc.dart'
     as _i331;
 import '../../features/Attendance/data/data_source/attendance_locale_data_source.dart'
@@ -158,6 +163,7 @@ _i174.GetIt $initGetIt(
     environmentFilter,
   );
   final injectableModule = _$InjectableModule();
+  gh.factory<_i1018.AdminProfileBloc>(() => _i1018.AdminProfileBloc());
   gh.factory<_i402.DropdownCubit>(() => _i402.DropdownCubit());
   gh.factory<_i208.NavigationnCubit>(() => _i208.NavigationnCubit());
   gh.factory<_i964.FinanceBloc>(() => _i964.FinanceBloc());
@@ -173,38 +179,12 @@ _i174.GetIt $initGetIt(
       () => _i278.RewardRemoteDataSourceMock());
   gh.lazySingleton<_i251.LoanLocalDataSource>(
       () => _i251.LoanLocalDataSource(gh<_i460.SharedPreferences>()));
-  gh.lazySingleton<_i517.AdminRemoteDataSource>(
-      () => _i14.AdminRemoteDataSourceImpl(gh<_i361.Dio>()));
-  gh.lazySingleton<_i583.AdminRepository>(
-      () => _i335.AdminRepositoryImpl(gh<_i517.AdminRemoteDataSource>()));
+  gh.lazySingleton<_i184.AuditLogRepository>(
+      () => _i184.AuditLogRepository(gh<_i460.SharedPreferences>()));
   gh.lazySingleton<_i803.RemoteDataSource>(() => _i803.RemoteDataSource(
         dio: gh<_i361.Dio>(),
         secureStorage: gh<_i558.FlutterSecureStorage>(),
       ));
-  gh.lazySingleton<_i345.GetAllEmployeesUseCase>(
-      () => _i345.GetAllEmployeesUseCase(gh<_i583.AdminRepository>()));
-  gh.lazySingleton<_i541.AddEmployeeUseCase>(
-      () => _i541.AddEmployeeUseCase(gh<_i583.AdminRepository>()));
-  gh.lazySingleton<_i982.AddWorkshopUseCase>(
-      () => _i982.AddWorkshopUseCase(gh<_i583.AdminRepository>()));
-  gh.lazySingleton<_i1024.ConfirmPaymentUseCase>(
-      () => _i1024.ConfirmPaymentUseCase(gh<_i583.AdminRepository>()));
-  gh.lazySingleton<_i381.DeleteEmployeeUseCase>(
-      () => _i381.DeleteEmployeeUseCase(gh<_i583.AdminRepository>()));
-  gh.lazySingleton<_i173.DeleteWorkshopUseCase>(
-      () => _i173.DeleteWorkshopUseCase(gh<_i583.AdminRepository>()));
-  gh.lazySingleton<_i253.GetEmployeeDetailsUseCase>(
-      () => _i253.GetEmployeeDetailsUseCase(gh<_i583.AdminRepository>()));
-  gh.lazySingleton<_i940.GetOnlineEmployeesUseCase>(
-      () => _i940.GetOnlineEmployeesUseCase(gh<_i583.AdminRepository>()));
-  gh.lazySingleton<_i368.ToggleEmployeeArchiveUseCase>(
-      () => _i368.ToggleEmployeeArchiveUseCase(gh<_i583.AdminRepository>()));
-  gh.lazySingleton<_i849.ToggleWorkshopArchiveUseCase>(
-      () => _i849.ToggleWorkshopArchiveUseCase(gh<_i583.AdminRepository>()));
-  gh.lazySingleton<_i547.UpdateHourlyRateUseCase>(
-      () => _i547.UpdateHourlyRateUseCase(gh<_i583.AdminRepository>()));
-  gh.lazySingleton<_i949.UpdateOvertimeRateUseCase>(
-      () => _i949.UpdateOvertimeRateUseCase(gh<_i583.AdminRepository>()));
   gh.factory<_i36.ActiveUnactiveCubit>(
       () => _i36.ActiveUnactiveCubit(gh<_i351.HiveService>()));
   gh.factory<_i492.ButtonCubit>(
@@ -228,8 +208,6 @@ _i174.GetIt $initGetIt(
   gh.lazySingleton<_i241.AttendanceLocaleDataSource>(() =>
       _i241.AttendanceLocaleDataSource(
           sharedPreferences: gh<_i460.SharedPreferences>()));
-  gh.lazySingleton<_i184.AuditLogRepository>(
-      () => _i184.AuditLogRepository(gh<_i979.Box<_i254.AuditLogModel>>()));
   gh.lazySingleton<_i180.RewardRepository>(() => _i144.RewardRepositoryImpl(
       remoteDataSource: gh<_i22.RewardRemoteDataSourceImpl>()));
   gh.lazySingleton<_i1057.AppRepository>(() => _i1057.AppRepository(
@@ -237,6 +215,8 @@ _i174.GetIt $initGetIt(
         local: gh<_i18.LocalDataSource>(),
         connectivity: gh<_i895.Connectivity>(),
       ));
+  gh.lazySingleton<_i14.AdminRemoteDataSourceImpl>(
+      () => _i14.AdminRemoteDataSourceImpl(baseApi: gh<_i893.BaseApi>()));
   gh.lazySingleton<_i1069.WorkshopRemoteDataSource>(
       () => _i1069.WorkshopRemoteDataSource(baseApi: gh<_i893.BaseApi>()));
   gh.lazySingleton<_i220.AttendanceRemoteData>(
@@ -267,6 +247,8 @@ _i174.GetIt $initGetIt(
             local: gh<_i241.AttendanceLocaleDataSource>(),
             connectivity: gh<_i895.Connectivity>(),
           ));
+  gh.lazySingleton<_i583.AdminRepository>(
+      () => _i335.AdminRepositoryImpl(gh<_i14.AdminRemoteDataSourceImpl>()));
   gh.lazySingleton<_i1.GetAdminRewardsUseCase>(
       () => _i1.GetAdminRewardsUseCase(gh<_i180.RewardRepository>()));
   gh.lazySingleton<_i1050.GetEmployeeRewardsUseCase>(
@@ -309,6 +291,30 @@ _i174.GetIt $initGetIt(
       ));
   gh.factory<_i207.ProfileBloc>(
       () => _i207.ProfileBloc(gh<_i675.AuthRepository>()));
+  gh.lazySingleton<_i345.GetAllEmployeesUseCase>(
+      () => _i345.GetAllEmployeesUseCase(gh<_i583.AdminRepository>()));
+  gh.lazySingleton<_i541.AddEmployeeUseCase>(
+      () => _i541.AddEmployeeUseCase(gh<_i583.AdminRepository>()));
+  gh.lazySingleton<_i982.AddWorkshopUseCase>(
+      () => _i982.AddWorkshopUseCase(gh<_i583.AdminRepository>()));
+  gh.lazySingleton<_i1024.ConfirmPaymentUseCase>(
+      () => _i1024.ConfirmPaymentUseCase(gh<_i583.AdminRepository>()));
+  gh.lazySingleton<_i381.DeleteEmployeeUseCase>(
+      () => _i381.DeleteEmployeeUseCase(gh<_i583.AdminRepository>()));
+  gh.lazySingleton<_i173.DeleteWorkshopUseCase>(
+      () => _i173.DeleteWorkshopUseCase(gh<_i583.AdminRepository>()));
+  gh.lazySingleton<_i253.GetEmployeeDetailsUseCase>(
+      () => _i253.GetEmployeeDetailsUseCase(gh<_i583.AdminRepository>()));
+  gh.lazySingleton<_i940.GetOnlineEmployeesUseCase>(
+      () => _i940.GetOnlineEmployeesUseCase(gh<_i583.AdminRepository>()));
+  gh.lazySingleton<_i368.ToggleEmployeeArchiveUseCase>(
+      () => _i368.ToggleEmployeeArchiveUseCase(gh<_i583.AdminRepository>()));
+  gh.lazySingleton<_i849.ToggleWorkshopArchiveUseCase>(
+      () => _i849.ToggleWorkshopArchiveUseCase(gh<_i583.AdminRepository>()));
+  gh.lazySingleton<_i547.UpdateHourlyRateUseCase>(
+      () => _i547.UpdateHourlyRateUseCase(gh<_i583.AdminRepository>()));
+  gh.lazySingleton<_i949.UpdateOvertimeRateUseCase>(
+      () => _i949.UpdateOvertimeRateUseCase(gh<_i583.AdminRepository>()));
   gh.lazySingleton<_i951.AttendanceBloc>(() => _i951.AttendanceBloc(
         gh<_i538.GetEmployeeAttendanceUseCase>(),
         gh<_i0.SyncAttendanceUseCase>(),
@@ -333,6 +339,10 @@ _i174.GetIt $initGetIt(
         issueRewardUseCase: gh<_i679.IssueRewardUseCase>(),
         getAllEmployeesUseCase: gh<_i345.GetAllEmployeesUseCase>(),
       ));
+  gh.factory<_i371.AdminDashboardBloc>(() => _i371.AdminDashboardBloc(
+        gh<_i940.GetOnlineEmployeesUseCase>(),
+        gh<_i345.GetAllEmployeesUseCase>(),
+      ));
   gh.factory<_i424.LoginCubit>(
       () => _i424.LoginCubit(repository: gh<_i675.AuthRepository>()));
   gh.factory<_i23.NotificationBloc>(() => _i23.NotificationBloc(
@@ -352,6 +362,21 @@ _i174.GetIt $initGetIt(
         gh<_i226.UpdateLoanStatusUseCase>(),
         gh<_i850.RecordPaymentUseCase>(),
         gh<_i23.NotificationBloc>(),
+      ));
+  gh.factory<_i125.EmployeeDetailsBloc>(() => _i125.EmployeeDetailsBloc(
+        gh<_i253.GetEmployeeDetailsUseCase>(),
+        gh<_i547.UpdateHourlyRateUseCase>(),
+        gh<_i949.UpdateOvertimeRateUseCase>(),
+        gh<_i1024.ConfirmPaymentUseCase>(),
+        gh<_i381.DeleteEmployeeUseCase>(),
+        gh<_i368.ToggleEmployeeArchiveUseCase>(),
+        gh<_i14.AdminRemoteDataSourceImpl>(),
+        gh<_i184.AuditLogRepository>(),
+      ));
+  gh.factory<_i934.EmployeesBloc>(() => _i934.EmployeesBloc(
+        gh<_i345.GetAllEmployeesUseCase>(),
+        gh<_i541.AddEmployeeUseCase>(),
+        gh<_i368.ToggleEmployeeArchiveUseCase>(),
       ));
   return getIt;
 }

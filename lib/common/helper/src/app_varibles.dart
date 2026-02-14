@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:untitled8/common/helper/src/prefs_keys.dart';
-import 'package:untitled8/features/Attendance/data/models/attendance_model.dart';
+import 'package:untitled8/features/Attendance/data/models/attendance_model.dart' hide User;
 import '../../../core/di/injection.dart';
 import '../../../features/admin/domain/entities/workshop_entity.dart';
 import '../../../features/auth/data/model/login_response.dart';

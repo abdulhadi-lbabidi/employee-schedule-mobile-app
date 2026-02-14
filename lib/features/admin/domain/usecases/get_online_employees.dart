@@ -1,6 +1,6 @@
 import 'package:injectable/injectable.dart';
-
-import '../entities/employee_entity.dart';
+import 'package:untitled8/common/helper/src/typedef.dart';
+import '../../data/models/employee model/employee_model.dart';
 import '../repositories/admin_repository.dart';
 @lazySingleton
 class GetOnlineEmployeesUseCase {
@@ -8,7 +8,7 @@ class GetOnlineEmployeesUseCase {
 
   GetOnlineEmployeesUseCase(this.repository);
 
-  Future<List<EmployeeEntity>> call() {
+  DataResponse<GetAllEmployeeResponse> call() {
     return repository.getOnlineEmployees();
   }
 }

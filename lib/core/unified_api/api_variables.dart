@@ -1,11 +1,12 @@
 import 'package:untitled8/common/helper/src/app_varibles.dart';
+import 'package:untitled8/common/helper/src/typedef.dart';
 
 class ApiVariables {
   static const String _scheme = 'https';
   static const String _host = 'employee-api.nouh-agency.com';
   static const int? _port = null;
 
-  static Uri _mainUri(String path, {Map<String, String>? params}) {
+  static Uri _mainUri(String path, {QueryParams? params}) {
     return Uri(
       scheme: _scheme,
       host: _host,
@@ -93,8 +94,8 @@ class ApiVariables {
       _mainUri('/api/admin/workshops/$id/employees');
 
   // --- Attendance ---
-  static Uri getAttendances({Map<String, String>? params}) => _mainUri(
-    '/api/my-attendance/${AppVariables.user!.id}',
+  static Uri getAttendances({QueryParams? params}) => _mainUri(
+    '/api/my-attendance/${AppVariables.user!.userableId}',
     params: params,
   ); // تم التعديل هنا
   static Uri postAttendance() => _mainUri('/api/attendances/sync');

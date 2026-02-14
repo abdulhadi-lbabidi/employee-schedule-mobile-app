@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/utils/app_strings.dart';
+import '../../data/models/employee model/employee_model.dart';
 import '../../domain/entities/employee_entity.dart';
+import '../../domain/usecases/add_employee.dart';
 import '../bloc/employees/employees_bloc.dart';
 import '../bloc/employees/employees_event.dart';
 
@@ -91,8 +93,10 @@ class _AddEmployeePageState extends State<AddEmployeePage> {
                         size: 18.sp,
                         color: theme.disabledColor,
                       ),
-                      onPressed: () =>
-                          setState(() => _obscurePassword = !_obscurePassword),
+                      onPressed:
+                          () => setState(
+                            () => _obscurePassword = !_obscurePassword,
+                          ),
                     ),
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(15.r),
@@ -110,9 +114,11 @@ class _AddEmployeePageState extends State<AddEmployeePage> {
                       horizontal: 15.w,
                     ),
                   ),
-                  validator: (value) => (value == null || value.length < 6)
-                      ? "يجب أن تكون كلمة المرور 6 أحرف على الأقل"
-                      : null,
+                  validator:
+                      (value) =>
+                          (value == null || value.length < 6)
+                              ? "يجب أن تكون كلمة المرور 6 أحرف على الأقل"
+                              : null,
                 ),
               ),
               _buildTextField(
@@ -187,9 +193,8 @@ class _AddEmployeePageState extends State<AddEmployeePage> {
           fontSize: 14.sp,
           color: theme.textTheme.bodyLarge?.color,
         ),
-        keyboardType: isNumber || isPhone
-            ? TextInputType.number
-            : TextInputType.text,
+        keyboardType:
+            isNumber || isPhone ? TextInputType.number : TextInputType.text,
         decoration: InputDecoration(
           labelText: label,
           labelStyle: TextStyle(fontSize: 12.sp, color: theme.disabledColor),
@@ -206,8 +211,9 @@ class _AddEmployeePageState extends State<AddEmployeePage> {
             horizontal: 15.w,
           ),
         ),
-        validator: (value) =>
-            value == null || value.isEmpty ? "هذا الحقل مطلوب" : null,
+        validator:
+            (value) =>
+                value == null || value.isEmpty ? "هذا الحقل مطلوب" : null,
       ),
     );
   }
@@ -244,23 +250,22 @@ class _AddEmployeePageState extends State<AddEmployeePage> {
       final hourlyRate = _safeParseDouble(hourlyRateController.text);
       final overtimeRate = _safeParseDouble(overtimeRateController.text);
 
-      final newEmployee = EmployeeEntity(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
-        name: nameController.text,
-        phoneNumber: phoneController.text,
-        imageUrl: '',
-        currentLocation: 'غير محدد',
-        isOnline: false,
-        workshopName: '',
-        hourlyRate: hourlyRate,
-        overtimeRate: overtimeRate,
-        dailyWorkHours: 8.0, // ✅ تم إصلاح: تمرير double بدلاً من Map
-        weeklyHistory: [],
-        weeklyOvertime: 0,
-        isArchived: false,
-        password: passwordController.text,
+      final newEmployee = AddEmployeeParams(
+        // id: DateTime.now().millisecondsSinceEpoch.toString(),
+        fullName: nameController.text,
+        phone_number: phoneController.text,
         email: emailController.text,
-        // لاحظ أننا لا نمرر workshops أو position/department هنا
+        password: passwordController.text,
+
+        current_location: 'غير محدد',
+        hourly_rate: hourlyRate,
+        overtime_rate: overtimeRate,
+        department: 'Developer',
+        position: 'IT',
+        // dailyWorkHours: 8.0, // ✅ تم إصلاح: تمرير double بدلاً من Map
+        // weeklyHistory: [],
+        // weeklyOvertime: 0,
+        // isArchived: false,
       );
 
       context.read<EmployeesBloc>().add(AddEmployeeEvent(newEmployee));
@@ -283,7 +288,7 @@ class _AddEmployeePageState extends State<AddEmployeePage> {
       return double.parse(text.trim());
     } catch (e) {
       // إذا فشل التحويل، نرجع 0.0 أو قيمة افتراضية
-      return 0.0; 
+      return 0.0;
     }
   }
 
