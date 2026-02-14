@@ -139,4 +139,10 @@ class ApiVariables {
 
   static Uri deleteNotification(String id) =>
       _mainUri('/api/notifications/$id');
+  static Uri updateFCMToken() => _mainUri(
+      '');
+  static Uri deleteFCMToken() => _mainUri(
+      '');
+  static Uri getEmployeesHoursAndPaySummary(String id) =>
+      _mainUri('/api/employees/$id/hours-and-pay-summary');
 }

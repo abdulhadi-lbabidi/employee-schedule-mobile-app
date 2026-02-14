@@ -121,11 +121,11 @@ class _IssueRewardDialogState extends State<IssueRewardDialog> {
         ElevatedButton(
           onPressed: () {
             if (_formKey.currentState!.validate() && _selectedEmployee != null) {
-              context.read<RewardAdminBloc>().add(IssueNewReward(
-                employeeId: _selectedEmployee!.id.toString(),
+              context.read<RewardAdminBloc>().add(IssueRewardEvent(
+                employeeId: _selectedEmployee!.id!.toInt(),
                 employeeName: _selectedEmployee!.user!.fullName!,
-                adminId: widget.adminId,
-                adminName: widget.adminName,
+                // adminId: widget.adminId,
+                // adminName: widget.adminName,
                 amount: double.parse(_amountController.text),
                 reason: _reasonController.text,
               ));
