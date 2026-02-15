@@ -6,6 +6,8 @@ import '../../domain/repositories/employee_summary_repository.dart';
 import '../datasources/employee_summary_remote_data_source.dart';
 import 'package:injectable/injectable.dart';
 
+import '../models/employee_summary_model.dart';
+
 @LazySingleton(as: EmployeeSummaryRepository)
 class EmployeeSummaryRepositoryImpl implements EmployeeSummaryRepository {
   final EmployeeSummaryRemoteDataSource remoteDataSource;
@@ -13,11 +15,11 @@ class EmployeeSummaryRepositoryImpl implements EmployeeSummaryRepository {
   EmployeeSummaryRepositoryImpl({required this.remoteDataSource});
 
   @override
-  Future<Either<Failure, EmployeeSummaryEntity>> getEmployeeSummary(String employeeId) async {
+  Future<Either<Failure, EmployeeSummaryModel>> getEmployeeSummary(String employeeId) async {
     try {
       final response = await remoteDataSource.getEmployeeSummary(employeeId);
-      print('response.data: ${response.data}');
-      return Right(response.data);
+      print('response.data: ${response.toJson()}');
+      return Right(response);
     } catch (e) {
       return Left(ErrorHandler.handle(e).failure);
     }

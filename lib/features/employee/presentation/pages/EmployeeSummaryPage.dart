@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/di/injection.dart';
+import '../../data/models/employee_summary_model.dart';
 import '../../domain/entities/employee_summary_entity.dart';
 import '../bloc/employee_summary/employee_summary_bloc.dart';
 import '../bloc/employee_summary/employee_summary_event.dart';
@@ -73,7 +74,7 @@ class EmployeeSummaryPage extends StatelessWidget {
     );
   }
 
-  Widget _buildSummaryContent(EmployeeSummaryEntity summary, ThemeData theme) {
+  Widget _buildSummaryContent(EmployeeSummaryModel summary, ThemeData theme) {
     return SingleChildScrollView(
       physics: const AlwaysScrollableScrollPhysics(),
       padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
@@ -90,7 +91,7 @@ class EmployeeSummaryPage extends StatelessWidget {
             children: [
               _buildStatCard(
                 title: 'ساعات نظامية',
-                value: summary.totalRegularHours.toStringAsFixed(1),
+                value: summary.grandTotals!.totalRegularHours.toString(),
                 unit: 'ساعة',
                 icon: Icons.access_time_filled,
                 color: Colors.blue,
@@ -99,7 +100,7 @@ class EmployeeSummaryPage extends StatelessWidget {
               SizedBox(width: 15.w),
               _buildStatCard(
                 title: 'ساعات إضافية',
-                value: summary.totalOvertimeHours.toStringAsFixed(1),
+                value: summary.grandTotals!.totalOvertimeHours.toString(),
                 unit: 'ساعة',
                 icon: Icons.more_time_rounded,
                 color: Colors.orange,
@@ -113,7 +114,7 @@ class EmployeeSummaryPage extends StatelessWidget {
           SizedBox(height: 15.h),
           _buildMoneyCard(
             title: 'الأجر الأساسي',
-            amount: summary.regularPay,
+            amount: summary.grandTotals!.totalRegularPay!.toDouble(),
             icon: Icons.account_balance_wallet_rounded,
             color: Colors.indigo,
             theme: theme,
@@ -121,26 +122,26 @@ class EmployeeSummaryPage extends StatelessWidget {
           SizedBox(height: 12.h),
           _buildMoneyCard(
             title: 'أجر العمل الإضافي',
-            amount: summary.overtimePay,
+            amount: summary.grandTotals!.totalOvertimePay!.toDouble(),
             icon: Icons.add_card_rounded,
             color: Colors.teal,
             theme: theme,
           ),
 
           SizedBox(height: 25.h),
-          _buildTotalPayCard(summary.totalPay, theme),
+          _buildTotalPayCard(summary.grandTotals!.grandTotalPay!.toDouble(), theme),
 
           SizedBox(height: 25.h),
           _buildSectionTitle('الورشات', Icons.workspaces_outline, theme),
           SizedBox(height: 15.h),
-          _buildWorkshopsSection(summary.workshopNames, theme),
+          _buildWorkshopsSection(summary.workshopsSummary , theme),
           SizedBox(height: 30.h),
         ],
       ),
     ).animate().fadeIn(duration: 500.ms).slideY(begin: 0.1, end: 0);
   }
 
-  Widget _buildEmployeeHeader(EmployeeSummaryEntity summary, ThemeData theme) {
+  Widget _buildEmployeeHeader(EmployeeSummaryModel summary, ThemeData theme) {
     return Container(
       width: double.infinity,
       padding: EdgeInsets.all(20.w),
@@ -162,7 +163,7 @@ class EmployeeSummaryPage extends StatelessWidget {
       child: Column(
         children: [
           Text(
-            summary.employeeFullName,
+            summary.employee!.user!.fullName.toString(),
             style: TextStyle(
                 color: Colors.white,
                 fontSize: 20.sp,
@@ -175,7 +176,7 @@ class EmployeeSummaryPage extends StatelessWidget {
               Icon(Icons.location_on_outlined, color: Colors.white70, size: 14.sp),
               SizedBox(width: 4.w),
               Text(
-                summary.currentLocation,
+                summary.employee!.position.toString(),
                 style: TextStyle(color: Colors.white70, fontSize: 13.sp),
               ),
             ],
@@ -343,31 +344,141 @@ class EmployeeSummaryPage extends StatelessWidget {
     ).animate().scale(delay: 400.ms, duration: 400.ms, curve: Curves.easeOutBack);
   }
 
-  Widget _buildWorkshopsSection(List<String> workshops, ThemeData theme) {
-    if (workshops.isEmpty) {
-      return Text('لا توجد ورش عمل مرتبطة حالياً',
-          style: TextStyle(color: Colors.grey.shade500, fontSize: 13.sp));
+  // الودجت الأساسي
+  Widget _buildWorkshopsSection(
+      List<WorkshopsSummary>? summary,
+      ThemeData theme,
+      ) {
+    if (summary == null || summary.isEmpty) {
+      return Center(
+        child: Text(
+          'لا توجد ورش عمل مرتبطة حالياً',
+          style: TextStyle(color: Colors.grey.shade500, fontSize: 13.sp),
+        ),
+      );
     }
-    return Wrap(
-      spacing: 10.w,
-      runSpacing: 10.h,
-      children: workshops
-          .map((ws) => Container(
-                padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 8.h),
-                decoration: BoxDecoration(
-                  color: theme.primaryColor.withOpacity(0.08),
-                  borderRadius: BorderRadius.circular(12.r),
-                  border: Border.all(color: theme.primaryColor.withOpacity(0.2)),
-                ),
-                child: Text(
-                  ws,
-                  style: TextStyle(
-                      fontSize: 12.sp,
-                      color: theme.primaryColor,
-                      fontWeight: FontWeight.bold),
-                ),
-              ))
+
+    return Column(
+      children: summary
+          .map((ws) => _buildWorkshopCard(ws, theme))
           .toList(),
+    );
+  }
+
+
+// ودجت فرعي لبناء كرت تفاصيل الورشة الواحدة
+  Widget _buildWorkshopCard(WorkshopsSummary ws, ThemeData theme) {
+    return Container(
+      margin: EdgeInsets.only(bottom: 12.h),
+      padding: EdgeInsets.all(16.w),
+      decoration: BoxDecoration(
+        color: theme.primaryColor.withOpacity(0.04),
+        borderRadius: BorderRadius.circular(12.r),
+        border: Border.all(color: theme.primaryColor.withOpacity(0.2)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          /// --- عنوان الورشة ---
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                "ورشة عمل: ${ws.workshopName ?? ''}",
+                style: TextStyle(
+                  fontSize: 16.sp,
+                  color: theme.primaryColor,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              Icon(Icons.handyman,
+                  color: theme.primaryColor, size: 20.sp),
+            ],
+          ),
+
+          Divider(
+              height: 20.h,
+              color: theme.primaryColor.withOpacity(0.1)),
+
+          /// --- الساعات ---
+          Row(
+            children: [
+              Expanded(
+                  child: _buildInfoItem(
+                      "ساعات أساسية",
+                      "${ws.regularHours ?? 0}\$",
+                      theme)),
+              Expanded(
+                  child: _buildInfoItem(
+                      "ساعات إضافية",
+                      "${ws.overtimeHours ?? 0} \$",
+                      theme)),
+            ],
+          ),
+
+          SizedBox(height: 12.h),
+
+          /// --- الأجور ---
+          Row(
+            children: [
+              Expanded(
+                  child: _buildInfoItem(
+                      "أجر أساسي",
+                      "${ws.regularPay ?? 0}\$",
+                      theme)),
+              Expanded(
+                  child: _buildInfoItem(
+                      "أجر إضافي",
+                      "${ws.overtimePay ?? 0}\$",
+                      theme)),
+            ],
+          ),
+
+          Divider(
+              height: 20.h,
+              color: theme.primaryColor.withOpacity(0.1)),
+
+          /// --- الإجمالي ---
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                "إجمالي المستحقات:",
+                style: TextStyle(
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.bold),
+              ),
+              Text(
+                "${ws.totalPay ?? 0}\$",
+                style: TextStyle(
+                  fontSize: 16.sp,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.green.shade700,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+
+// ودجت مساعد لترتيب النصوص (العنوان والقيمة) تحت بعضها
+  Widget _buildInfoItem(String title, String value, ThemeData theme) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+            title,
+            style: TextStyle(fontSize: 12.sp, color: Colors.grey.shade600)
+        ),
+        SizedBox(height: 4.h),
+        Text(
+            value,
+            style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600, color: Colors.black87)
+        ),
+      ],
     );
   }
 

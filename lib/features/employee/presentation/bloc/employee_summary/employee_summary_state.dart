@@ -1,6 +1,8 @@
 import 'package:equatable/equatable.dart';
 import 'package:untitled8/features/employee/domain/entities/employee_summary_entity.dart';
 
+import '../../../data/models/employee_summary_model.dart';
+
 abstract class EmployeeSummaryState extends Equatable {
   const EmployeeSummaryState();
 
@@ -13,7 +15,7 @@ class EmployeeSummaryInitial extends EmployeeSummaryState {}
 class EmployeeSummaryLoading extends EmployeeSummaryState {}
 
 class EmployeeSummaryLoaded extends EmployeeSummaryState {
-  final EmployeeSummaryEntity summary;
+  final EmployeeSummaryModel summary;
   const EmployeeSummaryLoaded(this.summary);
 
   @override

@@ -10,10 +10,10 @@ class EmployeeSummaryRemoteDataSource with HandlingApiManager {
 
   EmployeeSummaryRemoteDataSource(this._baseApi);
 
-  Future<EmployeeSummaryResponse> getEmployeeSummary(String empId) async {
+  Future<EmployeeSummaryModel> getEmployeeSummary(String empId) async {
     return wrapHandlingApi(
       tryCall: () => _baseApi.get(ApiVariables.getEmployeesHoursAndPaySummary(empId)),
-      jsonConvert: (json) => EmployeeSummaryResponse.fromJson(json),
+      jsonConvert: (json) => EmployeeSummaryModel.fromJson(json),
     );
   }
 }

@@ -85,7 +85,7 @@ class AdminRemoteDataSourceImpl with HandlingApiManager {
 
   Future<void> deleteEmployee(String id) async {
     return wrapHandlingApi(
-      tryCall: () => _baseApi.delete(ApiVariables.employeeDetails(id)),
+      tryCall: () => _baseApi.delete(ApiVariables.employeeDelete(id)),
 
       jsonConvert: (_) {},
     );

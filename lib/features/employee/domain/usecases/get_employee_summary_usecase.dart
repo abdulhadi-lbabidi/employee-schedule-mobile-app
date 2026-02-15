@@ -1,6 +1,7 @@
 import 'package:dartz/dartz.dart';
 import 'package:injectable/injectable.dart';
 import '../../../../core/unified_api/failures.dart';
+import '../../data/models/employee_summary_model.dart';
 import '../entities/employee_summary_entity.dart';
 import '../repositories/employee_summary_repository.dart';
 
@@ -10,7 +11,7 @@ class GetEmployeeSummaryUseCase {
 
   GetEmployeeSummaryUseCase(this.repository);
 
-  Future<Either<Failure, EmployeeSummaryEntity>> call(String employeeId) async {
+  Future<Either<Failure, EmployeeSummaryModel>> call(String employeeId) async {
     return await repository.getEmployeeSummary(employeeId);
   }
 }

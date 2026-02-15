@@ -12,6 +12,7 @@ import '../bloc/employee_details/employee_details_bloc.dart';
 import '../bloc/employee_details/employee_details_event.dart';
 import '../bloc/employee_details/employee_details_state.dart';
 import 'EditEmployeePage.dart';
+import 'EmployeesPage.dart';
 
 class EmployeeDetailsPage extends StatefulWidget {
   final String employeeId;
@@ -320,7 +321,10 @@ class _EmployeeDetailsPageState extends State<EmployeeDetailsPage> {
                   context.read<EmployeeDetailsBloc>().add(
                     DeleteEmployeeEvent(id),
                   );
-                  Navigator.pop(d);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => EmployeesPage()),
+                  );
                 },
                 child: const Text("حذف", style: TextStyle(color: Colors.red)),
               ),
