@@ -32,6 +32,7 @@ import 'features/admin/presentation/bloc/employees/employees_bloc.dart';
 import 'features/admin/presentation/bloc/employee_details/employee_details_bloc.dart';
 import 'features/admin/presentation/bloc/workshops/workshops_bloc.dart';
 import 'features/loan/presentation/bloc/loan_bloc.dart';
+import 'features/reward/presentation/bloc/reward_admin/reward_admin_bloc.dart';
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
@@ -103,6 +104,7 @@ class MyApp extends StatelessWidget {
             BlocProvider(create: (_) => sl<WorkshopsBloc>()),
             BlocProvider(create: (_) => sl<FinanceBloc>()),
             BlocProvider(create: (_) => sl<LoanBloc>()),
+            BlocProvider(create: (_) => sl<RewardAdminBloc>()),
           ],
           child: BlocBuilder<ThemeBloc, ThemeState>(
             builder: (context, themeState) {

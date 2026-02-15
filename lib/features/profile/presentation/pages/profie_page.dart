@@ -60,25 +60,25 @@ class _ProfilePageState extends State<ProfilePage> {
                   ),
                 ),
                 centerTitle: true,
-                actions: [
-                  IconButton(
-                    icon: Icon(
-                      Icons.edit_note_rounded,
-                      size: 28.sp,
-                      color: theme.primaryColor,
-                    ),
-                    onPressed: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => BlocProvider.value(
-                          value: profileBloc,
-                          child: const EditProfilePage(),
-                        ),
-                      ),
-                    ),
-                  ),
-                  SizedBox(width: 10.w),
-                ],
+                // actions: [
+                //   IconButton(
+                //     icon: Icon(
+                //       Icons.edit_note_rounded,
+                //       size: 28.sp,
+                //       color: theme.primaryColor,
+                //     ),
+                //     onPressed: () => Navigator.push(
+                //       context,
+                //       MaterialPageRoute(
+                //         builder: (_) => BlocProvider.value(
+                //           value: profileBloc,
+                //           child: const EditProfilePage(),
+                //         ),
+                //       ),
+                //     ),
+                //   ),
+                //   SizedBox(width: 10.w),
+                // ],
               ),
               body: SingleChildScrollView(
                 padding: EdgeInsets.all(20.w),
@@ -106,8 +106,8 @@ class _ProfilePageState extends State<ProfilePage> {
                       label: 'البريد الإلكتروني',
                       value: state.profile.data!.user?.email ?? "---",
                     ),
-                    SizedBox(height: 15.h),
-                    _buildChangePasswordButton(context, theme),
+                    // SizedBox(height: 15.h),
+                    // _buildChangePasswordButton(context, theme),
                     SizedBox(height: 25.h),
                     _buildSectionTitle("تفاصيل العمل", theme),
                     SizedBox(height: 15.h),
@@ -169,35 +169,35 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  Widget _buildChangePasswordButton(BuildContext context, ThemeData theme) {
-    return InkWell(
-      onTap: () => showChangePasswordDialog(context, profileBloc),
-      child: Container(
-        padding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 16.w),
-        decoration: BoxDecoration(
-          color: theme.primaryColor.withOpacity(0.05),
-          borderRadius: BorderRadius.circular(15.r),
-          border: Border.all(color: theme.primaryColor.withOpacity(0.2)),
-        ),
-        child: Row(
-          children: [
-            Icon(Icons.lock_reset_rounded, color: theme.primaryColor, size: 22.sp),
-            SizedBox(width: 12.w),
-            Text(
-              "تغيير كلمة المرور",
-              style: TextStyle(
-                fontSize: 14.sp,
-                color: theme.primaryColor,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const Spacer(),
-            Icon(Icons.arrow_forward_ios_rounded, color: theme.primaryColor, size: 14.sp),
-          ],
-        ),
-      ),
-    ).animate().fadeIn(delay: 300.ms);
-  }
+  // Widget _buildChangePasswordButton(BuildContext context, ThemeData theme) {
+  //   return InkWell(
+  //     onTap: () => showChangePasswordDialog(context, profileBloc),
+  //     child: Container(
+  //       padding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 16.w),
+  //       decoration: BoxDecoration(
+  //         color: theme.primaryColor.withOpacity(0.05),
+  //         borderRadius: BorderRadius.circular(15.r),
+  //         border: Border.all(color: theme.primaryColor.withOpacity(0.2)),
+  //       ),
+  //       child: Row(
+  //         children: [
+  //           Icon(Icons.lock_reset_rounded, color: theme.primaryColor, size: 22.sp),
+  //           SizedBox(width: 12.w),
+  //           Text(
+  //             "تغيير كلمة المرور",
+  //             style: TextStyle(
+  //               fontSize: 14.sp,
+  //               color: theme.primaryColor,
+  //               fontWeight: FontWeight.bold,
+  //             ),
+  //           ),
+  //           const Spacer(),
+  //           Icon(Icons.arrow_forward_ios_rounded, color: theme.primaryColor, size: 14.sp),
+  //         ],
+  //       ),
+  //     ),
+  //   ).animate().fadeIn(delay: 300.ms);
+  // }
 
   Widget _buildRewardShortcut(
     BuildContext context,

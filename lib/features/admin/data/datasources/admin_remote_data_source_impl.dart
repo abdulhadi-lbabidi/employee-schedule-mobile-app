@@ -135,7 +135,7 @@ class AdminRemoteDataSourceImpl with HandlingApiManager {
   }) async {
     return wrapHandlingApi(
       tryCall: () => _baseApi.put(
-        ApiVariables.employeeUpdate(employeeId), // 🔹 استخدام نقطة نهاية التحديث
+        ApiVariables.employeeUpdate(employeeId), //  استخدام نقطة نهاية التحديث
         data: {
           'full_name': name,
           'phone_number': phoneNumber,
@@ -143,7 +143,6 @@ class AdminRemoteDataSourceImpl with HandlingApiManager {
           'password': password,
           'position': position,
           'department': department,
-
           'hourly_rate': hourlyRate,
           'overtime_rate': overtimeRate,
           'current_location': currentLocation,

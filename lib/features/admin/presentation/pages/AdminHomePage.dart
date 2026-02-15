@@ -29,7 +29,7 @@ class _AdminHomePageState extends State<AdminHomePage> {
   final List<Widget> _pages = [
     const AdminDashboardPage(),
     const EmployeesPage(),
-    const AdminFinancePage(),
+    const FinancialDashboard(),
     const AdminLoanPage(),
     const WorkshopsPage(),
     const AdminNotificationsPage(),

@@ -173,7 +173,7 @@ class AdminDashboardPage extends StatelessWidget {
             Navigator.push(context, MaterialPageRoute(builder: (_) => const AdminNotificationsPage()));
           }),
           _actionBtn("كشف رواتب", Icons.payments_rounded, Colors.green, theme, () {
-            Navigator.push(context, MaterialPageRoute(builder: (_) => const AdminFinancePage()));
+            Navigator.push(context, MaterialPageRoute(builder: (_) => const FinancialDashboard()));
           }),
         ],
       ),

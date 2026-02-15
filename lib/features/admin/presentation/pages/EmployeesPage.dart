@@ -196,7 +196,7 @@ class _EmployeesPageState extends State<EmployeesPage> {
           children: [
             Icon(Icons.location_on_outlined, size: 12.sp, color: theme.disabledColor),
             SizedBox(width: 4.w),
-           // Text(emp.workshopName, style: TextStyle(color: theme.disabledColor, fontSize: 12.sp)),
+           Text(emp.position.toString(), style: TextStyle(color: theme.disabledColor, fontSize: 12.sp)),
           ],
         ),
         trailing: Icon(Icons.arrow_forward_ios_rounded, size: 14.sp, color: theme.disabledColor.withOpacity(0.5)),
@@ -204,51 +204,4 @@ class _EmployeesPageState extends State<EmployeesPage> {
     );
 
   }
-
-//  Widget _buildEmployeeCard(BuildContext context, dynamic emp, ThemeData theme) {
-//     final bool isArchived = emp.isArchived;
-//     return Card(
-//       margin: EdgeInsets.only(bottom: 12.h),
-//       elevation: isArchived ? 0 : 1,
-//       color: isArchived ? theme.disabledColor.withOpacity(0.05) : theme.cardColor,
-//       shape: RoundedRectangleBorder(
-//         borderRadius: BorderRadius.circular(16.r),
-//         side: BorderSide(color: theme.dividerColor.withOpacity(isArchived ? 0.1 : 0.05)),
-//       ),
-//       child: ListTile(
-//         onTap: () async {
-//           await Navigator.push(context, MaterialPageRoute(builder: (_) => EmployeeDetailsPage(employeeId: emp.id)));
-//           if (context.mounted) {
-//             context.read<EmployeesBloc>().add(LoadEmployeesEvent());
-//           }
-//         },
-//         leading: CircleAvatar(
-//           radius: 22.r,
-//           backgroundColor: theme.primaryColor.withOpacity(0.1),
-//           child: emp.imageUrl.isNotEmpty
-//             ? ClipRRect(
-//                 borderRadius: BorderRadius.circular(22.r),
-//                 child: Image.network(emp.imageUrl, fit: BoxFit.cover, errorBuilder: (_, __, ___) => Icon(Icons.person, color: theme.primaryColor)))
-//             : Icon(Icons.person, color: theme.primaryColor, size: 24.sp)
-//         ),
-//
-//         title: Text(emp.name,
-//           style: TextStyle(
-//             fontWeight: FontWeight.bold,
-//             fontSize: 14.sp,
-//             decoration: isArchived ? TextDecoration.lineThrough : null,
-//             color: isArchived ? theme.disabledColor : theme.textTheme.bodyLarge?.color,
-//           )),
-//         subtitle: Row(
-//           children: [
-//             Icon(Icons.location_on_outlined, size: 12.sp, color: theme.disabledColor),
-//             SizedBox(width: 4.w),
-//             Text(emp.workshopName, style: TextStyle(color: theme.disabledColor, fontSize: 12.sp)),
-//           ],
-//         ),
-//         trailing: Icon(Icons.arrow_forward_ios_rounded, size: 14.sp, color: theme.disabledColor.withOpacity(0.5)),
-//       ),
-//     );
-//
-//   }
 }

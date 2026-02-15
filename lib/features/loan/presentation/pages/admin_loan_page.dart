@@ -24,11 +24,11 @@ class _AdminLoanPageState extends State<AdminLoanPage> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F7FA),
+      backgroundColor:theme.scaffoldBackgroundColor,
       appBar: AppBar(
         title: const Text("طلبات السلف", style: TextStyle(fontWeight: FontWeight.bold)),
         centerTitle: true,
-        backgroundColor: Colors.white,
+        backgroundColor: theme.scaffoldBackgroundColor,
         elevation: 0,
         foregroundColor: Colors.black,
         actions: [
@@ -114,7 +114,7 @@ class _AdminLoanPageState extends State<AdminLoanPage> {
                         borderRadius: BorderRadius.circular(20.r),
                       ),
                       child: Text(
-                        "${NumberFormat.decimalPattern().format(loan.amount)} ل.س",
+                        "${NumberFormat.decimalPattern().format(loan.amount)} \$",
                         style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold, fontSize: 14.sp),
                       ),
                     ),
