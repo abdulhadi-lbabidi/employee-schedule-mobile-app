@@ -16,6 +16,20 @@ abstract class AdminRepository {
   DataResponse<GetEmployeeResponse> getEmployeeDetails(String id);
   DataResponse<void> deleteEmployee(String id);
   DataResponse<void> toggleEmployeeArchive(String id, bool isArchived); // 🔹 أرشفة الموظف
+
+  //  إضافة دالة تحديث بيانات الموظف الكاملة
+  DataResponse<void> updateEmployeeFullDetails({
+    required String employeeId,
+    required String name,
+    required String phoneNumber,
+    String? email,
+    String? password,
+    String? position,
+    String? department,
+    required double hourlyRate,
+    required double overtimeRate,
+    String? currentLocation,
+  });
   
   // 🔹 إدارة الورشات
   DataResponse<List<WorkshopEntity>> getWorkshops();

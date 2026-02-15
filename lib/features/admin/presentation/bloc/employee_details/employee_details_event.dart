@@ -42,15 +42,23 @@ class ToggleArchiveEmployeeDetailEvent extends EmployeeDetailsEvent {
 class UpdateEmployeeFullEvent extends EmployeeDetailsEvent {
   final String name;
   final String phoneNumber;
-  final String workshop;
+  final String? email;
+  final String? password;
+  final String? position;
+  final String? department;
   final double hourlyRate;
   final double overtimeRate;
+  final String? currentLocation;
 
   UpdateEmployeeFullEvent({
     required this.name,
     required this.phoneNumber,
-    required this.workshop,
+    this.email,
+    this.password,
+    this.position,
+    this.department,
     required this.hourlyRate,
     required this.overtimeRate,
+    this.currentLocation,
   });
 }

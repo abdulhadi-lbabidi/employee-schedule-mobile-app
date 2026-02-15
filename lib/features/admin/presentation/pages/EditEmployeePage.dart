@@ -18,8 +18,13 @@ class EditEmployeePage extends StatefulWidget {
 class _EditEmployeePageState extends State<EditEmployeePage> {
   late TextEditingController nameController;
   late TextEditingController phoneController;
+  late TextEditingController emailController;
+  late TextEditingController passwordController;
+  late TextEditingController positionController;
+  late TextEditingController departmentController;
   late TextEditingController hourlyRateController;
   late TextEditingController overtimeRateController;
+  late TextEditingController currentLocationController;
   String selectedWorkshop = '';
 
   final List<String> workshops = ['ورشة النجارة', 'ورشة الخياطة', 'المستودع', 'ورشة الإلكترونيات'];
@@ -29,24 +34,39 @@ class _EditEmployeePageState extends State<EditEmployeePage> {
     super.initState();
     nameController = TextEditingController(text: widget.employee.user?.fullName??'');
     phoneController = TextEditingController(text: widget.employee.user?.phoneNumber??'');
+    emailController = TextEditingController(text: widget.employee.user?.email??'');
+    passwordController = TextEditingController(text: '********'); // 🔹 لا نعرض كلمة المرور الحالية
+    positionController = TextEditingController(text: widget.employee.position??'');
+    departmentController = TextEditingController(text: widget.employee.department??'');
     hourlyRateController = TextEditingController(text: widget.employee.hourlyRate.toString());
     overtimeRateController = TextEditingController(text: widget.employee.overtimeRate.toString());
-    // selectedWorkshop = widget.employee.workshopName;
+    currentLocationController = TextEditingController(text: widget.employee.currentLocation??'');
+    
+    //  التصحيح: تهيئة selectedWorkshop من قائمة الورش
+    if (widget.employee.workshops != null && widget.employee.workshops!.isNotEmpty) {
+      selectedWorkshop = widget.employee.workshops!.first.name ?? ''; //  استخدام اسم أول ورشة
+    } else {
+      selectedWorkshop = workshops.first; //  تعيين إلى أول ورشة افتراضية إذا لم تكن هناك ورش
+    }
   }
 
   @override
   void dispose() {
     nameController.dispose();
     phoneController.dispose();
+    emailController.dispose();
+    passwordController.dispose();
+    positionController.dispose();
+    departmentController.dispose();
     hourlyRateController.dispose();
     overtimeRateController.dispose();
+    currentLocationController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Directionality(
-      textDirection: TextDirection.rtl,
+    return Directionality(textDirection: TextDirection.rtl,
       child: Scaffold(
         backgroundColor: const Color(0xFFF5F7F9),
         appBar: AppBar(
@@ -80,11 +100,15 @@ class _EditEmployeePageState extends State<EditEmployeePage> {
         children: [
           _buildTextField("الاسم الكامل", nameController, Icons.person_outline),
           _buildTextField("رقم الهاتف", phoneController, Icons.phone_android_outlined, isPhone: true),
+          _buildTextField("البريد الإلكتروني", emailController, Icons.email_outlined, keyboardType: TextInputType.emailAddress),
+          _buildTextField("كلمة المرور (اتركها فارغة لعدم التغيير)", passwordController, Icons.lock_outline, isPassword: true),
+          _buildTextField("المسمى الوظيفي", positionController, Icons.work_outline),
+          _buildTextField("القسم", departmentController, Icons.business_center_outlined),
+          _buildTextField("الموقع الحالي", currentLocationController, Icons.location_on_outlined),
+
           SizedBox(height: 15.h),
           Text("الورشة الميدانية", style: TextStyle(color: Colors.grey, fontSize: 12.sp)),
           SizedBox(height: 8.h),
-          _buildWorkshopDropdown(),
-          Divider(height: 40.h),
           Row(
             children: [
               Expanded(child: _buildTextField("راتب الساعة", hourlyRateController, Icons.money, isNumber: true)),
@@ -97,33 +121,15 @@ class _EditEmployeePageState extends State<EditEmployeePage> {
     );
   }
 
-  Widget _buildWorkshopDropdown() {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 12.w),
-      decoration: BoxDecoration(
-        color: Colors.grey.shade50,
-        borderRadius: BorderRadius.circular(12.r),
-        border: Border.all(color: Colors.grey.shade300),
-      ),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<String>(
-          value: workshops.contains(selectedWorkshop) ? selectedWorkshop : workshops.first,
-          isExpanded: true,
-          style: TextStyle(fontSize: 14.sp, color: Colors.black),
-          items: workshops.map((w) => DropdownMenuItem(value: w, child: Text(w, style: TextStyle(fontSize: 14.sp)))).toList(),
-          onChanged: (val) => setState(() => selectedWorkshop = val!),
-        ),
-      ),
-    );
-  }
 
-  Widget _buildTextField(String label, TextEditingController controller, IconData icon, {bool isNumber = false, bool isPhone = false}) {
+  Widget _buildTextField(String label, TextEditingController controller, IconData icon, {bool isNumber = false, bool isPhone = false, bool isPassword = false, TextInputType keyboardType = TextInputType.text}) {
     return Padding(
       padding: EdgeInsets.only(bottom: 15.h),
       child: TextField(
         controller: controller,
         style: TextStyle(fontSize: 14.sp),
-        keyboardType: isNumber || isPhone ? TextInputType.number : TextInputType.text,
+        keyboardType: keyboardType == TextInputType.text && (isNumber || isPhone) ? TextInputType.number : keyboardType,
+        obscureText: isPassword,
         decoration: InputDecoration(
           labelText: label,
           labelStyle: TextStyle(fontSize: 12.sp),
@@ -151,9 +157,14 @@ class _EditEmployeePageState extends State<EditEmployeePage> {
           context.read<EmployeeDetailsBloc>().add(UpdateEmployeeFullEvent(
             name: nameController.text,
             phoneNumber: phoneController.text,
-            workshop: selectedWorkshop,
+            email: emailController.text,
+            password: passwordController.text == '********' ? null : passwordController.text,
+            position: positionController.text,
+            department: departmentController.text,
+
             hourlyRate: double.tryParse(hourlyRateController.text) ?? 0.0,
             overtimeRate: double.tryParse(overtimeRateController.text) ?? 0.0,
+            currentLocation: currentLocationController.text,
           ));
           Navigator.pop(context);
           ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("تم تحديث البيانات بنجاح", style: TextStyle(fontSize: 13.sp))));

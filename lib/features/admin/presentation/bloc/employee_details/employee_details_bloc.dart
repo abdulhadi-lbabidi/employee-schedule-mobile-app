@@ -14,6 +14,8 @@ import '../../../domain/usecases/get_employee_details.dart';
 import '../../../domain/usecases/update_hourly_rate.dart';
 import '../../../domain/usecases/update_overtime_rate.dart';
 import '../../../domain/usecases/toggle_employee_archive.dart';
+import '../../../domain/usecases/update_employee_full_details.dart'; // 🔹 إضافة
+
 import 'employee_details_event.dart';
 import 'employee_details_state.dart';
 
@@ -26,6 +28,8 @@ class EmployeeDetailsBloc
   final ConfirmPaymentUseCase confirmPaymentUseCase;
   final DeleteEmployeeUseCase deleteEmployeeUseCase;
   final ToggleEmployeeArchiveUseCase toggleEmployeeArchiveUseCase;
+  final UpdateEmployeeFullDetailsUseCase updateEmployeeFullDetailsUseCase; // 🔹 إضافة
+
   final AdminRemoteDataSourceImpl remoteDataSource;
   final AuditLogRepository auditLogRepository;
 
@@ -40,6 +44,7 @@ class EmployeeDetailsBloc
     this.toggleEmployeeArchiveUseCase,
     this.remoteDataSource,
     this.auditLogRepository,
+    this.updateEmployeeFullDetailsUseCase, // 🔹 إضافة
   ) : super(EmployeeDetailsInitial()) {
     on<LoadEmployeeDetailsEvent>(_onLoadDetails);
     on<UpdateHourlyRateEvent>(_onUpdateHourlyRate);
@@ -75,7 +80,6 @@ class EmployeeDetailsBloc
     if (_employee == null) return;
     try {
       await toggleEmployeeArchiveUseCase(event.employeeId, event.isArchived);
-      //_employee = _employee!.copyWith(isArchived: event.isArchived);
       _employee = _employee!;
       emit(EmployeeDetailsLoaded(_employee!));
 
@@ -115,29 +119,6 @@ class EmployeeDetailsBloc
                 ? "دفع مستحقات الأسبوع ${event.weekNumber} بالكامل"
                 : "دفع مبلغ ${event.amountPaid} ل.س من مستحقات الأسبوع ${event.weekNumber}",
       );
-
-      // final updatedHistory =
-      //     currentEmp.weeklyHistory.map((week) {
-      //       if (week.weekNumber == event.weekNumber) {
-      //         double newAmountPaid = week.amountPaid + event.amountPaid;
-      //         return WeeklyWorkHistory(
-      //           weekNumber: week.weekNumber,
-      //           month: week.month,
-      //           year: week.year,
-      //           workshops: week.workshops,
-      //           isPaid: event.isFullPayment,
-      //           amountPaid: newAmountPaid,
-      //         );
-      //       }
-      //       return week;
-      //     }).toList();
-      //
-      // final updatedEmployee = currentEmp.copyWith(
-      //   weeklyHistory: updatedHistory,
-      // );
-      //
-      // _employee = updatedEmployee;
-      // emit(EmployeeDetailsLoaded(updatedEmployee));
     } catch (e) {
       debugPrint('Error confirming payment: $e');
       emit(EmployeeDetailsError('فشل العملية: ${e.toString()}'));
@@ -155,20 +136,36 @@ class EmployeeDetailsBloc
     try {
       final oldEmployee = _employee!;
 
-      final updatedEmployee = _employee!.copyWith(
-        user:User(fullName: event.name,phoneNumber:event.phoneNumber ) ,
-        // phoneNumber: ,
-        // workshopName: event.workshop,
+      // 🔹 استدعاء الـ UseCase الجديد بجميع الحقول
+      await updateEmployeeFullDetailsUseCase(UpdateEmployeeFullDetailsParams(
+        employeeId: oldEmployee.id.toString(),
+        name: event.name,
+        phoneNumber: event.phoneNumber,
+        email: event.email,
+        password: event.password,
+        position: event.position,
+        department: event.department,
+
         hourlyRate: event.hourlyRate,
         overtimeRate: event.overtimeRate,
+        currentLocation: event.currentLocation,
+      ));
+
+      // 🔹 تحديث الكائن المحلي _employee بعد النجاح
+      _employee = _employee!.copyWith(
+        user: _employee!.user!.copyWith(
+          fullName: event.name,
+          phoneNumber: event.phoneNumber,
+          email: event.email,
+        ),
+        position: event.position,
+        department: event.department,
+
+        hourlyRate: event.hourlyRate,
+        overtimeRate: event.overtimeRate,
+        currentLocation: event.currentLocation,
+        // كلمة المرور لا يتم تحديثها محليًا هنا، فقط يتم إرسالها للباك إند
       );
-      //
-      // // ✅ التصحيح: استخدام toDatumModel() كـ Extension
-      // final updatedDatum = updatedEmployee.toDatumModel();
-
-      await remoteDataSource.updateEmployee(updatedEmployee);
-
-      _employee = updatedEmployee;
 
       await auditLogRepository.logAction(
         actionType: "تحديث بيانات الموظف",
@@ -191,7 +188,6 @@ class EmployeeDetailsBloc
     try {
       await deleteEmployeeUseCase(event.employeeId);
 
-      // Log audit action for employee deletion
       if (_employee != null) {
         await auditLogRepository.logAction(
           actionType: "حذف موظف",
@@ -222,7 +218,6 @@ class EmployeeDetailsBloc
       final oldRate = _employee!.hourlyRate;
       _employee = _employee!.copyWith(hourlyRate: event.newRate);
 
-      // Log audit action for hourly rate update
       await auditLogRepository.logAction(
         actionType: "تحديث الراتب الساعي",
         targetName: _employee!.user!.fullName!,
@@ -251,7 +246,6 @@ class EmployeeDetailsBloc
       final oldRate = _employee!.overtimeRate;
       _employee = _employee!.copyWith(overtimeRate: event.newRate);
 
-      // Log audit action for overtime rate update
       await auditLogRepository.logAction(
         actionType: "تحديث معدل الإضافي",
         targetName: _employee!.user!.fullName!,
@@ -282,11 +276,26 @@ class EmployeeDetailsBloc
         'رقم الهاتف: من "${oldEmployee.user!.phoneNumber}" إلى "${event.phoneNumber}"',
       );
     }
-    // if (oldEmployee.workshopName != event.workshop) {
-    //   changes.add(
-    //     'ورشة العمل: من "${oldEmployee.workshopName}" إلى "${event.workshop}"',
-    //   );
-    // }
+    if (oldEmployee.user!.email != event.email && event.email != null) {
+      changes.add(
+        'البريد الإلكتروني: من "${oldEmployee.user!.email}" إلى "${event.email}"',
+      );
+    }
+    if (oldEmployee.position != event.position && event.position != null) {
+      changes.add(
+        'المسمى الوظيفي: من "${oldEmployee.position}" إلى "${event.position}"',
+      );
+    }
+    if (oldEmployee.department != event.department && event.department != null) {
+      changes.add(
+        'القسم: من "${oldEmployee.department}" إلى "${event.department}"',
+      );
+    }
+    if (oldEmployee.currentLocation != event.currentLocation && event.currentLocation != null) {
+      changes.add(
+        'الموقع الحالي: من "${oldEmployee.currentLocation}" إلى "${event.currentLocation}"',
+      );
+    }
     if (oldEmployee.hourlyRate != event.hourlyRate) {
       changes.add(
         'الراتب الساعي: من ${oldEmployee.hourlyRate} إلى ${event.hourlyRate}',

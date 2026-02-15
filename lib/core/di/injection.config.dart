@@ -51,6 +51,8 @@ import '../../features/admin/domain/usecases/toggle_employee_archive.dart'
     as _i368;
 import '../../features/admin/domain/usecases/toggle_workshop_archive.dart'
     as _i849;
+import '../../features/admin/domain/usecases/update_employee_full_details.dart'
+    as _i668;
 import '../../features/admin/domain/usecases/update_hourly_rate.dart' as _i547;
 import '../../features/admin/domain/usecases/update_overtime_rate.dart'
     as _i949;
@@ -345,6 +347,8 @@ _i174.GetIt $initGetIt(
       ));
   gh.lazySingleton<_i345.GetAllEmployeesUseCase>(
       () => _i345.GetAllEmployeesUseCase(gh<_i583.AdminRepository>()));
+  gh.factory<_i668.UpdateEmployeeFullDetailsUseCase>(() =>
+      _i668.UpdateEmployeeFullDetailsUseCase(gh<_i583.AdminRepository>()));
   gh.lazySingleton<_i541.AddEmployeeUseCase>(
       () => _i541.AddEmployeeUseCase(gh<_i583.AdminRepository>()));
   gh.lazySingleton<_i982.AddWorkshopUseCase>(
@@ -416,6 +420,7 @@ _i174.GetIt $initGetIt(
         gh<_i368.ToggleEmployeeArchiveUseCase>(),
         gh<_i14.AdminRemoteDataSourceImpl>(),
         gh<_i184.AuditLogRepository>(),
+        gh<_i668.UpdateEmployeeFullDetailsUseCase>(),
       ));
   gh.factory<_i934.EmployeesBloc>(() => _i934.EmployeesBloc(
         gh<_i345.GetAllEmployeesUseCase>(),

@@ -119,19 +119,50 @@ class AdminRemoteDataSourceImpl with HandlingApiManager {
 
   }
 
+  // 🔹 إضافة دالة تحديث بيانات الموظف الكاملة
+  Future<void> updateEmployeeFullDetails({
+    required String employeeId,
+    required String name,
+    required String phoneNumber,
+    String? email,
+    String? password,
+    String? position,
+    String? department,
+
+    required double hourlyRate,
+    required double overtimeRate,
+    String? currentLocation,
+  }) async {
+    return wrapHandlingApi(
+      tryCall: () => _baseApi.put(
+        ApiVariables.employeeUpdate(employeeId), // 🔹 استخدام نقطة نهاية التحديث
+        data: {
+          'full_name': name,
+          'phone_number': phoneNumber,
+          'email': email,
+          'password': password,
+          'position': position,
+          'department': department,
+
+          'hourly_rate': hourlyRate,
+          'overtime_rate': overtimeRate,
+          'current_location': currentLocation,
+        },
+      ),
+      jsonConvert: (_) {},
+    );
+  }
+
   Future<List<WorkshopEntity>> getWorkshops() async {
     final response = await _baseApi.get(ApiVariables.workshops());
 
     if (response.statusCode == 200) {
-      // ✅ تحقق من شكل البيانات
       if (response.data is List) {
-        // لو البيانات list مباشرة
         final list = response.data as List;
         return list
             .map((e) => WorkshopEntity.fromJson(e as Map<String, dynamic>))
             .toList();
       } else if (response.data is Map) {
-        // لو البيانات wrapped في {data: [...]}
         final data = response.data as Map<String, dynamic>;
         final list = data['data'] as List? ?? [];
         return list
@@ -139,7 +170,6 @@ class AdminRemoteDataSourceImpl with HandlingApiManager {
             .toList();
       }
     }
-
     throw Exception('Failed to load workshops: ${response.statusCode}');
   }
 

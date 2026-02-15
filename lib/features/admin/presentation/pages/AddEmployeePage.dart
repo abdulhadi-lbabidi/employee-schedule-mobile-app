@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/utils/app_strings.dart';
-import '../../data/models/employee model/employee_model.dart';
+import '../../data/models/employee%20model/employee_model.dart';
 import '../../domain/entities/employee_entity.dart';
 import '../../domain/usecases/add_employee.dart';
 import '../bloc/employees/employees_bloc.dart';
@@ -21,9 +21,21 @@ class _AddEmployeePageState extends State<AddEmployeePage> {
   final emailController = TextEditingController();
   final phoneController = TextEditingController();
   final passwordController = TextEditingController();
+  final positionController = TextEditingController(); // 🔹 جديد
+  final departmentController = TextEditingController(); // 🔹 جديد
+  final currentLocationController = TextEditingController(); // 🔹 جديد
   final hourlyRateController = TextEditingController(text: "6");
   final overtimeRateController = TextEditingController(text: "1");
   bool _obscurePassword = true;
+
+  @override
+  void initState() {
+    super.initState();
+    //  تهيئة الـ Controllers الجديدة بقيم افتراضية (فارغة)
+    positionController.text = "";
+    departmentController.text = "";
+    currentLocationController.text = "";
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -60,10 +72,11 @@ class _AddEmployeePageState extends State<AddEmployeePage> {
                 theme,
               ),
               _buildTextField(
-                "email",
+                "البريد الإلكتروني", // 🔹 جديد
                 emailController,
-                Icons.person_add_alt_1_rounded,
+                Icons.email_outlined,
                 theme,
+                keyboardType: TextInputType.emailAddress,
               ),
               Padding(
                 padding: EdgeInsets.only(bottom: 16.h),
@@ -128,10 +141,27 @@ class _AddEmployeePageState extends State<AddEmployeePage> {
                 theme,
                 isPhone: true,
               ),
+              _buildTextField(
+                "المسمى الوظيفي", // 🔹 جديد
+                positionController,
+                Icons.work_outline,
+                theme,
+              ),
+              _buildTextField(
+                "القسم", // 🔹 جديد
+                departmentController,
+                Icons.business_center_outlined,
+                theme,
+              ),
+              _buildTextField(
+                "الموقع الحالي", // 🔹 جديد
+                currentLocationController,
+                Icons.location_on_outlined,
+                theme,
+              ),
 
-              // ✅ حذفنا قسم الورشات بالكلية
               SizedBox(height: 25.h),
-              _buildSectionTitle("الإعدادات المالية (ل.س)", theme),
+              _buildSectionTitle("الإعدادات المالية (\$)", theme),
               SizedBox(height: 15.h),
               Row(
                 children: [
@@ -184,6 +214,7 @@ class _AddEmployeePageState extends State<AddEmployeePage> {
     ThemeData theme, {
     bool isNumber = false,
     bool isPhone = false,
+    TextInputType keyboardType = TextInputType.text, // 🔹 جديد
   }) {
     return Padding(
       padding: EdgeInsets.only(bottom: 16.h),
@@ -193,8 +224,7 @@ class _AddEmployeePageState extends State<AddEmployeePage> {
           fontSize: 14.sp,
           color: theme.textTheme.bodyLarge?.color,
         ),
-        keyboardType:
-            isNumber || isPhone ? TextInputType.number : TextInputType.text,
+        keyboardType: keyboardType == TextInputType.text && (isNumber || isPhone) ? TextInputType.number : keyboardType, // 🔹 استخدام keyboardType الجديد
         decoration: InputDecoration(
           labelText: label,
           labelStyle: TextStyle(fontSize: 12.sp, color: theme.disabledColor),
@@ -243,29 +273,21 @@ class _AddEmployeePageState extends State<AddEmployeePage> {
     );
   }
 
-  // ✅ _handleSubmit مبسط بدون ورشات
   void _handleSubmit(BuildContext context) {
     if (_formKey.currentState!.validate()) {
-      // ⚠️ هذا الجزء هو مصدر الخطأ: يجب أن يكون التحويل آمناً
       final hourlyRate = _safeParseDouble(hourlyRateController.text);
       final overtimeRate = _safeParseDouble(overtimeRateController.text);
 
       final newEmployee = AddEmployeeParams(
-        // id: DateTime.now().millisecondsSinceEpoch.toString(),
         fullName: nameController.text,
         phone_number: phoneController.text,
         email: emailController.text,
         password: passwordController.text,
-
-        current_location: 'غير محدد',
+        position: positionController.text, // جديد
+        department: departmentController.text, //  جديد
+        current_location: currentLocationController.text, //  جديد
         hourly_rate: hourlyRate,
         overtime_rate: overtimeRate,
-        department: 'Developer',
-        position: 'IT',
-        // dailyWorkHours: 8.0, // ✅ تم إصلاح: تمرير double بدلاً من Map
-        // weeklyHistory: [],
-        // weeklyOvertime: 0,
-        // isArchived: false,
       );
 
       context.read<EmployeesBloc>().add(AddEmployeeEvent(newEmployee));
@@ -282,12 +304,10 @@ class _AddEmployeePageState extends State<AddEmployeePage> {
     }
   }
 
-  // دالة مساعدة للتحويل الآمن من String إلى double
   double _safeParseDouble(String text) {
     try {
       return double.parse(text.trim());
     } catch (e) {
-      // إذا فشل التحويل، نرجع 0.0 أو قيمة افتراضية
       return 0.0;
     }
   }
@@ -295,8 +315,12 @@ class _AddEmployeePageState extends State<AddEmployeePage> {
   @override
   void dispose() {
     nameController.dispose();
+    emailController.dispose();
     phoneController.dispose();
     passwordController.dispose();
+    positionController.dispose(); // 🔹 جديد
+    departmentController.dispose(); // 🔹 جديد
+    currentLocationController.dispose(); // 🔹 جديد
     hourlyRateController.dispose();
     overtimeRateController.dispose();
     super.dispose();

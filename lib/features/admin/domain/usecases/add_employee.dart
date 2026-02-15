@@ -40,7 +40,6 @@ class AddEmployeeParams with Params {
 
   @override
   BodyMap getBody() {
-    // TODO: implement getBody
     return {
       'full_name': fullName,
       'phone_number': phone_number,

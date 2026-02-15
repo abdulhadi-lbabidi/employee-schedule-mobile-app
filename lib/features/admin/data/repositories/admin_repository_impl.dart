@@ -5,11 +5,6 @@ import 'package:untitled8/common/helper/src/typedef.dart';
 import 'package:untitled8/core/unified_api/error_handler.dart';
 import 'package:untitled8/features/admin/data/datasources/admin_remote_data_source_impl.dart';
 import 'package:untitled8/features/admin/data/models/employee%20model/get_employee_response.dart';
-import 'package:untitled8/features/admin/data/models/employee%20model/get_employee_response.dart';
-import 'package:untitled8/features/admin/data/models/employee%20model/get_employee_response.dart';
-import 'package:untitled8/features/admin/data/models/employee%20model/get_employee_response.dart';
-import 'package:untitled8/features/admin/data/models/employee%20model/get_employee_response.dart';
-import 'package:untitled8/features/admin/data/models/employee%20model/get_employee_response.dart';
 import '../../domain/entities/employee_entity.dart';
 import '../../domain/entities/workshop_entity.dart';
 import '../../domain/repositories/admin_repository.dart';
@@ -94,5 +89,32 @@ class AdminRepositoryImpl with HandlingException implements AdminRepository {
     required double newRate,
   })  async=>
       wrapHandlingException(tryCall: () => remote.updateOvertimeRate(employeeId, newRate));
+
+  @override
+  DataResponse<void> updateEmployeeFullDetails({
+    required String employeeId,
+    required String name,
+    required String phoneNumber,
+    String? email,
+    String? password,
+    String? position,
+    String? department,
+    required double hourlyRate,
+    required double overtimeRate,
+    String? currentLocation,
+  }) async => wrapHandlingException(
+    tryCall: () => remote.updateEmployeeFullDetails(
+      employeeId: employeeId,
+      name: name,
+      phoneNumber: phoneNumber,
+      email: email,
+      password: password,
+      position: position,
+      department: department,
+      hourlyRate: hourlyRate,
+      overtimeRate: overtimeRate,
+      currentLocation: currentLocation,
+    ),
+  );
 
 }

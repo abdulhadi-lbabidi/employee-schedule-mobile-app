@@ -1,9 +1,10 @@
 import 'package:injectable/injectable.dart';
-import 'package:untitled8/features/admin/domain/repositories/employee_repository.dart';
+
+import '../repositories/admin_repository.dart';
 
 @injectable
 class UpdateEmployeeFullDetailsUseCase {
-  final EmployeeRepository repository;
+  final AdminRepository repository;
 
   UpdateEmployeeFullDetailsUseCase(this.repository);
 
@@ -16,7 +17,6 @@ class UpdateEmployeeFullDetailsUseCase {
       password: params.password,
       position: params.position,
       department: params.department,
-      workshop: params.workshop,
       hourlyRate: params.hourlyRate,
       overtimeRate: params.overtimeRate,
       currentLocation: params.currentLocation,
@@ -32,7 +32,6 @@ class UpdateEmployeeFullDetailsParams {
   final String? password;
   final String? position;
   final String? department;
-  final String workshop;
   final double hourlyRate;
   final double overtimeRate;
   final String? currentLocation;
@@ -45,7 +44,6 @@ class UpdateEmployeeFullDetailsParams {
     this.password,
     this.position,
     this.department,
-    required this.workshop,
     required this.hourlyRate,
     required this.overtimeRate,
     this.currentLocation,
