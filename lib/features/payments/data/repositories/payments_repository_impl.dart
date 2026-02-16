@@ -21,5 +21,6 @@ class PaymentsRepositoryImpl
   Future<Either<Failure, DuesReportModel>> getDuesReport() async =>
       wrapHandlingException(
         tryCall: () => remote.getDuesReport(),
+
       );
 }

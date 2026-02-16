@@ -21,6 +21,7 @@ class DuesReportBloc extends Bloc<DuesReportEvent, DuesReportState> {
     emit(DuesReportLoading());
 
     final result = await getDuesReport();
+    print("DuesReportBloc: $result");
 
     result.fold(
           (failure) => emit(DuesReportError(failure.message)),

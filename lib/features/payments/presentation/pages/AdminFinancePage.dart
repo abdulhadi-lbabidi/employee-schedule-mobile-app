@@ -1,17 +1,25 @@
-import 'package:dartz/dartz.dart' as emp;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-
 import '../../../admin/presentation/pages/EmployeeDetailsPage.dart';
 import '../bloc/dues-report/dues_report_bloc.dart';
 import '../bloc/dues-report/dues_report_event.dart';
 import '../bloc/dues-report/dues_report_state.dart';
 
-
-
-class FinancialDashboard extends StatelessWidget {
+class FinancialDashboard extends StatefulWidget {
   const FinancialDashboard({super.key});
+
+  @override
+  State<FinancialDashboard> createState() => _FinancialDashboardState();
+}
+
+class _FinancialDashboardState extends State<FinancialDashboard> {
+  @override
+  void initState() {
+    super.initState();
+    // استدعاء التحميل من الـ Bloc الموجود مسبقاً في الـ main
+    context.read<DuesReportBloc>().add(LoadDuesReport());
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -27,12 +35,22 @@ class FinancialDashboard extends StatelessWidget {
           }
 
           if (state is DuesReportError) {
-            return Center(child: Text(state.message));
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text("خطأ: ${state.message}"),
+                  ElevatedButton(
+                    onPressed: () => context.read<DuesReportBloc>().add(LoadDuesReport()),
+                    child: const Text("إعادة المحاولة"),
+                  )
+                ],
+              ),
+            );
           }
 
           if (state is DuesReportLoaded) {
             final report = state.report;
-
             return Padding(
               padding: const EdgeInsets.all(16),
               child: Column(
@@ -90,6 +108,7 @@ class FinancialDashboard extends StatelessWidget {
   Widget _buildStatisticsCard(int employees, double salaries) {
     return Card(
       color: Colors.indigo,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
       child: Padding(
         padding: const EdgeInsets.all(20),
         child: Row(

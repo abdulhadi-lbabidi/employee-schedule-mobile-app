@@ -15,6 +15,7 @@ class PaymentsDataSourcesImpl with HandlingApiManager {
     return wrapHandlingApi(
       tryCall: () => _baseApi.get(ApiVariables.getDuesReport()),
       jsonConvert: (json) => DuesReportModel.fromJson(json),
+
     );
   }
 }
