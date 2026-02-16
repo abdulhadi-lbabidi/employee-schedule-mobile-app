@@ -1,5 +1,4 @@
 import '../../../data/models/employee model/employee_model.dart';
-import '../../../domain/entities/employee_entity.dart';
 
 abstract class EmployeeDetailsState {}
 

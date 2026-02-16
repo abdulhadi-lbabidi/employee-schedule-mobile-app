@@ -9,11 +9,10 @@ class GetAttendanceResponse {
   final DateTime? startDate;
   final DateTime? endDate;
 
-  final int? totalRegularHours;
-  final int? totalOvertimeHours;
+  final double? totalRegularHours;
+  final double? totalOvertimeHours;
   final List<AttendanceModel>? attendances;
 
-  /// الإضافة الجديدة: رقم الأسبوع داخل الشهر
   final int? weekOfMonth;
 
   GetAttendanceResponse({
@@ -28,8 +27,8 @@ class GetAttendanceResponse {
   GetAttendanceResponse copyWith({
     DateTime? startDate,
     DateTime? endDate,
-    int? totalRegularHours,
-    int? totalOvertimeHours,
+    double? totalRegularHours,
+    double? totalOvertimeHours,
     List<AttendanceModel>? attendances,
     int? weekOfMonth,
   }) =>
@@ -49,7 +48,6 @@ class GetAttendanceResponse {
     DateTime? start;
     DateTime? end;
 
-    // دعم الصيغة القديمة "2026-02-07 إلى 2026-02-13"
     final weekString = json["week"];
     if (weekString != null && weekString is String) {
       final parts = weekString.split("إلى");
@@ -59,7 +57,6 @@ class GetAttendanceResponse {
       }
     }
 
-    // دعم start_date / end_date من backend
     start ??= json["start_date"] != null
         ? DateTime.tryParse(json["start_date"])
         : null;
@@ -67,10 +64,8 @@ class GetAttendanceResponse {
         ? DateTime.tryParse(json["end_date"])
         : null;
 
-    // ======= حساب رقم الأسبوع داخل الشهر =======
     int? computedWeekOfMonth;
     if (start != null) {
-      final firstDayOfMonth = DateTime(start.year, start.month, 1);
       final dayOffset = start.day - 1;
       computedWeekOfMonth = (dayOffset ~/ 7) + 1;
     }
@@ -78,8 +73,10 @@ class GetAttendanceResponse {
     return GetAttendanceResponse(
       startDate: start,
       endDate: end,
-      totalRegularHours: json["total_regular_hours"],
-      totalOvertimeHours: json["total_overtime_hours"],
+      totalRegularHours:
+      (json["total_regular_hours"] as num?)?.toDouble(),
+      totalOvertimeHours:
+      (json["total_overtime_hours"] as num?)?.toDouble(),
       attendances: json["attendances"] == null
           ? []
           : List<AttendanceModel>.from(
@@ -100,7 +97,6 @@ class GetAttendanceResponse {
     "week_of_month": weekOfMonth,
   };
 
-  /// للعرض فقط (كما كان)
   String get weekLabel {
     if (startDate == null || endDate == null) return "";
     return "${startDate!.toIso8601String().split('T').first} "
@@ -108,11 +104,11 @@ class GetAttendanceResponse {
         "${endDate!.toIso8601String().split('T').first}";
   }
 
-  /// فحص هل تاريخ داخل هذا الأسبوع
   bool containsDate(DateTime date) {
     if (startDate == null || endDate == null) return false;
 
-    final normalized = DateTime(date.year, date.month, date.day);
+    final normalized =
+    DateTime(date.year, date.month, date.day);
 
     return !normalized.isBefore(
       DateTime(startDate!.year, startDate!.month, startDate!.day),

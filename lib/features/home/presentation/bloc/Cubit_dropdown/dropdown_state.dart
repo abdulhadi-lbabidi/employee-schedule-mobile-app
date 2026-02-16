@@ -1,9 +1,9 @@
 import 'package:untitled8/features/Attendance/data/models/attendance_model.dart';
 
-import '../../../../admin/domain/entities/workshop_entity.dart';
+import '../../../../admin/data/models/workshop_models/workshop_model.g.dart';
 
 class DropdownState {
-  final WorkshopEntity? selectedValue;
+  final WorkshopModel? selectedValue;
   final AttendanceModel? localeAttendanceModel;
   final AttendanceModel? setLocaleAttendanceForLogOut;
 
@@ -21,7 +21,7 @@ class DropdownState {
     return DropdownState(
       selectedValue: identical(selectedValue, _unset)
           ? this.selectedValue
-          : selectedValue as WorkshopEntity?,
+          : selectedValue as WorkshopModel?,
       localeAttendanceModel: identical(localeAttendanceModel, _unset)
           ? this.localeAttendanceModel
           : localeAttendanceModel as AttendanceModel?,

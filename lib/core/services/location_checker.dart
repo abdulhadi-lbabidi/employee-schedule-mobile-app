@@ -3,17 +3,17 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:location/location.dart';
 import '../../common/helper/src/location_service.dart';
-import '../../features/admin/domain/entities/workshop_entity.dart';
+import '../../features/admin/data/models/workshop_models/workshop_model.g.dart';
 import '../toast.dart';
 
 class LocationChecker {
   static Future<void> checkUserProximity({
     required BuildContext context,
-    required WorkshopEntity workshop,
+    required WorkshopModel workshop,
     VoidCallback? onWithinRange,
   }) async {
 
-    if (!workshop.hasLocation) {
+    if (workshop.location ==null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("ورشة العمل لا تحتوي على موقع")),
       );
@@ -53,7 +53,7 @@ class LocationChecker {
       );
 
       // ❌ خارج المجال
-      if (distance > workshop.radiusInMeters) {
+      if (distance > workshop.radiusInMeters!) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(

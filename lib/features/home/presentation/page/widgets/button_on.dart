@@ -9,6 +9,7 @@ import 'package:untitled8/features/home/presentation/bloc/Cubit_dropdown/dropdow
 
 import '../../../../../common/helper/src/location_service.dart';
 import '../../../../../core/services/location_checker.dart';
+import '../../../../../core/widget/show_snack_bar.dart';
 import '../../../../Attendance/data/models/attendance_model.dart';
 import '../../bloc/Cubit_dropdown/dropdown_state.dart';
 
@@ -35,7 +36,7 @@ class _ButtonOnInState extends State<ButtonOnIn> {
                 final val =
                     context.read<DropdownCubit>().state.selectedValue;
                 if (val == null) {
-                  _showSnackBar(
+                  showSnackBar(
                     context,
                     'يرجى اختيار الورشة أولاً',
                     Colors.orange,
@@ -79,7 +80,7 @@ class _ButtonOnInState extends State<ButtonOnIn> {
                       ),
                     );
 
-                    _showSnackBar(
+                    showSnackBar(
                       context,
                       'تم تسجيل الحضور بنجاح',
                       Colors.green,
@@ -212,15 +213,7 @@ class _ButtonOutState extends State<ButtonOut> {
   }
 }
 
-void _showSnackBar(BuildContext context, String msg, Color color) {
-  ScaffoldMessenger.of(context).hideCurrentSnackBar();
-  ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(
-      content: Text(msg, style: TextStyle(fontSize: 13.sp)),
-      backgroundColor: color,
-    ),
-  );
-}
+
 
 int getWeekOfMonth(DateTime date) {
   // اليوم الأول من الشهر

@@ -20,10 +20,10 @@ Future<GetIt> configureInjection() async {
   final sharedPreferences = await SharedPreferences.getInstance();
   sl.registerLazySingleton(() => sharedPreferences);
 
-// ✅ HiveService
-  final hiveService = HiveService();
-  await hiveService.init(); // تأكد من تهيئة Hive
-  sl.registerSingleton<HiveService>(hiveService);
+// // ✅ HiveService
+//   final hiveService = HiveService();
+//   await hiveService.init(); // تأكد من تهيئة Hive
+//   sl.registerSingleton<HiveService>(hiveService);
   return $initGetIt(sl);
 }
 

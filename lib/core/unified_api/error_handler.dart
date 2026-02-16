@@ -45,6 +45,7 @@ class ErrorHandler implements Exception {
       failure = _handleError(error);
     } else {
       print('else state');
+      print(error.toString());
       // default error
       failure = ServerFailure(
         message: error.toString(),

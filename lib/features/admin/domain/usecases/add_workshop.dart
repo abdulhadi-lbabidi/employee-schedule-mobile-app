@@ -1,24 +1,42 @@
 import 'package:injectable/injectable.dart';
 import 'package:untitled8/common/helper/src/typedef.dart';
-
-import '../repositories/admin_repository.dart';
+import 'package:untitled8/core/unified_api/use_case.dart';
+import '../repositories/workshop_repository.dart';
 @lazySingleton
 class AddWorkshopUseCase {
-  final AdminRepository repository;
+  final WorkshopRepository repository;
 
   AddWorkshopUseCase(this.repository);
 
-  DataResponse<void> call({
-    required String name,
-    double? latitude,
-    double? longitude,
-    double radius = 200,
-  }) async {
-    return repository.addWorkshop(
-      name: name,
-      latitude: latitude,
-      longitude: longitude,
-      radius: radius,
+  DataResponse<void> call(
+    AddWorkshopParams params
+  ) async {
+
+    return repository.addWorkshop(params
     );
   }
+}
+
+class AddWorkshopParams with Params{
+  final String? name;
+  final double? latitude;
+  final double? longitude;
+  final double? radius ;
+  final String? city ;
+  final String? description;
+
+  AddWorkshopParams({required this.name, required this.latitude, required this.longitude, required this.radius, required this.city, required this.description});
+@override
+  BodyMap getBody() {
+    // TODO: implement getBody
+    return {
+      'name': name,
+      'latitude': latitude,
+      'longitude': longitude,
+      'radiusInMeters': radius,
+      'location':city,
+      'description':description
+    };
+  }
+
 }

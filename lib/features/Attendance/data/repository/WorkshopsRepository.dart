@@ -2,7 +2,8 @@ import 'package:dio/dio.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:hive/hive.dart';
 import 'package:injectable/injectable.dart';
-import '../../../admin/data/models/workshop_model.dart';
+
+import '../../../admin/data/models/workshop_models/workshop_model.g.dart';
 
 @lazySingleton
 class WorkshopsRepository {

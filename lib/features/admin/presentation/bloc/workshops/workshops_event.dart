@@ -1,19 +1,19 @@
+import '../../../domain/usecases/add_workshop.dart';
+
 abstract class WorkshopsEvent {}
 
-class LoadWorkshopsEvent extends WorkshopsEvent {}
+class GetAllWorkShopEvent extends WorkshopsEvent {}
+class GetAllArchivedWorkShopEvent extends WorkshopsEvent {}
+class GetWorkShopEmployeeDetailsEvent extends WorkshopsEvent {
+  final int id;
+
+  GetWorkShopEmployeeDetailsEvent({required this.id});
+}
 
 class AddWorkshopEvent extends WorkshopsEvent {
-  final String name;
-  final double? latitude;
-  final double? longitude;
-  final double radius;
+  final AddWorkshopParams params;
 
-  AddWorkshopEvent({
-    required this.name,
-    this.latitude,
-    this.longitude,
-    this.radius = 200,
-  });
+  AddWorkshopEvent({required this.params});
 }
 
 class DeleteWorkshopEvent extends WorkshopsEvent {
@@ -21,8 +21,14 @@ class DeleteWorkshopEvent extends WorkshopsEvent {
   DeleteWorkshopEvent(this.id);
 }
 
+
 class ToggleArchiveWorkshopEvent extends WorkshopsEvent {
   final String id;
-  final bool isArchived;
-  ToggleArchiveWorkshopEvent(this.id, this.isArchived);
+
+  ToggleArchiveWorkshopEvent({required this.id});
+}
+class RestoreArchiveWorkshopEvent extends WorkshopsEvent {
+  final String id;
+
+  RestoreArchiveWorkshopEvent({required this.id});
 }

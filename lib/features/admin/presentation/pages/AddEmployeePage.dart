@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import '../../../../core/utils/app_strings.dart';
-import '../../data/models/employee%20model/employee_model.dart';
-import '../../domain/entities/employee_entity.dart';
 import '../../domain/usecases/add_employee.dart';
 import '../bloc/employees/employees_bloc.dart';
 import '../bloc/employees/employees_event.dart';

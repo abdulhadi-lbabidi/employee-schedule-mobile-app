@@ -3,7 +3,6 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import '../../features/admin/data/models/employee model/employee_model.dart';
-import '../../features/admin/domain/entities/employee_entity.dart';
 import '../../features/Attendance/data/models/attendance_record.dart';
 
 class PdfReportService {

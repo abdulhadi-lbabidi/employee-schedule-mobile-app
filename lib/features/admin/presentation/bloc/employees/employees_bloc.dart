@@ -1,7 +1,6 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 import 'package:untitled8/features/admin/data/models/employee%20model/employee_model.dart';
-import '../../../domain/entities/employee_entity.dart';
 import '../../../domain/usecases/add_employee.dart';
 import '../../../domain/usecases/get_all_employees.dart';
 import '../../../domain/usecases/toggle_employee_archive.dart';

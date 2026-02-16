@@ -1,6 +1,5 @@
 import 'package:untitled8/features/admin/data/models/employee%20model/employee_model.dart';
 
-import '../../../domain/entities/employee_entity.dart';
 
 abstract class EmployeeDetailsEvent {}
 

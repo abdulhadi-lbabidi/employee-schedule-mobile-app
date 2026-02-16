@@ -1,11 +1,12 @@
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:injectable/injectable.dart';
 
 import '../features/Attendance/data/models/attendance_record.dart';
 import '../features/Notification/data/model/notification_model.dart';
 import '../features/admin/data/models/audit_log_model.dart';
-import '../features/admin/data/models/workshop_model.dart';
+import '../features/admin/data/models/workshop_models/workshop_model.g.dart';
 
-
+@lazySingleton
 class HiveService {
   final Map<String, Box> _boxes = {};
   bool _initialized = false;
@@ -23,7 +24,7 @@ class HiveService {
       openBox<AttendanceRecord>('attendanceBox'),
       openBox<AttendanceRecord>('pendingAttendance'),
       openBox('attendanceStatusBox'),
-      openBox<WorkshopModel>('workshopBox'),
+     // openBox<WorkshopModel>('workshopBox'),
       openBox<NotificationModel>('notificationBox'),
       openBox<AuditLogModel>('auditLogBox'),
       openBox('settings'),
@@ -34,7 +35,7 @@ class HiveService {
 
   void _registerAdapters() {
     if (!Hive.isAdapterRegistered(0)) Hive.registerAdapter(AttendanceRecordAdapter());
-    if (!Hive.isAdapterRegistered(1)) Hive.registerAdapter(WorkshopModelAdapter());
+   // if (!Hive.isAdapterRegistered(1)) Hive.registerAdapter(WorkshopModelAdapter());
     if (!Hive.isAdapterRegistered(2)) Hive.registerAdapter(NotificationModelAdapter());
   //  if (!Hive.isAdapterRegistered(3)) Hive.registerAdapter(AuditLogModelAdapter());
   }

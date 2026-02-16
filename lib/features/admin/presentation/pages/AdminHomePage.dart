@@ -40,7 +40,7 @@ class _AdminHomePageState extends State<AdminHomePage> {
     return MultiBlocProvider(
       providers: [
         BlocProvider(create: (_) => sl<EmployeesBloc>()..add(LoadEmployeesEvent())),
-        BlocProvider(create: (_) => sl<WorkshopsBloc>()..add(LoadWorkshopsEvent())),
+        //BlocProvider(create: (_) => sl<WorkshopsBloc>()..add(GetAllWorkShopEvent())),
         BlocProvider(create: (_) => sl<LoanBloc>()),
       ],
       child: Scaffold(

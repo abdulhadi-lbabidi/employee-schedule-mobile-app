@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:untitled8/features/admin/data/models/employee%20model/employee_model.dart';
-import '../../domain/entities/employee_entity.dart';
 
 class EmployeeStatusCard extends StatelessWidget {
   final EmployeeModel employee;

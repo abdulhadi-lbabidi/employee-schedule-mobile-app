@@ -340,7 +340,7 @@ class User {
   final String? fullName;
   final String? phoneNumber;
   final String? email;
-  final dynamic profileImageUrl;
+  final String? profileImageUrl;
 
   User({
     this.id,
@@ -355,7 +355,7 @@ class User {
     String? fullName,
     String? phoneNumber,
     String? email,
-    dynamic profileImageUrl,
+    String? profileImageUrl,
   }) =>
       User(
         id: id ?? this.id,

@@ -14,5 +14,6 @@ class PrefsKeys {
   static const selectedWorkShop = "selectedWorkShop";
   static const selectedAttendance = "selectedAttendance";
   static const getLocaleAttendanceForLogOut = "getLocaleAttendanceForLogOut";
+  static const localeWorkshopEmployeeDetails = "localeWorkshopEmployeeDetails";
 
 }

@@ -2,9 +2,10 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:untitled8/common/helper/src/prefs_keys.dart';
-import 'package:untitled8/features/Attendance/data/models/attendance_model.dart' hide User;
+import 'package:untitled8/features/Attendance/data/models/attendance_model.dart'
+    hide User;
+import 'package:untitled8/features/admin/data/models/workshop_models/workshop_model.g.dart';
 import '../../../core/di/injection.dart';
-import '../../../features/admin/domain/entities/workshop_entity.dart';
 import '../../../features/auth/data/model/login_response.dart';
 
 class AppVariables {
@@ -13,6 +14,7 @@ class AppVariables {
 
   // ------------------- Token -------------------
   static String? get token => _pref.getString(PrefsKeys.token);
+
   static set token(String? value) {
     if (value == null) {
       _pref.remove(PrefsKeys.token);
@@ -23,6 +25,7 @@ class AppVariables {
 
   // ------------------- Role -------------------
   static String? get role => _pref.getString(PrefsKeys.role);
+
   static set role(String? value) {
     if (value == null) {
       _pref.remove(PrefsKeys.role);
@@ -33,17 +36,19 @@ class AppVariables {
 
   // ------------------- First Time -------------------
   static bool get isFirstTime => _pref.getBool(PrefsKeys.isFirstTime) ?? true;
-  static set isFirstTime(bool value) => _pref.setBool(PrefsKeys.isFirstTime, value);
+
+  static set isFirstTime(bool value) =>
+      _pref.setBool(PrefsKeys.isFirstTime, value);
 
   // ------------------- Workshop -------------------
-  static WorkshopEntity? get selectedWorkShop {
+  static WorkshopModel? get selectedWorkShop {
     final jsonString = _pref.getString(PrefsKeys.selectedWorkShop);
     if (jsonString == null) return null;
     final Map<String, dynamic> jsonMap = json.decode(jsonString);
-    return WorkshopEntity.fromJson(jsonMap);
+    return WorkshopModel.fromJson(jsonMap);
   }
 
-  static set selectedWorkShop(WorkshopEntity? value) {
+  static set selectedWorkShop(WorkshopModel? value) {
     if (value == null) {
       _pref.remove(PrefsKeys.selectedWorkShop);
     } else {
@@ -51,7 +56,8 @@ class AppVariables {
     }
   }
 
-  static void clearSelectedWorkShop() => _pref.remove(PrefsKeys.selectedWorkShop);
+  static void clearSelectedWorkShop() =>
+      _pref.remove(PrefsKeys.selectedWorkShop);
 
   // ------------------- Attendance -------------------
   static AttendanceModel? get localeAttendance {
@@ -71,13 +77,17 @@ class AppVariables {
     } else {
       print('cash it');
 
-      _pref.setString(PrefsKeys.selectedAttendance, json.encode(value.toJson()));
+      _pref.setString(
+        PrefsKeys.selectedAttendance,
+        json.encode(value.toJson()),
+      );
     }
   }
-////////////////////////////////////secounds
 
+  ////////////////////////////////////secounds
 
-  static void clearLocaleAttendance() => _pref.remove(PrefsKeys.selectedAttendance);
+  static void clearLocaleAttendance() =>
+      _pref.remove(PrefsKeys.selectedAttendance);
 
   // ------------------- User -------------------
   static User? get user {
@@ -94,5 +104,3 @@ class AppVariables {
     }
   }
 }
-
-

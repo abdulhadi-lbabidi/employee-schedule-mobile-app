@@ -1,16 +1,14 @@
 import 'package:untitled8/common/helper/src/typedef.dart';
-
-import '../repositories/admin_repository.dart';
 import 'package:injectable/injectable.dart';
 
 import '../repositories/workshop_repository.dart';
 @lazySingleton
-class ToggleWorkshopArchiveUseCase {
+class RestoreWorkshopUseCase {
   final WorkshopRepository repository;
 
-  ToggleWorkshopArchiveUseCase(this.repository);
+  RestoreWorkshopUseCase(this.repository);
 
   DataResponse<void> call(String id) async {
-    return await repository.toggleWorkshopArchive(id);
+    return await repository.restoreArchivedWorkShop(id);
   }
 }

@@ -1,10 +1,9 @@
 import 'package:injectable/injectable.dart';
 import 'package:untitled8/common/helper/src/typedef.dart';
-
-import '../repositories/admin_repository.dart';
+import '../repositories/workshop_repository.dart';
 @lazySingleton
 class DeleteWorkshopUseCase {
-  final AdminRepository repository;
+  final WorkshopRepository repository;
 
   DeleteWorkshopUseCase(this.repository);
 

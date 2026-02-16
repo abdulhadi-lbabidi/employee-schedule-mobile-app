@@ -1,7 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:untitled8/common/helper/src/app_varibles.dart';
 import 'package:untitled8/features/Attendance/data/models/attendance_model.dart';
-import '../../../../admin/domain/entities/workshop_entity.dart';
+import 'package:untitled8/features/admin/data/models/workshop_models/workshop_model.g.dart';
 import 'dropdown_state.dart';
 import 'package:injectable/injectable.dart';
 
@@ -10,7 +10,7 @@ class DropdownCubit extends Cubit<DropdownState> {
   DropdownCubit() : super(DropdownState());
 
   /// تغيير القيمة المختارة (اسم الورشة)
-  void changeValue(WorkshopEntity newValue) {
+  void changeValue(WorkshopModel newValue) {
     emit(state.copyWith(selectedValue: newValue));
   }
 
@@ -35,7 +35,7 @@ class DropdownCubit extends Cubit<DropdownState> {
 
   void changeAttendance({
     required AttendanceModel newValue,
-    required WorkshopEntity workshopEntity,
+    required WorkshopModel workshopEntity,
   }) {
     AppVariables.localeAttendance = newValue;
     AppVariables.selectedWorkShop = workshopEntity;

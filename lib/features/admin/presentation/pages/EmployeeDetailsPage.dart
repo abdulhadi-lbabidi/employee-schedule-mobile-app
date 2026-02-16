@@ -7,7 +7,6 @@ import '../../../../core/utils/app_strings.dart';
 import '../../../../core/utils/date_helper.dart';
 import '../../../Notification/presentation/bloc/notification_bloc.dart';
 import '../../../Notification/presentation/bloc/notification_event.dart';
-import '../../domain/entities/employee_entity.dart';
 import '../bloc/employee_details/employee_details_bloc.dart';
 import '../bloc/employee_details/employee_details_event.dart';
 import '../bloc/employee_details/employee_details_state.dart';

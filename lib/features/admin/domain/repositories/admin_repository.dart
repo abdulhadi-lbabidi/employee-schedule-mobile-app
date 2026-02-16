@@ -1,8 +1,7 @@
 import 'package:untitled8/common/helper/src/typedef.dart';
-
 import 'package:untitled8/features/admin/data/models/employee%20model/employee_model.dart';
 import 'package:untitled8/features/admin/data/models/employee%20model/get_employee_response.dart';
-import '../entities/workshop_entity.dart';
+import '../../data/models/workshop_models/get_all_workshop_response.dart';
 import '../usecases/add_employee.dart';
 
 abstract class AdminRepository {
@@ -30,15 +29,6 @@ abstract class AdminRepository {
     required double overtimeRate,
     String? currentLocation,
   });
-  
-  // 🔹 إدارة الورشات
-  DataResponse<List<WorkshopEntity>> getWorkshops();
-  DataResponse<void> addWorkshop({
-    required String name,
-    double? latitude,
-    double? longitude,
-    double radius = 200,
-  });
-  DataResponse<void> deleteWorkshop(int id);
-  DataResponse<void> toggleWorkshopArchive(String id, bool isArchived);
+
+
 }

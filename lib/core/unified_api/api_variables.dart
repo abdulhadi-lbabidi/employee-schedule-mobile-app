@@ -75,6 +75,8 @@ class ApiVariables {
 
   // --- Admin: Workshops ---
   static Uri workshops() => _mainUri('/api/workshops/');
+  static Uri workshopsArchived() => _mainUri('/api/workshops-archived');
+  static Uri workshopEmployeesDetails(int id) => _mainUri('/api/workshops/$id/hours-by-employee');
 
   static Uri addWorkshop() => _mainUri('/api/workshops');
 
@@ -85,6 +87,7 @@ class ApiVariables {
   static Uri workshopDetails(int id) => _mainUri('/api/workshops/$id');
 
   static Uri archiveWorkshop(String id) => _mainUri('/api/workshops/$id');
+  static Uri restoreWorkshop(String id) => _mainUri('/api/workshops/$id/restore');
 
   static Uri archiveGetWorkshops() => _mainUri('/api/workshops-archived');
 

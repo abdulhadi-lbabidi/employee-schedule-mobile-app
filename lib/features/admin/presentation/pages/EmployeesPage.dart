@@ -185,7 +185,7 @@ class _EmployeesPageState extends State<EmployeesPage> {
             : Icon(Icons.person, color: theme.primaryColor, size: 24.sp)
         ),
 
-        title: Text(emp.user!.fullName!,
+        title: Text(emp.user?.fullName??'',
           style: TextStyle(
             fontWeight: FontWeight.bold, 
             fontSize: 14.sp,

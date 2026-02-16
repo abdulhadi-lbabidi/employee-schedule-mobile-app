@@ -3,7 +3,6 @@ import 'package:flutter_map/flutter_map.dart';
 
 import 'package:geolocator/geolocator.dart';
 import 'package:latlong2/latlong.dart' as latlong;
-
 class MapPickerWidget extends StatefulWidget {
   final latlong.LatLng? initialLocation;
   final double initialRadius;
@@ -22,13 +21,14 @@ class _MapPickerWidgetState extends State<MapPickerWidget> {
   latlong.LatLng? _pickedLocation;
   late double _radius;
   final MapController _mapController = MapController();
-  bool _isSatellite = true; // نجعله افتراضياً بنظام القمر الصناعي
+  bool _isSatellite = true;
 
   @override
   void initState() {
     super.initState();
     _pickedLocation = widget.initialLocation;
     _radius = widget.initialRadius;
+
     if (_pickedLocation == null) {
       _determinePosition();
     }
@@ -37,14 +37,15 @@ class _MapPickerWidgetState extends State<MapPickerWidget> {
   Future<void> _determinePosition() async {
     try {
       Position position = await Geolocator.getCurrentPosition();
+      final current =
+      latlong.LatLng(position.latitude, position.longitude);
+
       setState(() {
-        _pickedLocation = latlong.LatLng(position.latitude, position.longitude);
-        _mapController.move(_pickedLocation!, 15);
+        _pickedLocation = current;
+        _mapController.move(current, 15);
       });
-      // طباعة الإحداثيات عند تحديد الموقع الحالي
-      debugPrint(" Current Location: Lat: ${position.latitude}, Long: ${position.longitude}");
     } catch (e) {
-      debugPrint(" Error determining position: $e");
+      debugPrint("Error determining position: $e");
     }
   }
 
@@ -56,14 +57,16 @@ class _MapPickerWidgetState extends State<MapPickerWidget> {
         actions: [
           if (_pickedLocation != null)
             IconButton(
-              icon: const Icon(Icons.check, color: Colors.green, size: 30),
+              icon: const Icon(Icons.check,
+                  color: Colors.green, size: 28),
               onPressed: () {
-                // طباعة الإحداثيات عند الموافقة على الموقع
-                debugPrint("✅ Picked Location Confirmed: Lat: ${_pickedLocation!.latitude}, Long: ${_pickedLocation!.longitude}, Radius: $_radius");
-                Navigator.pop(context, {
-                  'location': _pickedLocation,
-                  'radius': _radius,
-                });
+                Navigator.pop(
+                  context,
+                  MapPickerResult(
+                    location: _pickedLocation!,
+                    radius: _radius,
+                  ),
+                );
               },
             ),
         ],
@@ -73,23 +76,22 @@ class _MapPickerWidgetState extends State<MapPickerWidget> {
           FlutterMap(
             mapController: _mapController,
             options: MapOptions(
-              initialCenter: _pickedLocation ?? const latlong.LatLng(33.5138, 36.2765),
+              initialCenter: _pickedLocation ??
+                  const latlong.LatLng(33.5138, 36.2765),
               initialZoom: 15,
-              onTap: (tapPosition, point) {
-                setState(() {
-                  _pickedLocation = point;
-                });
-                // طباعة الإحداثيات عند الضغط اليدوي على الخريطة
-                debugPrint("📍 Map Tapped: Lat: ${point.latitude}, Long: ${point.longitude}");
+              onTap: (_, point) {
+                setState(() => _pickedLocation = point);
               },
             ),
             children: [
               TileLayer(
-                urlTemplate: _isSatellite 
+                urlTemplate: _isSatellite
                     ? 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
                     : 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                userAgentPackageName: 'com.example.untitled8.nouh_app',
+                userAgentPackageName:
+                'com.example.untitled8.nouh_app',
               ),
+
               if (_pickedLocation != null) ...[
                 CircleLayer(
                   circles: [
@@ -120,37 +122,43 @@ class _MapPickerWidgetState extends State<MapPickerWidget> {
               ],
             ],
           ),
-          
+
+          /// تبديل نوع الخريطة
           Positioned(
             top: 20,
             left: 20,
             child: FloatingActionButton(
               mini: true,
               heroTag: 'toggleView',
-              onPressed: () => setState(() => _isSatellite = !_isSatellite),
+              onPressed: () =>
+                  setState(() => _isSatellite = !_isSatellite),
               backgroundColor: Colors.white,
               child: Icon(
-                _isSatellite ? Icons.map : Icons.satellite_alt,
+                _isSatellite
+                    ? Icons.map
+                    : Icons.satellite_alt,
                 color: Colors.blue,
               ),
             ),
           ),
-          
+
+          /// شريط اختيار نصف القطر
           Positioned(
             bottom: 20,
             left: 20,
             right: 20,
             child: Card(
-              elevation: 4,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15)),
               child: Padding(
-                padding: const EdgeInsets.all(15.0),
+                padding: const EdgeInsets.all(15),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
                       "نطاق السماح: ${_radius.toInt()} متر",
-                      style: const TextStyle(fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                          fontWeight: FontWeight.bold),
                     ),
                     Slider(
                       value: _radius,
@@ -158,22 +166,15 @@ class _MapPickerWidgetState extends State<MapPickerWidget> {
                       max: 500,
                       divisions: 19,
                       label: _radius.round().toString(),
-                      onChanged: (val) {
-                        setState(() {
-                          _radius = val;
-                        });
-                      },
-                    ),
-                    const Text(
-                      "اضغط على الخريطة لتحديد مركز الورشة",
-                      style: TextStyle(fontSize: 12, color: Colors.grey),
+                      onChanged: (val) =>
+                          setState(() => _radius = val),
                     ),
                   ],
                 ),
               ),
             ),
           ),
-          
+
           Positioned(
             top: 20,
             right: 20,
@@ -182,11 +183,22 @@ class _MapPickerWidgetState extends State<MapPickerWidget> {
               heroTag: 'myLocation',
               onPressed: _determinePosition,
               backgroundColor: Colors.white,
-              child: const Icon(Icons.my_location, color: Colors.blue),
+              child: const Icon(Icons.my_location,
+                  color: Colors.blue),
             ),
           ),
         ],
       ),
     );
   }
+}
+
+class MapPickerResult {
+  final latlong.LatLng location;
+  final double radius;
+
+  MapPickerResult({
+    required this.location,
+    required this.radius,
+  });
 }

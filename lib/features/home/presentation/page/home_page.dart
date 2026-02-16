@@ -30,7 +30,7 @@ class _HomePageState extends State<HomePage> {
     super.initState();
     Future.microtask(() {
       // context.read<AttendanceCubit>().loadAllRecords();
-      context.read<WorkshopsBloc>().add(LoadWorkshopsEvent());
+      context.read<WorkshopsBloc>().add(GetAllWorkShopEvent());
       context.read<DropdownCubit>().initDropDown();
       context.read<AttendanceBloc>().add(InitLocaleAttendanceEvent());
     });
@@ -88,10 +88,10 @@ class _HomePageState extends State<HomePage> {
                   .animate()
                   .fadeIn(delay: 200.ms, duration: 600.ms)
                   .scale(
-                    begin: const Offset(0.9, 0.9),
-                    end: const Offset(1, 1),
-                    curve: Curves.elasticOut,
-                  ),
+                begin: const Offset(0.9, 0.9),
+                end: const Offset(1, 1),
+                curve: Curves.elasticOut,
+              ),
 
               SizedBox(height: 30.h),
               _buildSectionTitle(
@@ -167,7 +167,10 @@ class _HomePageState extends State<HomePage> {
   Widget _buildStatusCard(ThemeData theme) {
     return BlocBuilder<DropdownCubit, DropdownState>(
       builder: (context, state) {
-        final isActive = context.read<DropdownCubit>().state.localeAttendanceModel != null;
+        final isActive = context
+            .read<DropdownCubit>()
+            .state
+            .localeAttendanceModel != null;
         String timeText =
             '--:--';
         return Cardattendancestatus(
@@ -202,7 +205,6 @@ class _HomePageState extends State<HomePage> {
   Widget _buildTodayRecordsList(ThemeData theme) {
     return BlocBuilder<AttendanceBloc, AttendanceState>(
       builder: (context, state) {
-
         final records = state.localeTodayAttendanceList;
 
 
@@ -220,11 +222,11 @@ class _HomePageState extends State<HomePage> {
             return Padding(
               padding: EdgeInsets.only(bottom: 12.h),
               child: CardTodRecord(
-                    day: r.date!.day.toString(),
-                    checkIn: r.checkIn!,
-                    checkOut: r.checkOut,
-                    workshop: r.workshop!.name!,
-                  )
+                day: r.date!.day.toString(),
+                checkIn: r.checkIn!,
+                checkOut: r.checkOut,
+                workshop: r.workshop!.name!,
+              )
                   .animate()
                   .fadeIn(delay: (800 + (index * 100)).ms, duration: 500.ms)
                   .slideX(begin: 0.1, end: 0),
