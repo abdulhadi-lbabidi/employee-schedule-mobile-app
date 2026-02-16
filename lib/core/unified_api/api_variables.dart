@@ -149,4 +149,7 @@ class ApiVariables {
       '');
   static Uri getEmployeesHoursAndPaySummary(String id) =>
       _mainUri('/api/employees/$id/hours-and-pay-summary');
+
+  static Uri getDuesReport() => _mainUri('/api/employees/dues-report');
+
 }

@@ -25,6 +25,7 @@ import 'features/home/presentation/bloc/Cubit_Navigation/navigation_cubit.dart';
 import 'features/home/presentation/bloc/Cubit_dropdown/dropdown_cubit.dart';
 import 'features/home/presentation/bloc/cubit_active_unactive/active_unactive_cubit.dart';
 import 'features/home/presentation/bloc/finance/finance_bloc.dart';
+import 'features/payments/presentation/bloc/dues-report/dues_report_bloc.dart';
 import 'features/profile/presentation/bloc/Profile/_profile_bloc.dart';
 import 'features/admin/presentation/bloc/admin_dashboard/admin_dashboard_bloc.dart';
 import 'features/admin/presentation/bloc/admin_profile/admin_profile_bloc.dart';
@@ -91,6 +92,7 @@ class MyApp extends StatelessWidget {
           providers: [
             BlocProvider(create: (_) => ThemeBloc()..add(GetCurrentThemeEvent())),
             BlocProvider(create: (_) => sl<LoginCubit>()),
+            BlocProvider(create: (_) => sl<DuesReportBloc>()),
             BlocProvider(create: (_) => sl<AttendanceBloc>()),
             BlocProvider(create: (_) => sl<NavigationnCubit>()),
             BlocProvider(create: (_) => sl<DropdownCubit>()),

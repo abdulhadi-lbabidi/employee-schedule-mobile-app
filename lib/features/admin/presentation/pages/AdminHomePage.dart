@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/di/injection.dart';
 import '../../../loan/presentation/bloc/loan_bloc.dart';
 import '../../../loan/presentation/pages/admin_loan_page.dart';
+import '../../../payments/presentation/pages/AdminFinancePage.dart';
 import '../bloc/employees/employees_bloc.dart';
 import '../bloc/employees/employees_event.dart';
 import '../bloc/workshops/workshops_bloc.dart';
@@ -12,7 +13,7 @@ import '../bloc/workshops/workshops_event.dart';
 
 import 'AdminDashboardPage.dart';
 import 'EmployeesPage.dart';
-import 'AdminFinancePage.dart';
+
 import 'WorkshopsPage.dart';
 import 'AdminNotificationsPage.dart'; 
 

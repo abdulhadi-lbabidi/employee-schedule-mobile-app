@@ -173,7 +173,7 @@ class EmployeeSummaryPage extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.location_on_outlined, color: Colors.white70, size: 14.sp),
+              Icon(Icons.sensor_occupied_rounded, color: Colors.white70, size: 14.sp),
               SizedBox(width: 4.w),
               Text(
                 summary.employee!.position.toString(),
