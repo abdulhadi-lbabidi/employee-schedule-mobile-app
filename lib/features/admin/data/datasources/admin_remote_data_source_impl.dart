@@ -1,4 +1,3 @@
-import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
 import 'package:untitled8/core/unified_api/base_api.dart';
 import 'package:untitled8/core/unified_api/handling_api_manager.dart';
@@ -6,7 +5,7 @@ import 'package:untitled8/features/admin/data/models/employee%20model/get_employ
 import '../../../../core/unified_api/api_variables.dart';
 import '../../domain/usecases/add_employee.dart';
 import '../models/employee model/employee_model.dart';
-import '../models/workshop_models/get_all_workshop_response.dart';
+import '../models/employee model/get_employee_details_hours_details_response.dart';
 
 @lazySingleton
 class AdminRemoteDataSourceImpl with HandlingApiManager {
@@ -31,6 +30,13 @@ class AdminRemoteDataSourceImpl with HandlingApiManager {
         tryCall: () => _baseApi.get(ApiVariables.employeeDetails(id)),
         jsonConvert: getEmployeeResponseFromJson,
       );
+
+  Future<GetEmployeeDetailsHoursResponse> getEmployeeDetailsHours(String id) async =>
+      wrapHandlingApi(
+        tryCall: () => _baseApi.get(ApiVariables.employeeDetailsHours(id)),
+        jsonConvert: getEmployeeDetailsHoursResponseFromJson,
+      );
+
 
   Future<void> updateHourlyRate(String id, double rate) async {
     return wrapHandlingApi(

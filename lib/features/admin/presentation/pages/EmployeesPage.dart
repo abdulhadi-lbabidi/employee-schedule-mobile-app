@@ -170,7 +170,7 @@ class _EmployeesPageState extends State<EmployeesPage> {
       ),
       child: ListTile(
         onTap: () async {
-          await Navigator.push(context, MaterialPageRoute(builder: (_) => EmployeeDetailsPage(employeeId: emp.id.toString())));
+          await Navigator.push(context, MaterialPageRoute(builder: (_) => EmployeeDetailsPage(employeeModel: emp)));
           if (context.mounted) {
             context.read<EmployeesBloc>().add(LoadEmployeesEvent());
           }

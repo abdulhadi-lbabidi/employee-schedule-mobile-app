@@ -1,6 +1,7 @@
 import 'package:untitled8/common/helper/src/typedef.dart';
 import 'package:untitled8/features/admin/data/models/employee%20model/employee_model.dart';
 import 'package:untitled8/features/admin/data/models/employee%20model/get_employee_response.dart';
+import '../../data/models/employee model/get_employee_details_hours_details_response.dart';
 import '../../data/models/workshop_models/get_all_workshop_response.dart';
 import '../usecases/add_employee.dart';
 
@@ -13,6 +14,7 @@ abstract class AdminRepository {
   DataResponse<void> confirmPayment({required String employeeId, required int weekNumber});
   DataResponse<void> addEmployee(AddEmployeeParams employee);
   DataResponse<GetEmployeeResponse> getEmployeeDetails(String id);
+  DataResponse<GetEmployeeDetailsHoursResponse> getEmployeeDetailsHoursDetails(String id);
   DataResponse<void> deleteEmployee(String id);
   DataResponse<void> toggleEmployeeArchive(String id, bool isArchived); // 🔹 أرشفة الموظف
 

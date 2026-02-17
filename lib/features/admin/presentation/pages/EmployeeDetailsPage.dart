@@ -4,27 +4,36 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:untitled8/features/admin/data/models/employee%20model/employee_model.dart';
 import '../../../../core/di/injection.dart';
 import '../../../../core/utils/app_strings.dart';
-import '../../../../core/utils/date_helper.dart';
 import '../../../Notification/presentation/bloc/notification_bloc.dart';
 import '../../../Notification/presentation/bloc/notification_event.dart';
+import '../../data/models/employee model/get_employee_details_hours_details_response.dart';
 import '../bloc/employee_details/employee_details_bloc.dart';
 import '../bloc/employee_details/employee_details_event.dart';
 import '../bloc/employee_details/employee_details_state.dart';
+import '../widgets/employee_build_date_selector.dart';
+import '../widgets/totals_widgets.dart';
+import '../widgets/week_details_widget.dart';
 import 'EditEmployeePage.dart';
 import 'EmployeesPage.dart';
 
 class EmployeeDetailsPage extends StatefulWidget {
-  final String employeeId;
+  final EmployeeModel employeeModel;
 
-  const EmployeeDetailsPage({super.key, required this.employeeId});
+  const EmployeeDetailsPage({super.key, required this.employeeModel});
 
   @override
   State<EmployeeDetailsPage> createState() => _EmployeeDetailsPageState();
 }
 
 class _EmployeeDetailsPageState extends State<EmployeeDetailsPage> {
-  int selectedYear = DateTime.now().year;
-  int selectedMonth = DateTime.now().month;
+  late ValueNotifier<Week?> selectedWeek;
+
+  @override
+  void initState() {
+    selectedWeek = ValueNotifier(null);
+    // TODO: implement initState
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -34,8 +43,11 @@ class _EmployeeDetailsPageState extends State<EmployeeDetailsPage> {
     return BlocProvider(
       create:
           (_) =>
-              sl<EmployeeDetailsBloc>()
-                ..add(LoadEmployeeDetailsEvent(widget.employeeId)),
+              sl<EmployeeDetailsBloc>()..add(
+                LoadEmployeeDetailsHoursEvent(
+                  widget.employeeModel.user!.id.toString(),
+                ),
+              ),
       child: Scaffold(
         backgroundColor: theme.scaffoldBackgroundColor,
         appBar: AppBar(
@@ -53,8 +65,8 @@ class _EmployeeDetailsPageState extends State<EmployeeDetailsPage> {
           actions: [
             BlocBuilder<EmployeeDetailsBloc, EmployeeDetailsState>(
               builder: (context, state) {
-                if (state is EmployeeDetailsLoaded) {
-                  final employee = state.employee;
+                if (state is EmployeeDetailsHoursLoaded) {
+                  final employee = widget.employeeModel;
                   return Row(
                     children: [
                       IconButton(
@@ -65,7 +77,10 @@ class _EmployeeDetailsPageState extends State<EmployeeDetailsPage> {
                           color: Colors.orange,
                         ),
                         onPressed:
-                            () => _showArchiveConfirmation(context, employee),
+                            () => _showArchiveConfirmation(
+                              context,
+                              widget.employeeModel,
+                            ),
                       ),
                       IconButton(
                         icon: Icon(
@@ -78,7 +93,9 @@ class _EmployeeDetailsPageState extends State<EmployeeDetailsPage> {
                               context,
                               MaterialPageRoute(
                                 builder:
-                                    (_) => EditEmployeePage(employee: employee),
+                                    (_) => EditEmployeePage(
+                                      employee: widget.employeeModel,
+                                    ),
                               ),
                             ),
                       ),
@@ -95,7 +112,10 @@ class _EmployeeDetailsPageState extends State<EmployeeDetailsPage> {
                 size: 24.sp,
               ),
               onPressed:
-                  () => _showDeleteConfirmation(context, widget.employeeId),
+                  () => _showDeleteConfirmation(
+                    context,
+                    widget.employeeModel.id!.toString(),
+                  ),
             ),
           ],
         ),
@@ -116,43 +136,27 @@ class _EmployeeDetailsPageState extends State<EmployeeDetailsPage> {
               return const Center(child: CircularProgressIndicator());
             }
 
-            if (state is EmployeeDetailsLoaded || state is HourlyRateUpdating) {
-              final employee =
-                  state is EmployeeDetailsLoaded
-                      ? state.employee
-                      : (state as dynamic).employee as EmployeeModel;
-
+            if (state is EmployeeDetailsHoursLoaded) {
+              final employee = widget.employeeModel;
               return SingleChildScrollView(
                 padding: EdgeInsets.all(16.w),
                 child: Column(
                   children: [
-                    // if (employee.isArchived)
-                    //   _buildArchivedBanner(theme),
                     _EmployeeHeader(employee, theme),
                     SizedBox(height: 24.h),
-                    // _PasswordSection(employee, theme),
-                    // SizedBox(height: 20.h),
-                    _AttendanceStatsSection(employee, theme),
-                    SizedBox(height: 30.h),
 
-                    _buildSectionHeader(
-                      "تصفية النتائج",
-                      Icons.filter_alt_outlined,
-                      theme,
-                    ),
-                    SizedBox(height: 12.h),
-                    _buildDateSelector(theme),
-
-                    SizedBox(height: 30.h),
-                    _WeeklyWorkSection(
-                      employee: employee,
-                      selectedYear: selectedYear,
-                      selectedMonth: selectedMonth,
+                    TotalsWidget(
                       theme: theme,
+                      totals: state.employee.grandTotals!,
                     ),
-
                     SizedBox(height: 30.h),
-                    _RatesSection(employee, theme),
+                    EmployeeBuildDateSelector(
+                      theme: theme,
+                      selectedWeek: selectedWeek,
+                      weeks: state.employee.weeks!,
+                    ),
+                    SizedBox(height: 30.h),
+                    WeekDetailsWidget(employee: employee, theme: theme,selectedWeek: selectedWeek,),
                     SizedBox(height: 40.h),
                   ],
                 ),
@@ -162,23 +166,6 @@ class _EmployeeDetailsPageState extends State<EmployeeDetailsPage> {
           },
         ),
       ),
-    );
-  }
-
-  Widget _buildSectionHeader(String title, IconData icon, ThemeData theme) {
-    return Row(
-      children: [
-        Icon(icon, size: 18.sp, color: theme.primaryColor),
-        SizedBox(width: 8.w),
-        Text(
-          title,
-          style: TextStyle(
-            fontSize: 14.sp,
-            fontWeight: FontWeight.bold,
-            color: theme.textTheme.bodyLarge?.color,
-          ),
-        ),
-      ],
     );
   }
 
@@ -202,104 +189,6 @@ class _EmployeeDetailsPageState extends State<EmployeeDetailsPage> {
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildDateSelector(ThemeData theme) {
-    return Container(
-      padding: EdgeInsets.all(12.w),
-      decoration: BoxDecoration(
-        color: theme.cardColor,
-        borderRadius: BorderRadius.circular(16.r),
-        border: Border.all(color: theme.dividerColor.withOpacity(0.1)),
-        boxShadow: [
-          BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 10),
-        ],
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: _buildDropdown<int>(
-              value: selectedYear,
-              items: DateHelper.getYearsRange(),
-              onChanged: (val) => setState(() => selectedYear = val!),
-              label: "السنة",
-              theme: theme,
-            ),
-          ),
-          SizedBox(width: 12.w),
-          Expanded(
-            child: _buildDropdown<int>(
-              value: selectedMonth,
-              items: List.generate(12, (index) => index + 1),
-              itemLabel: (m) => DateHelper.getMonthName(m),
-              onChanged: (val) => setState(() => selectedMonth = val!),
-              label: "الشهر",
-              theme: theme,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDropdown<T>({
-    required T value,
-    required List<T> items,
-    required ValueChanged<T?> onChanged,
-    required String label,
-    required ThemeData theme,
-    String Function(T)? itemLabel,
-  })
-  {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 10.sp,
-            color: Colors.grey.shade600,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        SizedBox(height: 6.h),
-        Container(
-          padding: EdgeInsets.symmetric(horizontal: 12.w),
-          decoration: BoxDecoration(
-            color: theme.scaffoldBackgroundColor,
-            borderRadius: BorderRadius.circular(10.r),
-            border: Border.all(color: theme.dividerColor.withOpacity(0.2)),
-          ),
-          child: DropdownButtonHideUnderline(
-            child: DropdownButton<T>(
-              value: value,
-              isExpanded: true,
-              dropdownColor: theme.cardColor,
-              icon: Icon(Icons.keyboard_arrow_down, color: theme.primaryColor),
-              items:
-                  items
-                      .map(
-                        (T item) => DropdownMenuItem<T>(
-                          value: item,
-                          child: Text(
-                            itemLabel != null
-                                ? itemLabel(item)
-                                : item.toString(),
-                            style: TextStyle(
-                              fontSize: 13.sp,
-                              fontWeight: FontWeight.bold,
-                              color: theme.textTheme.bodyLarge?.color,
-                            ),
-                          ),
-                        ),
-                      )
-                      .toList(),
-              onChanged: onChanged,
-            ),
-          ),
-        ),
-      ],
     );
   }
 
@@ -418,70 +307,15 @@ class _EmployeeHeader extends StatelessWidget {
 //   }
 // }
 
-class _AttendanceStatsSection extends StatelessWidget {
-  final EmployeeModel employee;
-  final ThemeData theme;
-
-  const _AttendanceStatsSection(this.employee, this.theme);
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.all(20.w),
-      decoration: BoxDecoration(
-        color: theme.primaryColor.withOpacity(0.05),
-        borderRadius: BorderRadius.circular(20.r),
-        border: Border.all(color: theme.primaryColor.withOpacity(0.1)),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-           // _statCol("أيام الدوام", '${employee.daysAttended} يوم', theme),
-          Container(
-            width: 1,
-            height: 40.h,
-            color: theme.dividerColor.withOpacity(0.2),
-          ),
-          // _statCol("مستحقات معلقة", '${employee.unpaidBalance.toStringAsFixed(0)} ل.س', theme, color: Colors.red.shade700),
-        ],
-      ),
-    );
-  }
-
-  Widget _statCol(String t, String v, ThemeData theme, {Color? color}) =>
-      Column(
-        children: [
-          Text(
-            t,
-            style: TextStyle(
-              fontSize: 12.sp,
-              color: Colors.grey.shade600,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          SizedBox(height: 4.h),
-          Text(
-            v,
-            style: TextStyle(
-              fontSize: 18.sp,
-              fontWeight: FontWeight.w900,
-              color: color ?? theme.textTheme.bodyLarge?.color,
-            ),
-          ),
-        ],
-      );
-}
-
 class _WeeklyWorkSection extends StatelessWidget {
   final EmployeeModel employee;
-  final int selectedYear;
-  final int selectedMonth;
+  final int selectedWeek;
+
   final ThemeData theme;
 
   const _WeeklyWorkSection({
     required this.employee,
-    required this.selectedYear,
-    required this.selectedMonth,
+    required this.selectedWeek,
     required this.theme,
   });
 
@@ -822,7 +656,7 @@ class _WeeklyWorkSection extends StatelessWidget {
       final emp = state.employee;
       context.read<EmployeeDetailsBloc>().add(
         ConfirmPaymentEvent(
-            emp,
+          emp,
           weekNumber,
           amountPaid: amount,
           isFullPayment: isFull,
@@ -837,52 +671,4 @@ class _WeeklyWorkSection extends StatelessWidget {
       );
     }
   }
-}
-
-class _RatesSection extends StatelessWidget {
-  final EmployeeModel employee;
-  final ThemeData theme;
-
-  const _RatesSection(this.employee, this.theme);
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.all(20.w),
-      decoration: BoxDecoration(
-        color: theme.cardColor,
-        borderRadius: BorderRadius.circular(20.r),
-        border: Border.all(color: theme.dividerColor.withOpacity(0.1)),
-      ),
-      child: Column(
-        children: [
-          _rateRow("سعر الساعة العادية", employee.hourlyRate!),
-          SizedBox(height: 12.h),
-          _rateRow("سعر الساعة الإضافية", employee.overtimeRate!),
-        ],
-      ),
-    );
-  }
-
-  Widget _rateRow(String t, double v) => Row(
-    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-    children: [
-      Text(
-        t,
-        style: TextStyle(
-          fontSize: 13.sp,
-          color: Colors.grey.shade600,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-      Text(
-        "${v.toInt()} ل.س",
-        style: TextStyle(
-          fontWeight: FontWeight.w900,
-          fontSize: 15.sp,
-          color: theme.textTheme.bodyLarge?.color,
-        ),
-      ),
-    ],
-  );
 }

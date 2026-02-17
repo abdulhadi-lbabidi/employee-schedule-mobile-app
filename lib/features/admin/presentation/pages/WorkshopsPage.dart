@@ -214,7 +214,8 @@ class _WorkshopsPageState extends State<WorkshopsPage> {
     WorkshopModel workshop,
     bool isArchived,
     ThemeData theme,
-  ) {
+  )
+  {
     return Card(
       elevation: isArchived ? 0 : 1,
       margin: EdgeInsets.only(bottom: 12.h),
@@ -454,7 +455,8 @@ class _WorkshopsPageState extends State<WorkshopsPage> {
     String name,
     bool isArchived,
     ThemeData theme,
-  ) {
+  )
+  {
     final workshopsBloc = context.read<WorkshopsBloc>();
     showDialog(
       context: context,

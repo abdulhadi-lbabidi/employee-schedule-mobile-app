@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
+import 'package:untitled8/features/admin/domain/usecases/get_employee_details_hours_use_case.dart';
 import '../../../../admin/data/repositories/audit_log_repository.dart';
 import '../../../data/datasources/admin_remote_data_source_impl.dart';
 import '../../../data/models/employee model/employee_model.dart';
@@ -19,6 +20,7 @@ import 'employee_details_state.dart';
 class EmployeeDetailsBloc
     extends Bloc<EmployeeDetailsEvent, EmployeeDetailsState> {
   final GetEmployeeDetailsUseCase getEmployeeDetailsUseCase;
+  final GetEmployeeDetailsHoursUseCase getEmployeeDetailsHoursUseCase;
   final UpdateHourlyRateUseCase updateHourlyRateUseCase;
   final UpdateOvertimeRateUseCase updateOvertimeRateUseCase;
   final ConfirmPaymentUseCase confirmPaymentUseCase;
@@ -32,6 +34,7 @@ class EmployeeDetailsBloc
   EmployeeModel? _employee;
 
   EmployeeDetailsBloc(
+    this.getEmployeeDetailsHoursUseCase,
     this.getEmployeeDetailsUseCase,
     this.updateHourlyRateUseCase,
     this.updateOvertimeRateUseCase,
@@ -43,6 +46,7 @@ class EmployeeDetailsBloc
     this.updateEmployeeFullDetailsUseCase, // 🔹 إضافة
   ) : super(EmployeeDetailsInitial()) {
     on<LoadEmployeeDetailsEvent>(_onLoadDetails);
+    on<LoadEmployeeDetailsHoursEvent>(_onLoadHoursDetails);
     on<UpdateHourlyRateEvent>(_onUpdateHourlyRate);
     on<UpdateOvertimeRateEvent>(_onUpdateOvertimeRate);
     on<ConfirmPaymentEvent>(_onConfirmPayment);
@@ -54,7 +58,8 @@ class EmployeeDetailsBloc
   Future<void> _onLoadDetails(
     LoadEmployeeDetailsEvent event,
     Emitter<EmployeeDetailsState> emit,
-  ) async {
+  )
+  async {
     emit(EmployeeDetailsLoading());
 
     final val = await getEmployeeDetailsUseCase(event.employeeId);
@@ -65,6 +70,26 @@ class EmployeeDetailsBloc
       (r) {
         _employee = r.data;
         emit(EmployeeDetailsLoaded(_employee!));
+      },
+    );
+  }
+
+
+  Future<void> _onLoadHoursDetails(
+      LoadEmployeeDetailsHoursEvent event,
+      Emitter<EmployeeDetailsState> emit,
+      )
+  async {
+    emit(EmployeeDetailsLoading());
+
+    final val = await getEmployeeDetailsHoursUseCase(event.employeeId);
+    val.fold(
+          (l) {
+        emit(EmployeeDetailsError(l.message));
+      },
+          (r) {
+
+        emit(EmployeeDetailsHoursLoaded(r));
       },
     );
   }

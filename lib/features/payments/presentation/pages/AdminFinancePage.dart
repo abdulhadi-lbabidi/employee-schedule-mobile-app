@@ -80,14 +80,14 @@ class _FinancialDashboardState extends State<FinancialDashboard> {
                             subtitle: Text("المستحقات: ${emp.totalEarned}\$"),
                             trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                             onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => EmployeeDetailsPage(
-                                    employeeId: emp.id.toString(),
-                                  ),
-                                ),
-                              );
+                              // Navigator.push(
+                              //   context,
+                              //   MaterialPageRoute(
+                              //     builder: (_) => EmployeeDetailsPage(
+                              //       employeeModel: emp,
+                              //     ),
+                              //   ),
+                              // );
                             },
                           ),
                         );

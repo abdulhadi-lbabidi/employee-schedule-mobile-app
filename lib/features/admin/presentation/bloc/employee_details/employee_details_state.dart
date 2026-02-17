@@ -1,4 +1,5 @@
 import '../../../data/models/employee model/employee_model.dart';
+import '../../../data/models/employee model/get_employee_details_hours_details_response.dart';
 
 abstract class EmployeeDetailsState {}
 
@@ -9,6 +10,11 @@ class EmployeeDetailsLoading extends EmployeeDetailsState {}
 class EmployeeDetailsLoaded extends EmployeeDetailsState {
   final EmployeeModel employee;
   EmployeeDetailsLoaded(this.employee);
+}
+
+class EmployeeDetailsHoursLoaded extends EmployeeDetailsState {
+  final GetEmployeeDetailsHoursResponse employee;
+  EmployeeDetailsHoursLoaded(this.employee);
 }
 
 class HourlyRateUpdating extends EmployeeDetailsState {

@@ -49,6 +49,7 @@ class ApiVariables {
   static Uri employeeUpdate(String id) => _mainUri('/api/employees/$id');
 
   static Uri employeeDetails(String id) => _mainUri('/api/employees/$id');
+  static Uri employeeDetailsHours(String id) => _mainUri('/api/employees/$id/hours-by-workshop');
   static Uri employeeDelete(String id) => _mainUri('/api/employees/$id');
 
   static Uri archiveGetEmployees() => _mainUri('/api/employees-archived');
