@@ -151,8 +151,24 @@ import '../../features/payments/data/repositories/payments_repository_impl.dart'
 import '../../features/payments/domain/payments_repository/paymenys_repository.dart'
     as _i88;
 import '../../features/payments/domain/usecases/get_dues_report.dart' as _i879;
+import '../../features/payments/domain/usecases/get_unpaid_weeks_params.dart'
+    as _i4;
+import '../../features/payments/domain/usecases/get_unpaid_weeks_usecase.dart'
+    as _i133;
+import '../../features/payments/domain/usecases/post_payrecords_params.dart'
+    as _i699;
+import '../../features/payments/domain/usecases/post_payrecords_useCase.dart'
+    as _i992;
+import '../../features/payments/domain/usecases/update_payment_params.dart'
+    as _i803;
+import '../../features/payments/domain/usecases/update_payment_usecase.dart'
+    as _i1029;
 import '../../features/payments/presentation/bloc/dues-report/dues_report_bloc.dart'
     as _i467;
+import '../../features/payments/presentation/bloc/PaymentAction/payment_action_bloc.dart'
+    as _i427;
+import '../../features/payments/presentation/bloc/UnpaidWeeks/unpaid_weeks_bloc.dart'
+    as _i84;
 import '../../features/profile/data/datasources/update_password_remote_data_source.dart'
     as _i138;
 import '../../features/profile/data/repositories/profile_repository_impl.dart'
@@ -220,6 +236,14 @@ _i174.GetIt $initGetIt(
       () => _i251.LoanLocalDataSource(gh<_i460.SharedPreferences>()));
   gh.lazySingleton<_i184.AuditLogRepository>(
       () => _i184.AuditLogRepository(gh<_i460.SharedPreferences>()));
+  gh.factory<_i803.UpdatePaymentParams>(() => _i803.UpdatePaymentParams(
+        paymentId: gh<String>(),
+        totalAmount: gh<double>(),
+        amountPaid: gh<double>(),
+        paymentDate: gh<String>(),
+      ));
+  gh.factory<_i4.GetUnpaidWeeksParams>(
+      () => _i4.GetUnpaidWeeksParams(employeeId: gh<String>()));
   gh.factory<_i36.ActiveUnactiveCubit>(
       () => _i36.ActiveUnactiveCubit(gh<_i351.HiveService>()));
   gh.factory<_i492.ButtonCubit>(
@@ -247,6 +271,13 @@ _i174.GetIt $initGetIt(
       () => _i138.UpdatePasswordRemoteDataSource(gh<_i893.BaseApi>()));
   gh.lazySingleton<_i777.RewardRemoteDataSource>(
       () => _i777.RewardRemoteDataSource(gh<_i893.BaseApi>()));
+  gh.factory<_i699.PostPayRecordsParams>(() => _i699.PostPayRecordsParams(
+        employeeId: gh<int>(),
+        attendanceIds: gh<List<int>>(),
+        totalAmount: gh<double>(),
+        amountPaid: gh<double>(),
+        paymentDate: gh<String>(),
+      ));
   gh.lazySingleton<_i482.EmployeeSummaryRepository>(() =>
       _i183.EmployeeSummaryRepositoryImpl(
           remoteDataSource: gh<_i921.EmployeeSummaryRemoteDataSource>()));
@@ -423,6 +454,12 @@ _i174.GetIt $initGetIt(
       ));
   gh.lazySingleton<_i879.GetDuesReport>(
       () => _i879.GetDuesReport(gh<_i88.PaymenysRepository>()));
+  gh.lazySingleton<_i133.GetUnpaidWeeksUseCase>(
+      () => _i133.GetUnpaidWeeksUseCase(gh<_i88.PaymenysRepository>()));
+  gh.lazySingleton<_i992.PostPayRecordsUseCase>(
+      () => _i992.PostPayRecordsUseCase(gh<_i88.PaymenysRepository>()));
+  gh.lazySingleton<_i1029.UpdatePaymentUseCase>(
+      () => _i1029.UpdatePaymentUseCase(gh<_i88.PaymenysRepository>()));
   gh.factory<_i125.EmployeeDetailsBloc>(() => _i125.EmployeeDetailsBloc(
         gh<_i253.GetEmployeeDetailsUseCase>(),
         gh<_i547.UpdateHourlyRateUseCase>(),
@@ -441,6 +478,12 @@ _i174.GetIt $initGetIt(
         gh<_i541.AddEmployeeUseCase>(),
         gh<_i368.ToggleEmployeeArchiveUseCase>(),
       ));
+  gh.factory<_i427.PaymentActionBloc>(() => _i427.PaymentActionBloc(
+        gh<_i992.PostPayRecordsUseCase>(),
+        gh<_i1029.UpdatePaymentUseCase>(),
+      ));
+  gh.factory<_i84.UnpaidWeeksBloc>(
+      () => _i84.UnpaidWeeksBloc(gh<_i133.GetUnpaidWeeksUseCase>()));
   gh.factory<_i408.LoanBloc>(() => _i408.LoanBloc(
         gh<_i150.GetAllLoansUseCase>(),
         gh<_i363.GetEmployeeLoansUseCase>(),

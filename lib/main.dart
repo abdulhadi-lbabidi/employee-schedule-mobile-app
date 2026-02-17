@@ -25,6 +25,8 @@ import 'features/home/presentation/bloc/Cubit_Navigation/navigation_cubit.dart';
 import 'features/home/presentation/bloc/Cubit_dropdown/dropdown_cubit.dart';
 import 'features/home/presentation/bloc/cubit_active_unactive/active_unactive_cubit.dart';
 import 'features/home/presentation/bloc/finance/finance_bloc.dart';
+import 'features/payments/presentation/bloc/PaymentAction/payment_action_bloc.dart';
+import 'features/payments/presentation/bloc/UnpaidWeeks/unpaid_weeks_bloc.dart';
 import 'features/payments/presentation/bloc/dues-report/dues_report_bloc.dart';
 import 'features/profile/presentation/bloc/Profile/_profile_bloc.dart';
 import 'features/admin/presentation/bloc/admin_dashboard/admin_dashboard_bloc.dart';
@@ -107,6 +109,8 @@ class MyApp extends StatelessWidget {
             BlocProvider(create: (_) => sl<FinanceBloc>()),
             BlocProvider(create: (_) => sl<LoanBloc>()),
             BlocProvider(create: (_) => sl<RewardAdminBloc>()),
+            BlocProvider(create: (_) => sl<UnpaidWeeksBloc>()),
+            BlocProvider(create: (_) => sl<PaymentActionBloc>()),
           ],
           child: BlocBuilder<ThemeBloc, ThemeState>(
             builder: (context, themeState) {

@@ -1,3 +1,9 @@
+
+
+import 'package:injectable/injectable.dart';
+
+@injectable
+
 class UpdatePaymentParams {
   final String paymentId;
   final double totalAmount;

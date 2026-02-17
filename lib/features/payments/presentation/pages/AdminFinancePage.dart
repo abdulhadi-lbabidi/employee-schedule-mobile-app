@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
-import '../../../admin/presentation/pages/EmployeeDetailsPage.dart';
 import '../bloc/dues-report/dues_report_bloc.dart';
 import '../bloc/dues-report/dues_report_event.dart';
 import '../bloc/dues-report/dues_report_state.dart';
+import 'employee_details_page.dart';
 
 class FinancialDashboard extends StatefulWidget {
   const FinancialDashboard({super.key});
@@ -83,7 +82,7 @@ class _FinancialDashboardState extends State<FinancialDashboard> {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (_) => EmployeeDetailsPage(
+                                  builder: (_) => EmployeeDetailsPagePayments(
                                     employeeId: emp.id.toString(),
                                   ),
                                 ),

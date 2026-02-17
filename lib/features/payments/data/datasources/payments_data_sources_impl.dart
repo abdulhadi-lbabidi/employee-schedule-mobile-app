@@ -24,11 +24,13 @@ class PaymentsDataSourcesImpl with HandlingApiManager{
 
     );
   }
-  Future<UnpaidWeeks> getUnpaidWeeks(String id) async {
+
+  Future<List<UnpaidWeeks>> getUnpaidWeeks(String id) async { // تغيير النوع المرتجع إلى List
     return wrapHandlingApi(
       tryCall: () => _baseApi.get(ApiVariables.getUnpaidWeeks(id)),
-        jsonConvert:(json) =>  UnpaidWeeks.fromJson(json),
-
+      jsonConvert: (json) => (json as List)
+          .map((x) => UnpaidWeeks.fromJson(x))
+          .toList(),
     );
   }
   Future<void> postPayRecords(

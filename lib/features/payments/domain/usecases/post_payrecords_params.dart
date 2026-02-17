@@ -1,3 +1,9 @@
+
+
+import 'package:injectable/injectable.dart';
+
+@injectable
+
 class PostPayRecordsParams {
   final int employeeId;
   final List<int> attendanceIds;
