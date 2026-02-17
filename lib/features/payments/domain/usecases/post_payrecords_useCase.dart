@@ -7,14 +7,14 @@ import '../../data/ model/dues-report.dart';
 import '../payments_repository/paymenys_repository.dart';
 
 class PostPayRecordsUseCase
-    implements UseCase<DuesReportModel, PostPayRecordsParams> {
+    implements UseCase<void, PostPayRecordsParams> {
   final PaymenysRepository repository;
 
   PostPayRecordsUseCase(this.repository);
 
   @override
-  Future<Either<Failure, DuesReportModel>> call(
-      PostPayRecordsParams params) {
+  Future<Either<Failure, void>> call(
+      PostPayRecordsParams params) async {
     return repository.potsPayRecords(params);
   }
 }

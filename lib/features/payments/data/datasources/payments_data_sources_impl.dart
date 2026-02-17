@@ -31,7 +31,7 @@ class PaymentsDataSourcesImpl with HandlingApiManager{
 
     );
   }
-  Future<DuesReportModel> postPayRecords(
+  Future<void> postPayRecords(
       PostPayRecordsParams params,
       ) async {
     return wrapHandlingApi(
@@ -39,7 +39,7 @@ class PaymentsDataSourcesImpl with HandlingApiManager{
         ApiVariables.postPayRecords(),
         data: params.toJson(),
       ),
-      jsonConvert: (json) => DuesReportModel.fromJson(json),
+      jsonConvert: (_) {},
     );
   }
   Future<UpdatePayments> putUpdatePayments(

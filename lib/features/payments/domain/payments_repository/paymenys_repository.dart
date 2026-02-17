@@ -9,7 +9,7 @@ import '../usecases/update_payment_params.dart';
 
 abstract class PaymenysRepository {
   Future<Either<Failure, DuesReportModel>> getDuesReport();
-  Future<Either<Failure, DuesReportModel>> potsPayRecords(
+  Future<Either<Failure, void>> potsPayRecords(
       PostPayRecordsParams params,
       );
   Future<Either<Failure, UnpaidWeeks>> getUnpaidWeeks(String id);

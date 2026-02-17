@@ -28,7 +28,7 @@ class PaymentsRepositoryImpl
   }
 
   @override
-  Future<Either<Failure, DuesReportModel>> potsPayRecords(
+  Future<Either<Failure, void>> potsPayRecords(
       PostPayRecordsParams params,
       ) async {
     return wrapHandlingException(
