@@ -65,7 +65,7 @@ class Employee {
   final int id;
   final String fullName;
   final double totalEarned;
-  final int totalPaid;
+  final double totalPaid;
   final double remainingDue;
   final double totalHours;
 
@@ -82,7 +82,7 @@ class Employee {
     int? id,
     String? fullName,
     double? totalEarned,
-    int? totalPaid,
+    double? totalPaid,
     double? remainingDue,
     double? totalHours,
   }) =>

@@ -25,7 +25,7 @@ class SyncAttendanceParams with Params {
   SyncAttendanceParams({required this.attendanceBody});
 
   List<Map<String, dynamic>> getList() {
-    // TODO: implement getBody
+
     return attendanceBody.map((e) => e.toJson()).toList();
   }
 }
