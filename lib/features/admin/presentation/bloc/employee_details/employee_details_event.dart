@@ -8,6 +8,11 @@ class LoadEmployeeDetailsEvent extends EmployeeDetailsEvent {
   LoadEmployeeDetailsEvent(this.employeeId);
 }
 
+class LoadEmployeeDetailsHoursEvent extends EmployeeDetailsEvent {
+  final String employeeId;
+  LoadEmployeeDetailsHoursEvent(this.employeeId);
+}
+
 class UpdateHourlyRateEvent extends EmployeeDetailsEvent {
   final double newRate;
   UpdateHourlyRateEvent(this.newRate);

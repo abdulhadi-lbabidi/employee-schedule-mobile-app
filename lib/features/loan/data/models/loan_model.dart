@@ -36,8 +36,13 @@ class LoanModel extends LoanEntity {
       id: json['id'] as int? ?? 0,
       employeeId: employeeJson != null ? employeeJson['id'] as int? ?? 0 : 0,
       employeeName: employeeJson != null ? employeeJson['full_name'] as String? ?? "Unknown" : "Unknown",
-      amount: (json['amount'] as num? ?? 0).toDouble(),
-      paidAmount: (json['paid_amount'] as num? ?? 0).toDouble(),
+      amount: json['amount'] == null
+          ? 0
+          : double.tryParse(json['amount'].toString()) ?? 0,
+
+      paidAmount: json['paid_amount'] == null
+          ? 0
+          : double.tryParse(json['paid_amount'].toString()) ?? 0,
       date: parseDate(json['date']),
       role: _parseStatus(json['role']?.toString()),
       employeeModel: employeeJson != null ? AdminModel.fromJson(employeeJson) : null,

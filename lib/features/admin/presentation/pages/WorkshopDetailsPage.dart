@@ -385,7 +385,7 @@ class _WorkshopDetailsPageState extends State<WorkshopDetailsPage> {
               MaterialPageRoute(
                 builder:
                     (_) => EmployeeDetailsPage(
-                      employeeId: emp.employee!.id.toString(),
+                      employeeModel: emp.employee!,
                     ),
               ),
             ),

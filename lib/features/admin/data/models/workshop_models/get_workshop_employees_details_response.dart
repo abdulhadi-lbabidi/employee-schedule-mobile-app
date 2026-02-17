@@ -1,4 +1,5 @@
 
+import 'package:untitled8/features/admin/data/models/employee%20model/employee_model.dart';
 import 'package:untitled8/features/admin/data/models/workshop_models/workshop_model.g.dart';
 
 GetWorkshopEmployeeDetailsResponse getWorkshopEmployeeDetailsResponseFromJson( str) => GetWorkshopEmployeeDetailsResponse.fromJson(str);
@@ -34,7 +35,7 @@ class GetWorkshopEmployeeDetailsResponse {
 }
 
 class EmployeeElement {
-  final EmployeeEmployee? employee;
+  final EmployeeModel? employee;
   final double? totalRegularHours;
   final double? totalOvertimeHours;
 
@@ -45,7 +46,7 @@ class EmployeeElement {
   });
 
   EmployeeElement copyWith({
-    EmployeeEmployee? employee,
+    EmployeeModel? employee,
     double? totalRegularHours,
     double? totalOvertimeHours,
   }) =>
@@ -56,7 +57,7 @@ class EmployeeElement {
       );
 
   factory EmployeeElement.fromJson(Map<String, dynamic> json) => EmployeeElement(
-    employee: json["employee"] == null ? null : EmployeeEmployee.fromJson(json["employee"]),
+    employee: json["employee"] == null ? null : EmployeeModel.fromJson(json["employee"]),
     totalRegularHours: json["total_regular_hours"]?.toDouble(),
     totalOvertimeHours: json["total_overtime_hours"]?.toDouble(),
   );
@@ -68,91 +69,4 @@ class EmployeeElement {
   };
 }
 
-class EmployeeEmployee {
-  final int? id;
-  final String? position;
-  final String? department;
-  final User? user;
-
-  EmployeeEmployee({
-    this.id,
-    this.position,
-    this.department,
-    this.user,
-  });
-
-  EmployeeEmployee copyWith({
-    int? id,
-    String? position,
-    String? department,
-    User? user,
-  }) =>
-      EmployeeEmployee(
-        id: id ?? this.id,
-        position: position ?? this.position,
-        department: department ?? this.department,
-        user: user ?? this.user,
-      );
-
-  factory EmployeeEmployee.fromJson(Map<String, dynamic> json) => EmployeeEmployee(
-    id: json["id"],
-    position: json["position"],
-    department: json["department"],
-    user: json["user"] == null ? null : User.fromJson(json["user"]),
-  );
-
-  Map<String, dynamic> toJson() => {
-    "id": id,
-    "position": position,
-    "department": department,
-    "user": user?.toJson(),
-  };
-}
-
-class User {
-  final int? id;
-  final String? fullName;
-  final String? phoneNumber;
-  final String? email;
-  final String? profileImageUrl;
-
-  User({
-    this.id,
-    this.fullName,
-    this.phoneNumber,
-    this.email,
-    this.profileImageUrl,
-  });
-
-  User copyWith({
-    int? id,
-    String? fullName,
-    String? phoneNumber,
-    String? email,
-    String? profileImageUrl,
-  }) =>
-      User(
-        id: id ?? this.id,
-        fullName: fullName ?? this.fullName,
-        phoneNumber: phoneNumber ?? this.phoneNumber,
-        email: email ?? this.email,
-        profileImageUrl: profileImageUrl ?? this.profileImageUrl,
-      );
-
-  factory User.fromJson(Map<String, dynamic> json) => User(
-    id: json["id"],
-    fullName: json["full_name"],
-    phoneNumber: json["phone_number"],
-    email: json["email"],
-    profileImageUrl: json["profile_image_url"],
-  );
-
-  Map<String, dynamic> toJson() => {
-    "id": id,
-    "full_name": fullName,
-    "phone_number": phoneNumber,
-    "email": email,
-    "profile_image_url": profileImageUrl,
-  };
-}
 
