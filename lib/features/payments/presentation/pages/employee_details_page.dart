@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart';
 
 import '../../data/ model/get_unpaid_weeks.dart';
 import '../../domain/usecases/post_payrecords_params.dart';
+import '../../domain/usecases/update_payment_params.dart';
 import '../bloc/PaymentAction/payment_action_bloc.dart';
 import '../bloc/PaymentAction/payment_action_event.dart';
 import '../bloc/PaymentAction/payment_action_state.dart';
@@ -135,23 +137,51 @@ class _EmployeeDetailsPageState extends State<EmployeeDetailsPagePayments> {
                   builder: (context, state) {
                     if (state is PaymentActionLoading)
                       return const CircularProgressIndicator();
-                    return ElevatedButton(
-                      onPressed: () {
-                        context.read<PaymentActionBloc>().add(
-                          ExecutePostPayment(
-                            PostPayRecordsParams(
-                              employeeId: int.parse(widget.employeeId),
-                              attendanceIds: week.ids ?? [],
-                              totalAmount: week.estimatedAmount ?? 0,
-                              amountPaid:
-                                  double.tryParse(amountController.text) ?? 0,
-                              paymentDate: DateTime.now().toIso8601String(),
-                            ),
-                          ),
-                        );
-                      },
-                      child: const Text("تأكيد"),
-                    );
+                    return // ... داخل الـ AlertDialog في قسم actions
+                      ElevatedButton(
+                        onPressed: () {
+                          final double totalEstimated = week.estimatedAmount ?? 0;
+                          final double amountEntered = double.tryParse(amountController.text) ?? 0;
+
+                          if (amountEntered <= 0) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(content: Text("يرجى إدخال مبلغ صحيح")),
+                            );
+                            return;
+                          }
+
+                          // المنطق البرمجي لاختيار العملية المناسبة
+                          if (amountEntered < totalEstimated) {
+                            // 1. حالة المبلغ الجزئي (تقسيط): نستخدم Update
+                            // ملاحظة: تأكد أن الـ API يدعم التعديل دون وجود معرف دفع مسبق أو قم بتمرير المعرف المناسب
+                            context.read<PaymentActionBloc>().add(
+                              ExecuteUpdatePayment(
+                                widget.employeeId, // أو المعرف المطلوب للـ API
+                                UpdatePaymentParams(
+                                  paymentId: widget.employeeId,
+                                  totalAmount: totalEstimated,
+                                  amountPaid: amountEntered,
+                                  paymentDate:DateFormat('yyyy-MM-dd').format(DateTime.now()),
+                                ),
+                              ),
+                            );
+                          } else {
+                            // 2. حالة المبلغ الكامل (أو أكثر): نستخدم Post
+                            context.read<PaymentActionBloc>().add(
+                              ExecutePostPayment(
+                                PostPayRecordsParams(
+                                  employeeId: int.parse(widget.employeeId),
+                                  attendanceIds: week.ids ?? [],
+                                  totalAmount: totalEstimated,
+                                  amountPaid: amountEntered,
+                                  paymentDate:DateFormat('yyyy-MM-dd').format(DateTime.now()),
+                                ),
+                              ),
+                            );
+                          }
+                        },
+                        child: const Text("تأكيد"),
+                      );
                   },
                 ),
               ],
