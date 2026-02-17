@@ -498,7 +498,7 @@ class _WeeklyWorkSection extends StatelessWidget {
               ),
             ),
             Text(
-              "${v.toStringAsFixed(0)} ل.س",
+              "${v.toStringAsFixed(0)}\$",
               style: TextStyle(
                 color: c,
                 fontWeight: FontWeight.w900,
@@ -573,7 +573,7 @@ class _WeeklyWorkSection extends StatelessWidget {
           (d) => AlertDialog(
             title: const Text("خيارات الصرف"),
             content: Text(
-              "المبلغ المتبقي للأسبوع $weekNumber هو ${remaining.toStringAsFixed(0)} ل.س.",
+              "المبلغ المتبقي للأسبوع $weekNumber هو ${remaining.toStringAsFixed(0)} \$",
             ),
             actions: [
               TextButton(
