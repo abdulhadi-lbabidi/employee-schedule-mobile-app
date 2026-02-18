@@ -5,7 +5,6 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/di/injection.dart';
 import '../../data/models/employee_summary_model.dart';
-import '../../domain/entities/employee_summary_entity.dart';
 import '../bloc/employee_summary/employee_summary_bloc.dart';
 import '../bloc/employee_summary/employee_summary_event.dart';
 import '../bloc/employee_summary/employee_summary_state.dart';
@@ -21,17 +20,22 @@ class EmployeeSummaryPage extends StatelessWidget {
 
     return BlocProvider(
       create: (context) =>
-          sl<EmployeeSummaryBloc>()..add(LoadEmployeeSummaryEvent(employeeId)),
+      sl<EmployeeSummaryBloc>()..add(LoadEmployeeSummaryEvent(employeeId)),
       child: Scaffold(
         backgroundColor: theme.scaffoldBackgroundColor,
         appBar: AppBar(
           title: Text(
             'الكشف المالي',
-            style: TextStyle(fontSize: 20.sp, fontWeight: FontWeight.w900),
+            style: TextStyle(
+              fontSize: 20.sp,
+              fontWeight: FontWeight.w900, // تم استبدال black بـ w900 لضمان التوافق
+              color: theme.textTheme.bodyLarge?.color,
+            ),
           ),
           centerTitle: true,
           elevation: 0,
           backgroundColor: Colors.transparent,
+          iconTheme: IconThemeData(color: theme.primaryColor),
         ),
         body: RefreshIndicator(
           onRefresh: () async {
@@ -46,25 +50,7 @@ class EmployeeSummaryPage extends StatelessWidget {
               } else if (state is EmployeeSummaryLoaded) {
                 return _buildSummaryContent(state.summary, theme);
               } else if (state is EmployeeSummaryError) {
-                return Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.error_outline,
-                          color: Colors.red, size: 60.sp),
-                      SizedBox(height: 16.h),
-                      Text(state.message,
-                          style: TextStyle(
-                              color: Colors.red.shade700, fontSize: 16.sp)),
-                      TextButton(
-                        onPressed: () => context
-                            .read<EmployeeSummaryBloc>()
-                            .add(LoadEmployeeSummaryEvent(employeeId)),
-                        child: const Text('إعادة المحاولة'),
-                      )
-                    ],
-                  ),
-                );
+                return _buildErrorState(state.message, context, employeeId);
               }
               return const SizedBox.shrink();
             },
@@ -81,7 +67,6 @@ class EmployeeSummaryPage extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Header Card
           _buildEmployeeHeader(summary, theme),
           SizedBox(height: 25.h),
 
@@ -94,7 +79,7 @@ class EmployeeSummaryPage extends StatelessWidget {
                 value: summary.grandTotals!.totalRegularHours.toString(),
                 unit: 'ساعة',
                 icon: Icons.access_time_filled,
-                color: Colors.blue,
+                color: Colors.blue.shade700,
                 theme: theme,
               ),
               SizedBox(width: 15.w),
@@ -103,7 +88,7 @@ class EmployeeSummaryPage extends StatelessWidget {
                 value: summary.grandTotals!.totalOvertimeHours.toString(),
                 unit: 'ساعة',
                 icon: Icons.more_time_rounded,
-                color: Colors.orange,
+                color: Colors.orange.shade800,
                 theme: theme,
               ),
             ],
@@ -116,7 +101,7 @@ class EmployeeSummaryPage extends StatelessWidget {
             title: 'الأجر الأساسي',
             amount: summary.grandTotals!.totalRegularPay!.toDouble(),
             icon: Icons.account_balance_wallet_rounded,
-            color: Colors.indigo,
+            color: Colors.indigo.shade700,
             theme: theme,
           ),
           SizedBox(height: 12.h),
@@ -124,7 +109,7 @@ class EmployeeSummaryPage extends StatelessWidget {
             title: 'أجر العمل الإضافي',
             amount: summary.grandTotals!.totalOvertimePay!.toDouble(),
             icon: Icons.add_card_rounded,
-            color: Colors.teal,
+            color: Colors.teal.shade700,
             theme: theme,
           ),
 
@@ -134,7 +119,7 @@ class EmployeeSummaryPage extends StatelessWidget {
           SizedBox(height: 25.h),
           _buildSectionTitle('الورشات', Icons.workspaces_outline, theme),
           SizedBox(height: 15.h),
-          _buildWorkshopsSection(summary.workshopsSummary , theme),
+          _buildWorkshopsSection(summary.workshopsSummary, theme),
           SizedBox(height: 30.h),
         ],
       ),
@@ -144,19 +129,19 @@ class EmployeeSummaryPage extends StatelessWidget {
   Widget _buildEmployeeHeader(EmployeeSummaryModel summary, ThemeData theme) {
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.all(20.w),
+      padding: EdgeInsets.all(22.w),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: [theme.primaryColor, theme.primaryColor.withOpacity(0.7)],
+          colors: [theme.primaryColor, theme.primaryColor.withOpacity(0.85)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(24.r),
         boxShadow: [
           BoxShadow(
-            color: theme.primaryColor.withOpacity(0.3),
-            blurRadius: 15,
-            offset: const Offset(0, 8),
+            color: theme.primaryColor.withOpacity(0.4),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
           )
         ],
       ),
@@ -166,20 +151,27 @@ class EmployeeSummaryPage extends StatelessWidget {
             summary.employee!.user!.fullName.toString(),
             style: TextStyle(
                 color: Colors.white,
-                fontSize: 20.sp,
-                fontWeight: FontWeight.bold),
+                fontSize: 22.sp,
+                fontWeight: FontWeight.w900), // استبدال black
           ),
-          SizedBox(height: 5.h),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.sensor_occupied_rounded, color: Colors.white70, size: 14.sp),
-              SizedBox(width: 4.w),
-              Text(
-                summary.employee!.position.toString(),
-                style: TextStyle(color: Colors.white70, fontSize: 13.sp),
-              ),
-            ],
+          SizedBox(height: 6.h),
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 4.h),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(20.r),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.badge_rounded, color: Colors.white, size: 14.sp),
+                SizedBox(width: 6.w),
+                Text(
+                  summary.employee!.position.toString(),
+                  style: TextStyle(color: Colors.white, fontSize: 13.sp, fontWeight: FontWeight.w600),
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -194,13 +186,16 @@ class EmployeeSummaryPage extends StatelessWidget {
     required Color color,
     required ThemeData theme,
   }) {
+    final bool isDark = theme.brightness == Brightness.dark;
+    final Color textColor = isDark ? Colors.grey.shade300 : Colors.grey.shade900;
+
     return Expanded(
       child: Container(
         padding: EdgeInsets.all(16.w),
         decoration: BoxDecoration(
           color: theme.cardColor,
           borderRadius: BorderRadius.circular(20.r),
-          border: Border.all(color: color.withOpacity(0.1)),
+          border: Border.all(color: color.withOpacity(0.3), width: 1.5),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -208,16 +203,16 @@ class EmployeeSummaryPage extends StatelessWidget {
             Container(
               padding: EdgeInsets.all(8.w),
               decoration: BoxDecoration(
-                color: color.withOpacity(0.1),
+                color: color.withOpacity(0.15),
                 shape: BoxShape.circle,
               ),
-              child: Icon(icon, color: color, size: 20.sp),
+              child: Icon(icon, color: color, size: 22.sp),
             ),
             SizedBox(height: 12.h),
             Text(title,
                 style: TextStyle(
                     fontSize: 12.sp,
-                    color: Colors.grey.shade600,
+                    color: textColor.withOpacity(0.8),
                     fontWeight: FontWeight.bold)),
             SizedBox(height: 4.h),
             Row(
@@ -233,7 +228,7 @@ class EmployeeSummaryPage extends StatelessWidget {
                 Text(unit,
                     style: TextStyle(
                         fontSize: 11.sp,
-                        color: Colors.grey.shade500,
+                        color: textColor.withOpacity(0.6),
                         fontWeight: FontWeight.bold)),
               ],
             ),
@@ -250,29 +245,29 @@ class EmployeeSummaryPage extends StatelessWidget {
     required Color color,
     required ThemeData theme,
   }) {
+    final bool isDark = theme.brightness == Brightness.dark;
+
     return Container(
-      padding: EdgeInsets.all(16.w),
+      padding: EdgeInsets.all(18.w),
       decoration: BoxDecoration(
         color: theme.cardColor,
         borderRadius: BorderRadius.circular(18.r),
+        border: Border.all(color: theme.dividerColor.withOpacity(0.1)),
         boxShadow: [
-          BoxShadow(
-              color: Colors.black.withOpacity(0.02),
-              blurRadius: 10,
-              offset: const Offset(0, 4))
+          BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 12)
         ],
       ),
       child: Row(
         children: [
           Container(
-            padding: EdgeInsets.all(10.w),
+            padding: EdgeInsets.all(12.w),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(12.r),
+              color: color.withOpacity(0.15),
+              borderRadius: BorderRadius.circular(14.r),
             ),
-            child: Icon(icon, color: color, size: 24.sp),
+            child: Icon(icon, color: color, size: 26.sp),
           ),
-          SizedBox(width: 15.w),
+          SizedBox(width: 16.w),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -280,20 +275,18 @@ class EmployeeSummaryPage extends StatelessWidget {
                 Text(title,
                     style: TextStyle(
                         fontSize: 13.sp,
-                        color: Colors.grey.shade600,
+                        color: isDark ? Colors.grey.shade400 : Colors.grey.shade800,
                         fontWeight: FontWeight.bold)),
                 Text(
-                  '${NumberFormat("#,###").format(amount)} \$',
+                  '${NumberFormat("#,###.##").format(amount)} \$',
                   style: TextStyle(
-                      fontSize: 17.sp,
+                      fontSize: 19.sp,
                       fontWeight: FontWeight.w900,
-                      color: theme.textTheme.bodyLarge?.color),
+                      color: theme.primaryColor),
                 ),
               ],
             ),
           ),
-          Icon(Icons.arrow_forward_ios_rounded,
-              color: Colors.grey.shade300, size: 14.sp),
         ],
       ),
     );
@@ -302,16 +295,12 @@ class EmployeeSummaryPage extends StatelessWidget {
   Widget _buildTotalPayCard(double totalPay, ThemeData theme) {
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.symmetric(vertical: 20.h, horizontal: 24.w),
+      padding: EdgeInsets.symmetric(vertical: 22.h, horizontal: 24.w),
       decoration: BoxDecoration(
-        color: Colors.green.shade500,
+        color: Colors.green.shade600,
         borderRadius: BorderRadius.circular(24.r),
         boxShadow: [
-          BoxShadow(
-            color: Colors.green.withOpacity(0.3),
-            blurRadius: 15,
-            offset: const Offset(0, 8),
-          )
+          BoxShadow(color: Colors.green.withOpacity(0.35), blurRadius: 18, offset: const Offset(0, 8))
         ],
       ),
       child: Row(
@@ -321,163 +310,102 @@ class EmployeeSummaryPage extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text("المجموع النهائي",
-                  style: TextStyle(
-                      fontSize: 14.sp,
-                      color: Colors.white,
-                      fontWeight: FontWeight.w600)),
+                  style: TextStyle(fontSize: 15.sp, color: Colors.white, fontWeight: FontWeight.w900)),
               Text("صافي المستحقات",
-                  style: TextStyle(
-                      fontSize: 11.sp,
-                      color: Colors.white70,
-                      fontWeight: FontWeight.bold)),
+                  style: TextStyle(fontSize: 12.sp, color: Colors.white.withOpacity(0.9), fontWeight: FontWeight.w600)),
             ],
           ),
           Text(
-            "${NumberFormat("#,###").format(totalPay)} \$",
-            style: TextStyle(
-                fontSize: 24.sp,
-                fontWeight: FontWeight.w900,
-                color: Colors.white),
+            "${NumberFormat("#,###.##").format(totalPay)} \$",
+            style: TextStyle(fontSize: 26.sp, fontWeight: FontWeight.w900, color: Colors.white),
           ),
         ],
       ),
-    ).animate().scale(delay: 400.ms, duration: 400.ms, curve: Curves.easeOutBack);
+    ).animate().scale(delay: 300.ms, duration: 500.ms, curve: Curves.easeOutBack);
   }
 
-  // الودجت الأساسي
-  Widget _buildWorkshopsSection(
-      List<WorkshopsSummary>? summary,
-      ThemeData theme,
-      ) {
+  Widget _buildWorkshopsSection(List<WorkshopsSummary>? summary, ThemeData theme) {
     if (summary == null || summary.isEmpty) {
       return Center(
-        child: Text(
-          'لا توجد ورش عمل مرتبطة حالياً',
-          style: TextStyle(color: Colors.grey.shade500, fontSize: 13.sp),
+        child: Padding(
+          padding: EdgeInsets.symmetric(vertical: 20.h),
+          child: Text('لا توجد ورش عمل مرتبطة حالياً',
+              style: TextStyle(color: Colors.grey.shade600, fontSize: 14.sp, fontWeight: FontWeight.bold)),
         ),
       );
     }
-
-    return Column(
-      children: summary
-          .map((ws) => _buildWorkshopCard(ws, theme))
-          .toList(),
-    );
+    return Column(children: summary.map((ws) => _buildWorkshopCard(ws, theme)).toList());
   }
 
-
-// ودجت فرعي لبناء كرت تفاصيل الورشة الواحدة
   Widget _buildWorkshopCard(WorkshopsSummary ws, ThemeData theme) {
+    final bool isDark = theme.brightness == Brightness.dark;
     return Container(
-      margin: EdgeInsets.only(bottom: 12.h),
-      padding: EdgeInsets.all(16.w),
+      margin: EdgeInsets.only(bottom: 16.h),
+      padding: EdgeInsets.all(18.w),
       decoration: BoxDecoration(
-        color: theme.primaryColor.withOpacity(0.04),
-        borderRadius: BorderRadius.circular(12.r),
-        border: Border.all(color: theme.primaryColor.withOpacity(0.2)),
+        color: isDark ? theme.cardColor : Colors.white,
+        borderRadius: BorderRadius.circular(16.r),
+        border: Border.all(color: theme.primaryColor.withOpacity(0.3), width: 1.5),
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.04), blurRadius: 10)],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          /// --- عنوان الورشة ---
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                "ورشة عمل: ${ws.workshopName ?? ''}",
-                style: TextStyle(
-                  fontSize: 16.sp,
-                  color: theme.primaryColor,
-                  fontWeight: FontWeight.bold,
+              Expanded(
+                child: Text(
+                  "ورشة: ${ws.workshopName ?? ''}",
+                  style: TextStyle(fontSize: 17.sp, color: theme.primaryColor, fontWeight: FontWeight.w900),
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
-              Icon(Icons.handyman,
-                  color: theme.primaryColor, size: 20.sp),
+              Icon(Icons.handyman_rounded, color: theme.primaryColor, size: 22.sp),
             ],
           ),
-
-          Divider(
-              height: 20.h,
-              color: theme.primaryColor.withOpacity(0.1)),
-
-          /// --- الساعات ---
+          Divider(height: 24.h, thickness: 1.2, color: theme.primaryColor.withOpacity(0.15)),
           Row(
             children: [
-              Expanded(
-                  child: _buildInfoItem(
-                      "ساعات أساسية",
-                      "${ws.regularHours ?? 0}\$",
-                      theme)),
-              Expanded(
-                  child: _buildInfoItem(
-                      "ساعات إضافية",
-                      "${ws.overtimeHours ?? 0} \$",
-                      theme)),
+              Expanded(child: _buildInfoItem("ساعات أساسية", "${ws.regularHours ?? 0} س", theme)),
+              Expanded(child: _buildInfoItem("ساعات إضافية", "${ws.overtimeHours ?? 0} س", theme)),
             ],
           ),
-
-          SizedBox(height: 12.h),
-
-          /// --- الأجور ---
+          SizedBox(height: 18.h),
           Row(
             children: [
-              Expanded(
-                  child: _buildInfoItem(
-                      "أجر أساسي",
-                      "${ws.regularPay ?? 0}\$",
-                      theme)),
-              Expanded(
-                  child: _buildInfoItem(
-                      "أجر إضافي",
-                      "${ws.overtimePay ?? 0}\$",
-                      theme)),
+              Expanded(child: _buildInfoItem("أجر أساسي", "${ws.regularPay ?? 0} \$", theme)),
+              Expanded(child: _buildInfoItem("أجر إضافي", "${ws.overtimePay ?? 0} \$", theme)),
             ],
           ),
-
-          Divider(
-              height: 20.h,
-              color: theme.primaryColor.withOpacity(0.1)),
-
-          /// --- الإجمالي ---
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                "إجمالي المستحقات:",
-                style: TextStyle(
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.bold),
-              ),
-              Text(
-                "${ws.totalPay ?? 0}\$",
-                style: TextStyle(
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.green.shade700,
-                ),
-              ),
-            ],
+          SizedBox(height: 14.h),
+          Container(
+            padding: EdgeInsets.all(14.w),
+            decoration: BoxDecoration(
+              color: theme.primaryColor.withOpacity(0.07),
+              borderRadius: BorderRadius.circular(10.r),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text("الإجمالي:", style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w900, color: isDark ? Colors.white : Colors.black87)),
+                Text("${ws.totalPay ?? 0} \$", style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w900, color: Colors.green.shade700)),
+              ],
+            ),
           ),
         ],
       ),
     );
   }
 
-
-// ودجت مساعد لترتيب النصوص (العنوان والقيمة) تحت بعضها
   Widget _buildInfoItem(String title, String value, ThemeData theme) {
+    final bool isDark = theme.brightness == Brightness.dark;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-            title,
-            style: TextStyle(fontSize: 12.sp, color: Colors.grey.shade600)
-        ),
-        SizedBox(height: 4.h),
-        Text(
-            value,
-            style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.w600, color: Colors.black87)
-        ),
+        Text(title, style: TextStyle(fontSize: 12.sp, color: isDark ? Colors.grey.shade400 : Colors.grey.shade700, fontWeight: FontWeight.bold)),
+        SizedBox(height: 5.h),
+        Text(value, style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w900, color: theme.textTheme.bodyLarge?.color)),
       ],
     );
   }
@@ -485,16 +413,29 @@ class EmployeeSummaryPage extends StatelessWidget {
   Widget _buildSectionTitle(String title, IconData icon, ThemeData theme) {
     return Row(
       children: [
-        Icon(icon, size: 20.sp, color: theme.primaryColor),
-        SizedBox(width: 10.w),
-        Text(
-          title,
-          style: TextStyle(
-              fontSize: 16.sp,
-              fontWeight: FontWeight.w900,
-              color: theme.textTheme.bodyLarge?.color),
-        ),
+        Icon(icon, size: 22.sp, color: theme.primaryColor),
+        SizedBox(width: 12.w),
+        Text(title, style: TextStyle(fontSize: 17.sp, fontWeight: FontWeight.w900, color: theme.textTheme.bodyLarge?.color)),
       ],
+    );
+  }
+
+  Widget _buildErrorState(String message, BuildContext context, String id) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.error_outline_rounded, color: Colors.red, size: 70.sp),
+          SizedBox(height: 16.h),
+          Text(message, textAlign: TextAlign.center, style: TextStyle(color: Colors.red.shade800, fontSize: 16.sp, fontWeight: FontWeight.bold)),
+          SizedBox(height: 20.h),
+          ElevatedButton.icon(
+            onPressed: () => context.read<EmployeeSummaryBloc>().add(LoadEmployeeSummaryEvent(id)),
+            icon: const Icon(Icons.refresh),
+            label: const Text('إعادة المحاولة'),
+          )
+        ],
+      ),
     );
   }
 }

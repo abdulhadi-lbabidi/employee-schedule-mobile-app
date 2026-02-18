@@ -24,46 +24,15 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-
-
   @override
   void initState() {
     super.initState();
     Future.microtask(() {
-      // context.read<AttendanceCubit>().loadAllRecords();
       context.read<WorkshopsBloc>().add(GetAllWorkShopEvent());
       context.read<DropdownCubit>().initDropDown();
       context.read<AttendanceBloc>().add(InitLocaleAttendanceEvent());
     });
   }
-
-  // static const List<String> _arabicDays = [
-  //   'الاثنين',
-  //   'الثلاثاء',
-  //   'الأربعاء',
-  //   'الخميس',
-  //   'الجمعة',
-  //   'السبت',
-  //   'الأحد',
-  // ];
-
-  // Map<String, dynamic> _getDateInfo(DateTime now) {
-  //   final day = _arabicDays[now.weekday - 1];
-  //   final date = DateFormat('dd/MM').format(now);
-  //   final weekNumber = DateHelper.getWeekOfMonth(now);
-  //   final startOfWeek = now.subtract(Duration(days: now.weekday - 1));
-  //   final endOfWeek = now.add(Duration(days: 7 - now.weekday));
-  //   final startDate = DateFormat('yyyy/MM/dd').format(startOfWeek);
-  //   final endDate = DateFormat('yyyy/MM/dd').format(endOfWeek);
-  //
-  //   return {
-  //     'day': day,
-  //     'date': date,
-  //     'weekNumber': weekNumber,
-  //     'startDate': startDate,
-  //     'endDate': endDate,
-  //   };
-  // }
 
   @override
   Widget build(BuildContext context) {
@@ -71,133 +40,144 @@ class _HomePageState extends State<HomePage> {
 
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
-      body: SingleChildScrollView(
-        physics: const BouncingScrollPhysics(),
-        child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(height: 15.h),
-              _buildGreeting(theme)
-                  .animate()
-                  .fadeIn(duration: 500.ms)
-                  .slideX(begin: -0.2, end: 0, curve: Curves.easeOutQuad),
+      // إضافة AppBar بسيط يعطي طابعاً رسمياً
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        toolbarHeight: 0, // إخفاء البار مع الاحتفاظ بخصائصه
+      ),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 10.h),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildHeader(theme),
 
-              SizedBox(height: 30.h),
-              _buildStatusCard(theme)
-                  .animate()
-                  .fadeIn(delay: 200.ms, duration: 600.ms)
-                  .scale(
-                begin: const Offset(0.9, 0.9),
-                end: const Offset(1, 1),
-                curve: Curves.elasticOut,
-              ),
+                SizedBox(height: 30.h),
 
-              SizedBox(height: 30.h),
-              _buildSectionTitle(
-                "إجراءات سريعة",
-                theme,
-              ).animate().fadeIn(delay: 400.ms),
+                _buildStatusSection(theme),
 
-              SizedBox(height: 15.h),
-              _buildAttendanceControls()
-                  .animate()
-                  .fadeIn(delay: 500.ms)
-                  .slideY(begin: 0.1, end: 0),
+                SizedBox(height: 35.h),
+                _buildSectionTitle("إجراءات سريعة", Icons.flash_on_rounded, theme),
 
-              SizedBox(height: 35.h),
-              _buildSectionTitle(
-                "سجلات العمل اليوم",
-                theme,
-              ).animate().fadeIn(delay: 700.ms),
+                SizedBox(height: 15.h),
+                _buildAttendanceControls(theme),
 
-              SizedBox(height: 15.h),
-              _buildTodayRecordsList(theme),
-            ],
+                SizedBox(height: 40.h),
+                _buildSectionTitle("سجلات العمل اليوم", Icons.history_toggle_off_rounded, theme),
+
+                SizedBox(height: 15.h),
+                _buildTodayRecordsList(theme),
+
+                SizedBox(height: 20.h),
+              ],
+            ),
           ),
         ),
       ),
     );
   }
 
-  Widget _buildGreeting(ThemeData theme) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+  Widget _buildHeader(ThemeData theme) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
-          'أهلاً بك،',
-          style: TextStyle(
-            color: theme.disabledColor,
-            fontSize: 16.sp,
-            fontWeight: FontWeight.bold,
-          ),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'أهلاً بك،',
+              style: TextStyle(
+                color: theme.disabledColor,
+                fontSize: 14.sp,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            Text(
+              AppVariables.user?.fullName ?? 'المستخدم',
+              style: TextStyle(
+                color: theme.primaryColor,
+                fontSize: 24.sp,
+                fontWeight: FontWeight.w900,
+                letterSpacing: -0.5,
+              ),
+            ),
+          ],
         ),
-        Text(
-          AppVariables.user!.fullName!,
-          style: TextStyle(
-            color: theme.primaryColor,
-            fontSize: 28.sp,
-            fontWeight: FontWeight.w900,
-          ),
-        ),
-        SizedBox(height: 8.h),
-        Container(
-          height: 4.h,
-          width: 40.w,
+        // إضافة أيقونة ملف شخصي أو تنبيهات تعطي شكلاً أجمل
+
+      ],
+    ).animate().fadeIn(duration: 500.ms).slideY(begin: -0.2, end: 0);
+  }
+
+  Widget _buildStatusSection(ThemeData theme) {
+    return BlocBuilder<DropdownCubit, DropdownState>(
+      builder: (context, state) {
+        final isActive = state.localeAttendanceModel != null;
+        return Container(
           decoration: BoxDecoration(
-            color: theme.primaryColor,
-            borderRadius: BorderRadius.circular(10.r),
+            borderRadius: BorderRadius.circular(25.r),
+            boxShadow: [
+              BoxShadow(
+                color: (isActive ? Colors.green : theme.primaryColor).withOpacity(0.15),
+                blurRadius: 20,
+                offset: const Offset(0, 10),
+              ),
+            ],
+          ),
+          child: Cardattendancestatus(
+            statusText: isActive ? "نشط حالياً" : "غير نشط",
+            isActive: isActive,
+            checkInTime: '--:--',
+          ),
+        );
+      },
+    ).animate().fadeIn(delay: 200.ms).scale(curve: Curves.easeOutBack);
+  }
+
+  Widget _buildSectionTitle(String title, IconData icon, ThemeData theme) {
+    return Row(
+      children: [
+        Icon(icon, size: 18.sp, color: theme.primaryColor),
+        SizedBox(width: 8.w),
+        Text(
+          title,
+          style: TextStyle(
+            fontSize: 16.sp,
+            fontWeight: FontWeight.w900,
+            color: theme.textTheme.bodyLarge?.color?.withOpacity(0.8),
           ),
         ),
       ],
     );
   }
 
-  Widget _buildSectionTitle(String title, ThemeData theme) {
-    return Text(
-      title,
-      style: TextStyle(
-        fontSize: 16.sp,
-        fontWeight: FontWeight.w900,
-        color: theme.primaryColor.withOpacity(0.8),
-      ),
-    );
-  }
-
-  Widget _buildStatusCard(ThemeData theme) {
-    return BlocBuilder<DropdownCubit, DropdownState>(
-      builder: (context, state) {
-        final isActive = context
-            .read<DropdownCubit>()
-            .state
-            .localeAttendanceModel != null;
-        String timeText =
-            '--:--';
-        return Cardattendancestatus(
-          statusText: isActive ? "نشط حالياً" : "غير نشط",
-          isActive: isActive,
-          checkInTime: timeText,
-        );
-      },
-    );
-  }
-
-  Widget _buildAttendanceControls() {
+  Widget _buildAttendanceControls(ThemeData theme) {
     return BlocBuilder<ButtonCubit, ButtonState>(
       builder: (context, state) {
-        return Column(
-          children: [
-            Row(
-              children: [
-                Expanded(child: ButtonOnIn()),
-                SizedBox(width: 12.w),
-                Expanded(child: DropdownView()),
-              ],
-            ),
-            SizedBox(height: 15.h),
-            ButtonOut(),
-          ],
+        return Container(
+          padding: EdgeInsets.all(15.w),
+          decoration: BoxDecoration(
+            color: theme.cardColor.withOpacity(0.5),
+            borderRadius: BorderRadius.circular(20.r),
+            border: Border.all(color: theme.dividerColor.withOpacity(0.05)),
+          ),
+          child: Column(
+            children: [
+              Row(
+                children: [
+                  Expanded(child: ButtonOnIn()),
+                  SizedBox(width: 12.w),
+                  Expanded(child: DropdownView()),
+                ],
+              ),
+              SizedBox(height: 12.h),
+              ButtonOut(),
+            ],
+          ),
         );
       },
     );
@@ -208,39 +188,29 @@ class _HomePageState extends State<HomePage> {
       builder: (context, state) {
         final records = state.localeTodayAttendanceList;
 
-
         if (records.isEmpty) {
-          return _buildEmptyState(theme).animate().fadeIn(delay: 800.ms);
+          return _buildEmptyState(theme);
         }
 
-        // استيراد المكتبة في أعلى الملف إذا لم تكن موجودة
-
-
-// ... داخل ويدجيت _buildTodayRecordsList ...
-
-        return ListView.builder(
+        return ListView.separated(
           shrinkWrap: true,
           padding: EdgeInsets.zero,
           physics: const NeverScrollableScrollPhysics(),
           itemCount: records.length,
+          separatorBuilder: (context, index) => SizedBox(height: 12.h),
           itemBuilder: (context, index) {
             final r = records[index];
-            // تحويل التاريخ إلى اسم اليوم باللغة العربية
-            // 'EEEE' تعني اسم اليوم الكامل (الأحد، الاثنين...)
             String dayName = DateFormat('EEEE', 'ar').format(r.date ?? DateTime.now());
 
-            return Padding(
-              padding: EdgeInsets.only(bottom: 12.h),
-              child: CardTodRecord(
-                day: dayName, // نمرر اسم اليوم هنا بدلاً من الرقم
-                checkIn: r.checkIn!,
-                checkOut: r.checkOut,
-                workshop: r.workshop!.name!,
-              )
-                  .animate()
-                  .fadeIn(delay: (800 + (index * 100)).ms, duration: 500.ms)
-                  .slideX(begin: 0.1, end: 0),
-            );
+            return CardTodRecord(
+              day: dayName,
+              checkIn: r.checkIn!,
+              checkOut: r.checkOut,
+              workshop: r.workshop?.name ?? 'ورشة غير معروفة',
+            )
+                .animate()
+                .fadeIn(delay: (300 + (index * 100)).ms)
+                .slideX(begin: 0.1, end: 0);
           },
         );
       },
@@ -250,30 +220,33 @@ class _HomePageState extends State<HomePage> {
   Widget _buildEmptyState(ThemeData theme) {
     return Container(
       width: double.infinity,
-      padding: EdgeInsets.all(40.w),
+      padding: EdgeInsets.symmetric(vertical: 40.h),
       decoration: BoxDecoration(
-        color: theme.cardColor,
+        color: theme.cardColor.withOpacity(0.3),
         borderRadius: BorderRadius.circular(24.r),
-        border: Border.all(color: theme.dividerColor.withOpacity(0.1)),
+        border: Border.all(color: theme.dividerColor.withOpacity(0.05), style: BorderStyle.solid),
       ),
       child: Column(
         children: [
-          Icon(
-            Icons.history_rounded,
-            size: 50.sp,
-            color: theme.disabledColor.withOpacity(0.2),
+          Container(
+            padding: EdgeInsets.all(15.w),
+            decoration: BoxDecoration(
+              color: theme.disabledColor.withOpacity(0.05),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(Icons.calendar_today_rounded, size: 40.sp, color: theme.disabledColor.withOpacity(0.3)),
           ),
           SizedBox(height: 15.h),
           Text(
-            "لا توجد سجلات لليوم",
+            "لا توجد سجلات مسجلة اليوم",
             style: TextStyle(
               color: theme.disabledColor,
-              fontSize: 14.sp,
-              fontWeight: FontWeight.bold,
+              fontSize: 13.sp,
+              fontWeight: FontWeight.w600,
             ),
           ),
         ],
       ),
-    );
+    ).animate().fadeIn();
   }
 }
