@@ -138,18 +138,17 @@ class ApiVariables {
       '/api/rewards');
 
   // --- Notifications ---
-  static Uri notifications() => _mainUri(
-      '/api/notifications');
+  static Uri notifications() => _mainUri('/api/notifications');
 
-  static Uri sendNotification() => _mainUri(
-      '/api/notifications/send');
+  static Uri sendNotification() => _mainUri('/api/notifications/send');
+
 
   static Uri deleteNotification(String id) =>
       _mainUri('/api/notifications/$id');
   static Uri updateFCMToken() => _mainUri(
-      '');
+      '/api/update-fcm-token');
   static Uri deleteFCMToken() => _mainUri(
-      '');
+      '/api/delete-fcm-token');
   static Uri getEmployeesHoursAndPaySummary(String id) =>
       _mainUri('/api/employees/$id/hours-and-pay-summary');
    //payments

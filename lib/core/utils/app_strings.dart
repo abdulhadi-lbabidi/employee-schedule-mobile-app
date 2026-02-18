@@ -40,7 +40,7 @@ class AppStrings {
   static const String expensesByWorkshop = 'المستحقات  الورشات';
   static const String expensesByEmployee = 'المستحقات العمال';
   static const String previousPayments = 'المدفوعات سابقة';
-  static const String currency = 'ل.س';
+  static const String currency = '\$';
 
   // Workshops Page
   static const String workshopsTitle = 'إدارة الورشات';

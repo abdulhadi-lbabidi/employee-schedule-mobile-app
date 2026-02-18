@@ -214,7 +214,7 @@ class _AdminLoanPageState extends State<AdminLoanPage> {
         content: TextField(
           controller: controller,
           keyboardType: TextInputType.number,
-          decoration: const InputDecoration(labelText: "المبلغ المراد تسديده", suffixText: "ل.س"),
+          decoration: const InputDecoration(labelText: "المبلغ المراد تسديده", suffixText: "\$"),
         ),
         actions: [
           TextButton(onPressed: () => Navigator.pop(context), child: const Text("إلغاء")),

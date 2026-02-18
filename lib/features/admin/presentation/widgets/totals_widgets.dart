@@ -46,7 +46,7 @@ class TotalsWidget extends StatelessWidget {
             children: [
               _statCol(
                 "سعر الساعات الاساسية",
-                '${totals.totalRegularPay!= null ? totals.totalRegularPay!.toStringAsFixed(1) : 0}  ل.س',
+                '${totals.totalRegularPay!= null ? totals.totalRegularPay!.toStringAsFixed(1) : 0}\$',
                 theme,
               ),
               Container(
@@ -56,7 +56,7 @@ class TotalsWidget extends StatelessWidget {
               ),
               _statCol(
                 "سعر الساعات الاضافية",
-                '${totals.totalOvertimePay != null ? totals.totalOvertimePay!.toStringAsFixed(1) : 0} ل.س',
+                '${totals.totalOvertimePay != null ? totals.totalOvertimePay!.toStringAsFixed(1) : 0} \$',
                 theme,
 
               ),

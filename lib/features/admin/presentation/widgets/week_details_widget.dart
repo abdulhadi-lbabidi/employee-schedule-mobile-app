@@ -103,7 +103,7 @@ class WeekDetailsWidget extends StatelessWidget {
         ),
       ),
       Text(
-        "${v.toInt()} ${hour??'ل.س'}",
+        "${v.toInt()} ${hour??'\$'}",
         style: TextStyle(
           fontWeight: FontWeight.w900,
           fontSize: 15.sp,

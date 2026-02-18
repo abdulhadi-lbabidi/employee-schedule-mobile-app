@@ -139,7 +139,7 @@ class EmployeeDetailsBloc
         details:
             event.isFullPayment
                 ? "دفع مستحقات الأسبوع ${event.weekNumber} بالكامل"
-                : "دفع مبلغ ${event.amountPaid} ل.س من مستحقات الأسبوع ${event.weekNumber}",
+                : "دفع مبلغ ${event.amountPaid} \$ من مستحقات الأسبوع ${event.weekNumber}",
       );
     } catch (e) {
       debugPrint('Error confirming payment: $e');

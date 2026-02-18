@@ -85,7 +85,7 @@ class _IssueRewardDialogState extends State<IssueRewardDialog> {
               TextFormField(
                 controller: _amountController,
                 decoration: const InputDecoration(
-                  labelText: "المبلغ (ل.س)",
+                  labelText: "المبلغ (\$)",
                   border: OutlineInputBorder(),
                 ),
                 keyboardType: TextInputType.number,

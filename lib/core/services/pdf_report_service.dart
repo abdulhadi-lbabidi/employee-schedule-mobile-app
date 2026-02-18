@@ -78,7 +78,7 @@ class PdfReportService {
       decoration: const pw.BoxDecoration(color: PdfColors.grey100),
       child: pw.Row(mainAxisAlignment: pw.MainAxisAlignment.spaceBetween, children: [
         pw.Text("إجمالي المستحقات:", style: pw.TextStyle(font: boldFont, fontWeight: pw.FontWeight.bold)),
-        pw.Text("${total.toStringAsFixed(0)} ل.س", style: pw.TextStyle(font: boldFont, color: PdfColors.green800, fontWeight: pw.FontWeight.bold)),
+        pw.Text("${total.toStringAsFixed(0)} \$", style: pw.TextStyle(font: boldFont, color: PdfColors.green800, fontWeight: pw.FontWeight.bold)),
       ]),
     );
   }
@@ -93,7 +93,7 @@ class PdfReportService {
   //     data: list.map((e) {
   //       double due = 0; double hrs = 0;
   //       for (var w in e.weeklyHistory) { if (!w.isPaid) { for (var ws in w.workshops) { due += ws.calculateValue(e.hourlyRate, e.overtimeRate); hrs += (ws.regularHours + ws.overtimeHours); } } }
-  //       return [e.name, hrs.toStringAsFixed(1), "${due.toStringAsFixed(0)} ل.س", e.workshopName];
+  //       return [e.name, hrs.toStringAsFixed(1), "${due.toStringAsFixed(0)} \$", e.workshopName];
   //     }).toList(),
   //   );
   // }

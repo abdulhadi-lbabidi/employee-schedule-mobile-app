@@ -4,6 +4,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/utils/app_strings.dart';
 import '../../../Notification/presentation/bloc/notification_bloc.dart';
 import '../../../Notification/presentation/bloc/notification_event.dart';
+import '../bloc/workshops/workshops_bloc.dart';
+import '../bloc/workshops/workshops_state.dart';
 
 class SendNotificationPage extends StatefulWidget {
   const SendNotificationPage({super.key});
@@ -16,14 +18,9 @@ class _SendNotificationPageState extends State<SendNotificationPage> {
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   final _bodyController = TextEditingController();
-  String _selectedTarget = AppStrings.allEmployees;
-
-  final List<String> _targets = [
-    AppStrings.allEmployees,
-    'ورشة النجارة',
-    'ورشة الخياطة',
-    'المستودع',
-  ];
+  
+  // نستخدم الـ ID بدلاً من الاسم
+  String? _selectedWorkshopId;
 
   @override
   void dispose() {
@@ -53,13 +50,10 @@ class _SendNotificationPageState extends State<SendNotificationPage> {
               
               TextFormField(
                 controller: _titleController,
-                style: TextStyle(fontSize: 14.sp),
                 decoration: InputDecoration(
                   labelText: AppStrings.notificationTitleLabel,
-                  labelStyle: TextStyle(fontSize: 12.sp),
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(12.r)),
-                  prefixIcon: Icon(Icons.title, size: 20.sp),
-                  contentPadding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 15.w),
+                  prefixIcon: const Icon(Icons.title),
                 ),
                 validator: (val) => val == null || val.isEmpty ? AppStrings.fillAllFields : null,
               ),
@@ -67,35 +61,38 @@ class _SendNotificationPageState extends State<SendNotificationPage> {
               
               TextFormField(
                 controller: _bodyController,
-                maxLines: 5,
-                style: TextStyle(fontSize: 14.sp),
+                maxLines: 4,
                 decoration: InputDecoration(
                   labelText: AppStrings.notificationBodyLabel,
-                  labelStyle: TextStyle(fontSize: 12.sp),
                   alignLabelWithHint: true,
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(12.r)),
-                  prefixIcon: Padding(
-                    padding: EdgeInsets.only(bottom: 80.h),
-                    child: Icon(Icons.message, size: 20.sp),
-                  ),
-                  contentPadding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 15.w),
+                  prefixIcon: const Icon(Icons.message),
                 ),
                 validator: (val) => val == null || val.isEmpty ? AppStrings.fillAllFields : null,
               ),
               SizedBox(height: 20.h),
               
-              DropdownButtonFormField<String>(
-                value: _selectedTarget,
-                style: TextStyle(fontSize: 14.sp, color: Colors.black),
-                decoration: InputDecoration(
-                  labelText: AppStrings.targetAudience,
-                  labelStyle: TextStyle(fontSize: 12.sp),
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12.r)),
-                  prefixIcon: Icon(Icons.people_alt, size: 20.sp),
-                  contentPadding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 15.w),
-                ),
-                items: _targets.map((t) => DropdownMenuItem(value: t, child: Text(t, style: TextStyle(fontSize: 14.sp)))).toList(),
-                onChanged: (val) => setState(() => _selectedTarget = val!),
+              // اختيار الورشة من البيانات الحقيقية
+              BlocBuilder<WorkshopsBloc, WorkshopsState>(
+                builder: (context, state) {
+                  final workshops = state.getAllWorkShopData.data ?? [];
+                  return DropdownButtonFormField<String>(
+                    value: _selectedWorkshopId,
+                    decoration: InputDecoration(
+                      labelText: "الجمهور المستهدف",
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12.r)),
+                      prefixIcon: const Icon(Icons.people_alt),
+                    ),
+                    items: [
+                      const DropdownMenuItem(value: null, child: Text("جميع الموظفين")),
+                      ...workshops.map((w) => DropdownMenuItem(
+                        value: w.id.toString(),
+                        child: Text(w.name),
+                      )),
+                    ],
+                    onChanged: (val) => setState(() => _selectedWorkshopId = val),
+                  );
+                },
               ),
               SizedBox(height: 40.h),
               
@@ -104,13 +101,12 @@ class _SendNotificationPageState extends State<SendNotificationPage> {
                 height: 55.h,
                 child: ElevatedButton.icon(
                   onPressed: () => _sendNotification(context),
-                  icon: Icon(Icons.send, size: 20.sp),
-                  label: Text(AppStrings.send, style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold)),
+                  icon: const Icon(Icons.send),
+                  label: Text("إرسال التنبيه الآن", style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold)),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.blue,
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
-                    elevation: 4,
                   ),
                 ),
               ),
@@ -127,12 +123,12 @@ class _SendNotificationPageState extends State<SendNotificationPage> {
         AdminSendNotificationEvent(
           title: _titleController.text,
           body: _bodyController.text,
-          targetWorkshop: _selectedTarget == AppStrings.allEmployees ? null : _selectedTarget,
+          targetWorkshop: _selectedWorkshopId, // نرسل الـ ID الحقيقي
         ),
       );
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppStrings.sendSuccess, style: TextStyle(fontSize: 13.sp)), backgroundColor: Colors.green),
+        const SnackBar(content: Text("جاري الإرسال..."), backgroundColor: Colors.blue),
       );
       
       Navigator.pop(context);

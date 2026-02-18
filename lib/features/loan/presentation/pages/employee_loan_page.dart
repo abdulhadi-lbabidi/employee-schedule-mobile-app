@@ -155,17 +155,17 @@ class _EmployeeLoanPageState extends State<EmployeeLoanPage> {
             SizedBox(height: 20.h),
             _buildDetailRow(
               "القيمة الكلية:",
-              "${NumberFormat.decimalPattern().format(loan.amount)} ل.س",
+              "${NumberFormat.decimalPattern().format(loan.amount)} \$",
               theme,
             ),
             _buildDetailRow(
               "المبلغ المسدد:",
-              "${NumberFormat.decimalPattern().format(loan.paidAmount)} ل.س",
+              "${NumberFormat.decimalPattern().format(loan.paidAmount)} \$",
               theme,
             ),
             _buildDetailRow(
               "المبلغ المتبقي:",
-              "${NumberFormat.decimalPattern().format(loan.amount - loan.paidAmount)} ل.س",
+              "${NumberFormat.decimalPattern().format(loan.amount - loan.paidAmount)} \$",
               theme,
               isBold: true,
               valueColor: Colors.red.shade600,
@@ -303,7 +303,7 @@ class _AddLoanSheetState extends State<_AddLoanSheet> {
             inputFormatters: [FilteringTextInputFormatter.digitsOnly],
             decoration: const InputDecoration(
               labelText: "قيمة السلفة",
-              suffixText: "ل.س",
+              suffixText: "\$",
             ),
           ),
           SizedBox(height: 16.h),

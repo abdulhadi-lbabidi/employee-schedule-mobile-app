@@ -246,7 +246,7 @@ class _WorkshopDetailsPageState extends State<WorkshopDetailsPage> {
                         ),
                       ),
                       Text(
-                        "${NumberFormat.decimalPattern().format(cost)} ل.س",
+                        "${NumberFormat.decimalPattern().format(cost)}\$",
                         style: TextStyle(
                           fontSize: 22.sp,
                           fontWeight: FontWeight.w900,
