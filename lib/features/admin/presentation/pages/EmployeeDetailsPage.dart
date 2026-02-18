@@ -10,6 +10,9 @@ import '../../data/models/employee model/get_employee_details_hours_details_resp
 import '../bloc/employee_details/employee_details_bloc.dart';
 import '../bloc/employee_details/employee_details_event.dart';
 import '../bloc/employee_details/employee_details_state.dart';
+import '../bloc/employees/employees_bloc.dart';
+import '../bloc/employees/employees_event.dart';
+import '../bloc/employees/employees_state.dart';
 import '../widgets/employee_build_date_selector.dart';
 import '../widgets/totals_widgets.dart';
 import '../widgets/week_details_widget.dart';
@@ -18,8 +21,13 @@ import 'EmployeesPage.dart';
 
 class EmployeeDetailsPage extends StatefulWidget {
   final EmployeeModel employeeModel;
+  final bool isArchived;
 
-  const EmployeeDetailsPage({super.key, required this.employeeModel});
+  const EmployeeDetailsPage({
+    super.key,
+    required this.employeeModel,
+    required this.isArchived,
+  });
 
   @override
   State<EmployeeDetailsPage> createState() => _EmployeeDetailsPageState();
@@ -27,10 +35,12 @@ class EmployeeDetailsPage extends StatefulWidget {
 
 class _EmployeeDetailsPageState extends State<EmployeeDetailsPage> {
   late ValueNotifier<Week?> selectedWeek;
+  late ValueNotifier<bool> isArchivedNotifier;
 
   @override
   void initState() {
     selectedWeek = ValueNotifier(null);
+    isArchivedNotifier = ValueNotifier(widget.isArchived);
     // TODO: implement initState
     super.initState();
   }
@@ -45,7 +55,7 @@ class _EmployeeDetailsPageState extends State<EmployeeDetailsPage> {
           (_) =>
               sl<EmployeeDetailsBloc>()..add(
                 LoadEmployeeDetailsHoursEvent(
-                  widget.employeeModel.user!.id.toString(),
+                  widget.employeeModel.id.toString(),
                 ),
               ),
       child: Scaffold(
@@ -63,47 +73,73 @@ class _EmployeeDetailsPageState extends State<EmployeeDetailsPage> {
           ),
           centerTitle: true,
           actions: [
-            BlocBuilder<EmployeeDetailsBloc, EmployeeDetailsState>(
-              builder: (context, state) {
-                if (state is EmployeeDetailsHoursLoaded) {
-                  final employee = widget.employeeModel;
-                  return Row(
-                    children: [
-                      IconButton(
-                        icon: Icon(
-                          // employee.isArchived ? Icons.unarchive_outlined : Icons.archive_outlined,
-                          // color: employee.isArchived ? Colors.green : Colors.orange,
-                          Icons.archive_outlined,
-                          color: Colors.orange,
-                        ),
-                        onPressed:
-                            () => _showArchiveConfirmation(
-                              context,
-                              widget.employeeModel,
-                            ),
-                      ),
-                      IconButton(
-                        icon: Icon(
-                          Icons.edit_note_rounded,
-                          size: 28.sp,
-                          color: theme.primaryColor,
-                        ),
-                        onPressed:
-                            () => Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder:
-                                    (_) => EditEmployeePage(
-                                      employee: widget.employeeModel,
-                                    ),
-                              ),
-                            ),
-                      ),
-                    ],
-                  );
-                }
-                return const SizedBox.shrink();
+            BlocListener<EmployeesBloc, EmployeesState>(
+              listener: (context, state) {
+                state.restoreEmployeeArchivedData.listenerFunction(
+                  onSuccess: () {
+                    isArchivedNotifier.value = false;
+                  },
+                );
+                state.setEmployeeArchivedData.listenerFunction(
+                  onSuccess: () {
+                    isArchivedNotifier.value = true;
+                  },
+                );
               },
+              listenWhen:
+                  (pre, cur) =>
+                      (pre.setEmployeeArchivedData.status !=
+                          cur.setEmployeeArchivedData.status) ||
+                      (pre.restoreEmployeeArchivedData.status !=
+                          cur.restoreEmployeeArchivedData.status),
+              child: BlocBuilder<EmployeeDetailsBloc, EmployeeDetailsState>(
+                builder: (context, state) {
+                  if (state is EmployeeDetailsHoursLoaded) {
+                    final employee = widget.employeeModel;
+                    return Row(
+                      children: [
+                        ValueListenableBuilder(
+                          valueListenable: isArchivedNotifier,
+                          builder: (context, value, child) {
+                            return IconButton(
+                              icon: Icon(
+                                value
+                                    ? Icons.unarchive_outlined
+                                    : Icons.archive_outlined,
+                                color: value ? Colors.green : Colors.orange,
+                              ),
+                              onPressed:
+                                  () => _showArchiveConfirmation(
+                                    context,
+                                    widget.employeeModel,
+                                    value,
+                                  ),
+                            );
+                          },
+                        ),
+                        IconButton(
+                          icon: Icon(
+                            Icons.edit_note_rounded,
+                            size: 28.sp,
+                            color: theme.primaryColor,
+                          ),
+                          onPressed:
+                              () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder:
+                                      (_) => EditEmployeePage(
+                                        employee: widget.employeeModel,
+                                      ),
+                                ),
+                              ),
+                        ),
+                      ],
+                    );
+                  }
+                  return const SizedBox.shrink();
+                },
+              ),
             ),
             IconButton(
               icon: Icon(
@@ -156,7 +192,11 @@ class _EmployeeDetailsPageState extends State<EmployeeDetailsPage> {
                       weeks: state.employee.weeks!,
                     ),
                     SizedBox(height: 30.h),
-                    WeekDetailsWidget(employee: employee, theme: theme,selectedWeek: selectedWeek,),
+                    WeekDetailsWidget(
+                      employee: employee,
+                      theme: theme,
+                      selectedWeek: selectedWeek,
+                    ),
                     SizedBox(height: 40.h),
                   ],
                 ),
@@ -221,16 +261,49 @@ class _EmployeeDetailsPageState extends State<EmployeeDetailsPage> {
     );
   }
 
-  void _showArchiveConfirmation(BuildContext context, EmployeeModel employee) {
-    // final bool willArchive = !employee.isArchived;
-    // showDialog(context: context, builder: (d) => AlertDialog(
-    //   title: Text(willArchive ? 'أرشفة الموظف' : 'إلغاء الأرشفة'),
-    //   content: Text(willArchive ? 'هل أنت متأكد من أرشفة الموظف ${employee.name}؟' : 'هل تريد إعادة تنشيط الموظف ${employee.name}؟'),
-    //   actions: [
-    //     TextButton(onPressed: () => Navigator.pop(d), child: const Text("إلغاء")),
-    //     TextButton(onPressed: () { context.read<EmployeeDetailsBloc>().add(ToggleArchiveEmployeeDetailEvent(employee.id, willArchive)); Navigator.pop(d); }, child: Text(willArchive ? "أرشفة" : "تنشيط", style: TextStyle(color: willArchive ? Colors.orange : Colors.green))),
-    //   ],
-    // ));
+  void _showArchiveConfirmation(
+    BuildContext context,
+    EmployeeModel employee,
+    bool isArchived,
+  ) {
+    final bool willArchive = !isArchived;
+    showDialog(
+      context: context,
+      builder:
+          (d) => AlertDialog(
+            title: Text(willArchive ? 'أرشفة الموظف' : 'إلغاء الأرشفة'),
+            content: Text(
+              willArchive
+                  ? 'هل أنت متأكد من أرشفة الموظف ${employee.user?.fullName ?? 'المستخدم'}؟'
+                  : 'هل تريد إعادة تنشيط الموظف ${employee.user?.fullName ?? 'المستخدم'}؟',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(d),
+                child: const Text("إلغاء"),
+              ),
+              TextButton(
+                onPressed: () {
+                  isArchived
+                      ? context.read<EmployeesBloc>().add(
+                        RestoreArchiveEmployeeEvent(employee.id.toString()),
+                      )
+                      : context.read<EmployeesBloc>().add(
+                        ToggleArchiveEmployeeEvent(employee.id.toString()),
+                      );
+
+                  Navigator.pop(d);
+                },
+                child: Text(
+                  willArchive ? "أرشفة" : "تنشيط",
+                  style: TextStyle(
+                    color: willArchive ? Colors.orange : Colors.green,
+                  ),
+                ),
+              ),
+            ],
+          ),
+    );
   }
 }
 

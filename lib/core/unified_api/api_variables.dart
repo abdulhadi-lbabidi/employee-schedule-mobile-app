@@ -43,6 +43,7 @@ class ApiVariables {
   static Uri getEmployeesStatus() => _mainUri('/api/admin/employees/is_online');
 
   static Uri employees() => _mainUri('/api/employees');
+  static Uri employeesArchived() => _mainUri('/api/employees-archived');
 
   static Uri addEmployee() => _mainUri('/api/employees');
 
@@ -58,6 +59,7 @@ class ApiVariables {
       _mainUri('/api/employees-archived/restore');
 
   static Uri archiveEmployee(String id) => _mainUri('/api/employees/$id');
+  static Uri restoreEmployee(String id) => _mainUri('/api/employees/$id/restore');
 
   static Uri archiveRestoreEmployee(String id) =>
       _mainUri('/api/employees/$id/restore');

@@ -51,7 +51,7 @@ class EmployeeDetailsBloc
     on<UpdateOvertimeRateEvent>(_onUpdateOvertimeRate);
     on<ConfirmPaymentEvent>(_onConfirmPayment);
     on<DeleteEmployeeEvent>(_onDeleteEmployee);
-    on<ToggleArchiveEmployeeDetailEvent>(_onToggleArchiveEmployee);
+    // on<ToggleArchiveEmployeeDetailEvent>(_onToggleArchiveEmployee);
     on<UpdateEmployeeFullEvent>(_onUpdateFullEmployee);
   }
 
@@ -94,27 +94,28 @@ class EmployeeDetailsBloc
     );
   }
 
-  Future<void> _onToggleArchiveEmployee(
-    ToggleArchiveEmployeeDetailEvent event,
-    Emitter<EmployeeDetailsState> emit,
-  ) async {
-    if (_employee == null) return;
-    try {
-      await toggleEmployeeArchiveUseCase(event.employeeId, event.isArchived);
-      _employee = _employee!;
-      emit(EmployeeDetailsLoaded(_employee!));
-
-      await auditLogRepository.logAction(
-        actionType: event.isArchived ? "أرشفة موظف" : "إلغاء أرشفة موظف",
-        targetName: _employee!.user!.fullName!,
-        details:
-            event.isArchived ? "تمت أرشفة الموظف" : "تمت إعادة تنشيط الموظف",
-      );
-    } catch (e) {
-      debugPrint('Error toggling employee archive: $e');
-      emit(EmployeeDetailsError('فشل تغيير حالة الأرشفة'));
-    }
-  }
+  // Future<void> _onToggleArchiveEmployee(
+  //   ToggleArchiveEmployeeDetailEvent event,
+  //   Emitter<EmployeeDetailsState> emit,
+  // )
+  // async {
+  //   if (_employee == null) return;
+  //   try {
+  //     await toggleEmployeeArchiveUseCase(event.employeeId);
+  //     _employee = _employee!;
+  //     emit(EmployeeDetailsLoaded(_employee!));
+  //
+  //     await auditLogRepository.logAction(
+  //       actionType: event.isArchived ? "أرشفة موظف" : "إلغاء أرشفة موظف",
+  //       targetName: _employee!.user!.fullName!,
+  //       details:
+  //           event.isArchived ? "تمت أرشفة الموظف" : "تمت إعادة تنشيط الموظف",
+  //     );
+  //   } catch (e) {
+  //     debugPrint('Error toggling employee archive: $e');
+  //     emit(EmployeeDetailsError('فشل تغيير حالة الأرشفة'));
+  //   }
+  // }
 
   Future<void> _onConfirmPayment(
     ConfirmPaymentEvent event,

@@ -46,7 +46,8 @@ class WorkshopsBloc extends Bloc<WorkshopsEvent, WorkshopsState> {
     RestoreArchiveWorkshopEvent event,
     Emitter<WorkshopsState> emit,
   )
-  async {
+  async
+  {
     emit(
       state.copyWith(restoreArchiveData: state.restoreArchiveData.setLoading()),
     );
@@ -59,7 +60,8 @@ class WorkshopsBloc extends Bloc<WorkshopsEvent, WorkshopsState> {
           ),
         ),
       ),
-      (workshops) {
+      (workshops)
+      {
         final workshop = state.getAllArchivedWorkshopData.data!.data!.firstWhere(
           (e) => e.id.toString() == event.id,
         );
@@ -237,7 +239,8 @@ class WorkshopsBloc extends Bloc<WorkshopsEvent, WorkshopsState> {
   Future<void> _onToggleArchiveWorkshop(
     ToggleArchiveWorkshopEvent event,
     Emitter<WorkshopsState> emit,
-  ) async {
+  )
+  async {
     emit(
       state.copyWith(
         toggleWorkshopArchiveData: state.toggleWorkshopArchiveData.setLoading(),

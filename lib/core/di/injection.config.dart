@@ -39,6 +39,8 @@ import '../../features/admin/domain/usecases/add_workshop.dart' as _i982;
 import '../../features/admin/domain/usecases/confirm_payment.dart' as _i1024;
 import '../../features/admin/domain/usecases/delete_employee.dart' as _i381;
 import '../../features/admin/domain/usecases/delete_workshop.dart' as _i173;
+import '../../features/admin/domain/usecases/get_all_archive_employee_use_case.dart'
+    as _i351;
 import '../../features/admin/domain/usecases/get_all_archived_workshop_use_case.dart'
     as _i578;
 import '../../features/admin/domain/usecases/get_all_employees.dart' as _i345;
@@ -52,6 +54,8 @@ import '../../features/admin/domain/usecases/get_online_employees.dart'
     as _i940;
 import '../../features/admin/domain/usecases/get_workshop_employee_details_use_case.dart'
     as _i448;
+import '../../features/admin/domain/usecases/restore_employee_archive_use_case.dart'
+    as _i539;
 import '../../features/admin/domain/usecases/restore_workshop_use_case.dart'
     as _i19;
 import '../../features/admin/domain/usecases/toggle_employee_archive.dart'
@@ -386,6 +390,8 @@ _i174.GetIt $initGetIt(
       ));
   gh.lazySingleton<_i345.GetAllEmployeesUseCase>(
       () => _i345.GetAllEmployeesUseCase(gh<_i583.AdminRepository>()));
+  gh.lazySingleton<_i351.GetAllArchiveEmployeeUseCase>(
+      () => _i351.GetAllArchiveEmployeeUseCase(gh<_i583.AdminRepository>()));
   gh.factory<_i668.UpdateEmployeeFullDetailsUseCase>(() =>
       _i668.UpdateEmployeeFullDetailsUseCase(gh<_i583.AdminRepository>()));
   gh.lazySingleton<_i541.AddEmployeeUseCase>(
@@ -406,17 +412,19 @@ _i174.GetIt $initGetIt(
       () => _i949.UpdateOvertimeRateUseCase(gh<_i583.AdminRepository>()));
   gh.lazySingleton<_i47.GetEmployeeDetailsHoursUseCase>(
       () => _i47.GetEmployeeDetailsHoursUseCase(gh<_i583.AdminRepository>()));
+  gh.lazySingleton<_i539.RestoreEmployeeArchiveUseCase>(
+      () => _i539.RestoreEmployeeArchiveUseCase(gh<_i583.AdminRepository>()));
   gh.lazySingleton<_i951.AttendanceBloc>(() => _i951.AttendanceBloc(
         gh<_i538.GetEmployeeAttendanceUseCase>(),
         gh<_i0.SyncAttendanceUseCase>(),
       ));
-  gh.lazySingleton<_i578.GetAllArchivedWorkshopUseCase>(() =>
-      _i578.GetAllArchivedWorkshopUseCase(
-          repository: gh<_i200.WorkshopRepository>()));
   gh.lazySingleton<_i217.GetAllWorkshopUseCase>(() =>
       _i217.GetAllWorkshopUseCase(repository: gh<_i200.WorkshopRepository>()));
   gh.lazySingleton<_i448.GetWorkshopEmployeeDetailsUseCase>(() =>
       _i448.GetWorkshopEmployeeDetailsUseCase(
+          repository: gh<_i200.WorkshopRepository>()));
+  gh.lazySingleton<_i578.GetAllArchivedWorkshopUseCase>(() =>
+      _i578.GetAllArchivedWorkshopUseCase(
           repository: gh<_i200.WorkshopRepository>()));
   gh.lazySingleton<_i982.AddWorkshopUseCase>(
       () => _i982.AddWorkshopUseCase(gh<_i200.WorkshopRepository>()));
@@ -482,6 +490,8 @@ _i174.GetIt $initGetIt(
         gh<_i345.GetAllEmployeesUseCase>(),
         gh<_i541.AddEmployeeUseCase>(),
         gh<_i368.ToggleEmployeeArchiveUseCase>(),
+        gh<_i351.GetAllArchiveEmployeeUseCase>(),
+        gh<_i539.RestoreEmployeeArchiveUseCase>(),
       ));
   gh.factory<_i427.PaymentActionBloc>(() => _i427.PaymentActionBloc(
         gh<_i992.PostPayRecordsUseCase>(),

@@ -8,6 +8,7 @@ import '../usecases/add_employee.dart';
 abstract class AdminRepository {
   DataResponse<GetAllEmployeeResponse> getOnlineEmployees();
   DataResponse<GetAllEmployeeResponse> getAllEmployees();
+  DataResponse<GetAllEmployeeResponse> getAllArchiveEmployees();
 
   DataResponse<void> updateHourlyRate({required String employeeId, required double newRate});
   DataResponse<void> updateOvertimeRate({required String employeeId, required double newRate});
@@ -16,7 +17,8 @@ abstract class AdminRepository {
   DataResponse<GetEmployeeResponse> getEmployeeDetails(String id);
   DataResponse<GetEmployeeDetailsHoursResponse> getEmployeeDetailsHoursDetails(String id);
   DataResponse<void> deleteEmployee(String id);
-  DataResponse<void> toggleEmployeeArchive(String id, bool isArchived); // 🔹 أرشفة الموظف
+  DataResponse<void> toggleEmployeeArchive(String id); // 🔹 أرشفة الموظف
+  DataResponse<void> restoreEmployeeArchive(String id); // 🔹 أرشفة الموظف
 
   //  إضافة دالة تحديث بيانات الموظف الكاملة
   DataResponse<void> updateEmployeeFullDetails({

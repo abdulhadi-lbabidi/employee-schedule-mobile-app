@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 import 'package:untitled8/common/helper/src/app_varibles.dart';
@@ -120,8 +121,7 @@ class AttendanceBloc extends Bloc<AttendanceEvent, AttendanceState> {
   FutureOr<void> _getAllAttendance(
       GetAllAttendanceEvent event,
       Emitter<AttendanceState> emit,
-      )
-  async {
+      ) async {
     emit(
       state.copyWith(
         getAllAttendanceData: state.getAllAttendanceData.setLoading(),
@@ -134,9 +134,8 @@ class AttendanceBloc extends Bloc<AttendanceEvent, AttendanceState> {
           (l) async {
         emit(
           state.copyWith(
-            getAllAttendanceData: state.getAllAttendanceData.setFaild(
-              errorMessage: l.message,
-            ),
+            getAllAttendanceData:
+            state.getAllAttendanceData.setFaild(errorMessage: l.message),
           ),
         );
       },
@@ -163,62 +162,163 @@ class AttendanceBloc extends Bloc<AttendanceEvent, AttendanceState> {
         }
 
         // ================= الحالة العادية =================
-        // دمج القديم مع الجديد حسب الأسبوع
-        final oldList = await localeDataSource.getAttendance();
+        final oldList = await localeDataSource.getAttendance(); // الحضور المحلي
         final newList = r ?? [];
 
         final Map<String, GetAttendanceResponse> weekMap = {};
         String weekKey(GetAttendanceResponse w) =>
             "${w.startDate?.toIso8601String()}_${w.endDate?.toIso8601String()}";
 
-        // أضف الأسابيع القديمة أولاً
-        // for (final week in oldList) {
-        //   weekMap[weekKey(week)] = week;
-        // }
-
-        // دمج الأسابيع الجديدة من الباك
+        // 1️⃣ أضف البيانات الجديدة أولًا
         for (final week in newList) {
           final key = weekKey(week);
-          if (weekMap.containsKey(key)) {
-            final oldWeek = weekMap[key]!;
+          weekMap[key] = week;
+        }
 
-            // دمج attendances: المحلي + الجديد من الباك
-            final Map<int, AttendanceModel> attendancesMap = {
-              for (final a in oldWeek.attendances ?? []) a.id!: a,
-              for (final a in week.attendances ?? []) a.id!: a,
-            };
+        // 2️⃣ دمج الحضور المحلي مع البيانات الموجودة في الأسابيع حسب التاريخ
+        for (final localWeek in oldList) {
+          for (final a in localWeek.attendances ?? []) {
+            if (a.id == null) continue;
 
-            weekMap[key] =
-                oldWeek.copyWith(attendances: attendancesMap.values.toList());
-          } else {
-            weekMap[key] = week;
+            bool added = false;
+
+            for (final key in weekMap.keys) {
+              final week = weekMap[key]!;
+
+              if (a.date != null &&
+                  !a.date!.isBefore(week.startDate!) &&
+                  !a.date!.isAfter(week.endDate!)) {
+                final existingIds =
+                    week.attendances?.map((e) => e.id).toSet() ?? {};
+                if (!existingIds.contains(a.id)) {
+                  final List<AttendanceModel> updatedAttendances = [...(week.attendances ?? []), a];
+                  weekMap[key] = week.copyWith(attendances: updatedAttendances);
+                }
+                added = true;
+                break;
+              }
+            }
+
+            // إذا لم يكن الحضور ينتمي لأي أسبوع، أنشئ أسبوع جديد
+            if (!added && a.date != null) {
+              final startOfWeek = a.date!;
+              final endOfWeek = startOfWeek.add(const Duration(days: 6));
+
+              final newWeek = GetAttendanceResponse(
+                startDate: startOfWeek,
+                endDate: endOfWeek,
+                attendances: [a],
+                totalRegularHours: 0,
+                totalOvertimeHours: 0,
+              );
+
+              weekMap["${startOfWeek.toIso8601String()}_${endOfWeek.toIso8601String()}"] =
+                  newWeek;
+            }
           }
         }
 
-        final mergedList = weekMap.values.toList();
-// قائمة اليوم من المدموج
-            final todayList = getTodayAttendancesFromList(mergedList);
+        var mergedList = weekMap.values.toList();
 
-// مجموع الرواتب
-            double totalSalery = 0;
-            mergedList.forEach((e) {
-              totalSalery +=
-              ((e.totalRegularHours! / 8) * AppVariables.user!.userable!.hourlyRate!) +
-                  (e.totalOvertimeHours! * AppVariables.user!.userable!.overtimeRate!);
+        // ================= حالة عدم وجود بيانات للشهر =================
+        final requestedMonth = event.params.month;
+        final currentYear = DateTime.now().year;
 
-            });
+        if (requestedMonth != null) {
+          final hasMonthData = mergedList.any((e) =>
+          e.startDate?.month == requestedMonth &&
+              e.startDate?.year == currentYear);
 
-// مجموع الساعات
-            double totalHours = 0;
-            mergedList.forEach((e) {
-              e.attendances?.forEach((g) {
-                totalHours += (g.regularHours ?? 0) + (g.overtimeHours ?? 0);
-              });
-            });
+          if (!hasMonthData) {
+            final todayList = state.localeTodayAttendanceList ?? [];
+            if (todayList.isNotEmpty) {
+              final generatedMonth = GetAttendanceResponse(
+                startDate: DateTime(currentYear, requestedMonth, 1),
+                endDate: DateTime(currentYear, requestedMonth + 1, 0),
+                attendances: todayList,
+                totalRegularHours: 0,
+                totalOvertimeHours: 0,
+              );
 
-            print('Total:');
-            print(totalSalery);
-            print(totalHours);
+              mergedList.add(generatedMonth);
+            }
+          }
+        }
+
+        // ================= اختيار الأسبوع =================
+        int getWeeksCountInMonth(int year, int month) {
+          final lastDay = DateTime(year, month + 1, 0).day;
+          return (lastDay / 7).ceil(); // أقصى شيء 5
+        }
+
+        DateTimeRange getWeekRangeInMonth({
+          required int year,
+          required int month,
+          required int weekNumber,
+        }) {
+          final lastDay = DateTime(year, month + 1, 0).day;
+
+          final startDay = ((weekNumber - 1) * 7) + 1;
+          final endDay = (weekNumber * 7);
+
+          final safeEndDay = endDay > lastDay ? lastDay : endDay;
+
+          return DateTimeRange(
+            start: DateTime(year, month, startDay),
+            end: DateTime(year, month, safeEndDay),
+          );
+        }
+
+        GetAttendanceResponse? getWeekByNumber({
+          required List<GetAttendanceResponse> list,
+          required int year,
+          required int month,
+          required int weekNumber,
+        }) {
+          final range = getWeekRangeInMonth(
+            year: year,
+            month: month,
+            weekNumber: weekNumber,
+          );
+
+          return list.firstWhere(
+                (w) =>
+            w.startDate != null &&
+                w.endDate != null &&
+                !w.startDate!.isAfter(range.end) &&
+                !w.endDate!.isBefore(range.start),
+            orElse: () => GetAttendanceResponse(attendances: []),
+          );
+        }
+
+        final selectedWeekNumber = 1; // يمكن تغييره حسب UI
+        final selectedWeekData = getWeekByNumber(
+          list: mergedList,
+          year: currentYear,
+          month: requestedMonth!,
+          weekNumber: selectedWeekNumber,
+        );
+
+        // ================= قائمة اليوم =================
+        final todayList = getTodayAttendancesFromList(mergedList);
+
+        // ================= حساب الرواتب =================
+        double totalSalery = 0;
+        for (final e in mergedList) {
+          totalSalery +=
+              ((e.totalRegularHours ?? 0) / 8 *
+                  AppVariables.user!.userable!.hourlyRate!) +
+                  ((e.totalOvertimeHours ?? 0) *
+                      AppVariables.user!.userable!.overtimeRate!);
+        }
+
+        // ================= حساب الساعات =================
+        double totalHours = 0;
+        for (final e in mergedList) {
+          for (final g in e.attendances ?? []) {
+            totalHours += (g.regularHours ?? 0) + (g.overtimeHours ?? 0);
+          }
+        }
 
         emit(
           state.copyWith(
@@ -227,23 +327,30 @@ class AttendanceBloc extends Bloc<AttendanceEvent, AttendanceState> {
             localeAttendanceList: mergedList,
             localeTodayAttendanceList: todayList,
             totalHours: totalHours,
-            totalSalery:totalSalery
+            totalSalery: totalSalery,
           ),
         );
       },
     );
   }
 
-// دالة مساعدة
+// ================= دالة اليوم =================
   List<AttendanceModel> getTodayAttendancesFromList(
-      List<GetAttendanceResponse> list) {
+      List<GetAttendanceResponse> list,
+      ) {
     final now = DateTime.now();
+
     final week = list.firstWhere(
           (w) => w.containsDate(now),
       orElse: () => GetAttendanceResponse(attendances: []),
     );
+
     return week.attendances ?? [];
   }
+
+
+
+
 
 
   FutureOr<void> _syncAttendance(

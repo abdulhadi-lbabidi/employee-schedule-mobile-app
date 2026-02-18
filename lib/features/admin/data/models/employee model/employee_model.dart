@@ -11,13 +11,6 @@ class GetAllEmployeeResponse {
     this.data,
   });
 
-  GetAllEmployeeResponse copyWith({
-    List<EmployeeModel>? data,
-  }) =>
-      GetAllEmployeeResponse(
-        data: data ?? this.data,
-      );
-
   factory GetAllEmployeeResponse.fromJson(Map<String, dynamic> json) => GetAllEmployeeResponse(
     data: json["data"] == null ? [] : List<EmployeeModel>.from(json["data"]!.map((x) => EmployeeModel.fromJson(x))),
   );
@@ -25,6 +18,14 @@ class GetAllEmployeeResponse {
   Map<String, dynamic> toJson() => {
     "data": data == null ? [] : List<dynamic>.from(data!.map((x) => x.toJson())),
   };
+
+  GetAllEmployeeResponse copyWith({
+    List<EmployeeModel>? data,
+  }) {
+    return GetAllEmployeeResponse(
+      data: data ?? this.data,
+    );
+  }
 }
 class EmployeeModel {
   final int? id;

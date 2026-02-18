@@ -43,9 +43,9 @@ class AdminRepositoryImpl with HandlingException implements AdminRepository {
       wrapHandlingException(tryCall: () => remote.getOnlineEmployees());
 
   @override
-  DataResponse<void> toggleEmployeeArchive(String id, bool isArchived) async =>
+  DataResponse<void> toggleEmployeeArchive(String id) async =>
       wrapHandlingException(
-        tryCall: () => remote.toggleEmployeeArchive(id, isArchived),
+        tryCall: () => remote.toggleEmployeeArchive(id),
       );
 
   @override
@@ -98,4 +98,13 @@ class AdminRepositoryImpl with HandlingException implements AdminRepository {
   )async =>await wrapHandlingException(
   tryCall: () => remote.getEmployeeDetailsHours(id),
   );
+
+  @override
+  DataResponse<GetAllEmployeeResponse> getAllArchiveEmployees() async =>
+      wrapHandlingException(tryCall: () => remote.getAllArchiveEmployees());
+
+  @override
+  DataResponse<void> restoreEmployeeArchive(String id)async =>
+      wrapHandlingException(tryCall: () => remote.restoreEmployeeArchive(id));
+
 }

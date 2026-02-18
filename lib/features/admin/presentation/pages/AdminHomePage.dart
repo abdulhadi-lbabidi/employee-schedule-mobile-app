@@ -40,7 +40,7 @@ class _AdminHomePageState extends State<AdminHomePage> {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider(create: (_) => sl<EmployeesBloc>()..add(LoadEmployeesEvent())),
+        BlocProvider(create: (_) => sl<EmployeesBloc>()..add(GetAllEmployeeEvent())),
         //BlocProvider(create: (_) => sl<WorkshopsBloc>()..add(GetAllWorkShopEvent())),
         BlocProvider(create: (_) => sl<LoanBloc>()),
       ],

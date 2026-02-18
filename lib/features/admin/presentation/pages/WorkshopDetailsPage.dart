@@ -8,8 +8,6 @@ import 'package:untitled8/features/admin/data/models/workshop_models/workshop_mo
 import 'package:untitled8/features/admin/presentation/bloc/workshops/workshops_state.dart';
 import '../../../../core/widgets/cached_network_image_with_auth.dart';
 import '../../data/models/workshop_models/get_workshop_employees_details_response.dart';
-import '../bloc/employees/employees_bloc.dart';
-import '../bloc/employees/employees_event.dart';
 import '../bloc/workshops/workshops_bloc.dart';
 import '../bloc/workshops/workshops_event.dart';
 import '../widgets/map_picker_widget.dart';
@@ -39,114 +37,111 @@ class _WorkshopDetailsPageState extends State<WorkshopDetailsPage> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return BlocProvider.value(
-      value: context.read<EmployeesBloc>()..add(LoadEmployeesEvent()),
-      child: Scaffold(
-        backgroundColor: theme.scaffoldBackgroundColor,
-        body: CustomScrollView(
-          slivers: [
-            _buildSliverAppBar(context, theme),
-            SliverToBoxAdapter(
-              child: BlocConsumer<WorkshopsBloc, WorkshopsState>(
-                builder: (context, state) {
-                  return state.getWorkshopEmployeeDetailsData.builder(
-                    onSuccess: (r) {
-                      final workshopEmployees = r!.employees!;
+    return Scaffold(
+      backgroundColor: theme.scaffoldBackgroundColor,
+      body: CustomScrollView(
+        slivers: [
+          _buildSliverAppBar(context, theme),
+          SliverToBoxAdapter(
+            child: BlocConsumer<WorkshopsBloc, WorkshopsState>(
+              builder: (context, state) {
+                return state.getWorkshopEmployeeDetailsData.builder(
+                  onSuccess: (r) {
+                    final workshopEmployees = r!.employees!;
 
-                      double totalBasicHours = 0;
-                      double totalOTHours = 0;
-                      double totalFinancialCost = 0;
+                    double totalBasicHours = 0;
+                    double totalOTHours = 0;
+                    double totalFinancialCost = 0;
 
-                      for (var emp in workshopEmployees) {
-                        totalBasicHours += emp.totalRegularHours ?? 0;
-                        totalOTHours += emp.totalOvertimeHours ?? 0;
-                        totalFinancialCost +=
-                            (emp.totalRegularHours ?? 0) +
-                            (emp.totalOvertimeHours ?? 0);
-                      }
+                    for (var emp in workshopEmployees) {
+                      totalBasicHours += emp.totalRegularHours ?? 0;
+                      totalOTHours += emp.totalOvertimeHours ?? 0;
+                      totalFinancialCost +=
+                          (emp.totalRegularHours ?? 0) +
+                          (emp.totalOvertimeHours ?? 0);
+                    }
 
-                      return Padding(
-                        padding: EdgeInsets.all(20.w),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            _buildFinancialAndWorkStats(
-                              context,
-                              totalBasicHours,
-                              totalOTHours,
-                              totalFinancialCost,
-                              theme,
-                            ),
-                            SizedBox(height: 30.h),
+                    return Padding(
+                      padding: EdgeInsets.all(20.w),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          _buildFinancialAndWorkStats(
+                            context,
+                            totalBasicHours,
+                            totalOTHours,
+                            totalFinancialCost,
+                            theme,
+                          ),
+                          SizedBox(height: 30.h),
 
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  'القوة العاملة الحالية',
-                                  style: TextStyle(
-                                    fontSize: 17.sp,
-                                    fontWeight: FontWeight.bold,
-                                    color: theme.primaryColor,
-                                  ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                'القوة العاملة الحالية',
+                                style: TextStyle(
+                                  fontSize: 17.sp,
+                                  fontWeight: FontWeight.bold,
+                                  color: theme.primaryColor,
                                 ),
-                                Text(
-                                  "${workshopEmployees.length} موظف",
-                                  style: TextStyle(
-                                    fontSize: 12.sp,
-                                    color: theme.disabledColor,
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                              ),
+                              Text(
+                                "${workshopEmployees.length} موظف",
+                                style: TextStyle(
+                                  fontSize: 12.sp,
+                                  color: theme.disabledColor,
+                                  fontWeight: FontWeight.bold,
                                 ),
-                              ],
-                            ),
-                            SizedBox(height: 15.h),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 15.h),
 
-                            workshopEmployees.isEmpty
-                                ? _buildEmptyState(theme)
-                                : ListView.builder(
-                                  padding: EdgeInsets.zero,
-                                  shrinkWrap: true,
-                                  physics: const NeverScrollableScrollPhysics(),
-                                  itemCount: workshopEmployees.length,
-                                  itemBuilder: (context, index) {
-                                    final emp = workshopEmployees[index];
+                          workshopEmployees.isEmpty
+                              ? _buildEmptyState(theme)
+                              : ListView.builder(
+                                padding: EdgeInsets.zero,
+                                shrinkWrap: true,
+                                physics: const NeverScrollableScrollPhysics(),
+                                itemCount: workshopEmployees.length,
+                                itemBuilder: (context, index) {
+                                  final emp = workshopEmployees[index];
 
-                                    return _buildEmployeeCard(
-                                      context,
-                                      emp,
-                                      emp.totalRegularHours!,
-                                      emp.totalOvertimeHours!,
-                                      index,
-                                      theme,
-                                    );
-                                  },
-                                ),
-                            SizedBox(height: 30.h),
-                            _buildDeleteButton(context, theme),
-                          ],
-                        ),
-                      );
-                    },
-                    loadingWidget: const Center(
-                      child: Padding(
-                        padding: EdgeInsets.all(80),
-                        child: CircularProgressIndicator(),
+                                  return _buildEmployeeCard(
+                                    context,
+                                    emp,
+                                    emp.totalRegularHours!,
+                                    emp.totalOvertimeHours!,
+                                    index,
+                                    theme,
+                                  );
+                                },
+                              ),
+                          SizedBox(height: 30.h),
+                          _buildDeleteButton(context, theme),
+                        ],
                       ),
+                    );
+                  },
+                  loadingWidget: const Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(80),
+                      child: CircularProgressIndicator(),
                     ),
-                    failedWidget: const SizedBox.shrink(),
-                  );
-                },
-                listener: (context,state){
-                  state.deleteWorkshopData.listenerFunction(onSuccess: (){
-                    Navigator.pop(context);
-                  });
+                  ),
+                  failedWidget: const SizedBox.shrink(),
+                );
+              },
+              listener: (context,state){
+                state.deleteWorkshopData.listenerFunction(onSuccess: (){
+                  Navigator.pop(context);
+                });
 
-                },
-              ),
+              },
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -386,6 +381,7 @@ class _WorkshopDetailsPageState extends State<WorkshopDetailsPage> {
                 builder:
                     (_) => EmployeeDetailsPage(
                       employeeModel: emp.employee!,
+                      isArchived: false,
                     ),
               ),
             ),

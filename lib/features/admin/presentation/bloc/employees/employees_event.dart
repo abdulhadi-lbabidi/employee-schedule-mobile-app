@@ -2,7 +2,9 @@ import '../../../domain/usecases/add_employee.dart';
 
 abstract class EmployeesEvent {}
 
-class LoadEmployeesEvent extends EmployeesEvent {}
+class GetAllEmployeeEvent extends EmployeesEvent {}
+
+class GetAllEmployeeArchivedEvent extends EmployeesEvent {}
 
 class RefreshEmployeesEvent extends EmployeesEvent {}
 
@@ -18,6 +20,10 @@ class AddEmployeeEvent extends EmployeesEvent {
 
 class ToggleArchiveEmployeeEvent extends EmployeesEvent {
   final String id;
-  final bool isArchived;
-  ToggleArchiveEmployeeEvent(this.id, this.isArchived);
+  ToggleArchiveEmployeeEvent(this.id);
+}
+
+class RestoreArchiveEmployeeEvent extends EmployeesEvent {
+  final String id;
+  RestoreArchiveEmployeeEvent(this.id);
 }

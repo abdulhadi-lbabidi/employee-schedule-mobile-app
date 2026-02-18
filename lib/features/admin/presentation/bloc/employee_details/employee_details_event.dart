@@ -37,11 +37,6 @@ class DeleteEmployeeEvent extends EmployeeDetailsEvent {
   DeleteEmployeeEvent(this.employeeId);
 }
 
-class ToggleArchiveEmployeeDetailEvent extends EmployeeDetailsEvent {
-  final String employeeId;
-  final bool isArchived;
-  ToggleArchiveEmployeeDetailEvent(this.employeeId, this.isArchived);
-}
 
 class UpdateEmployeeFullEvent extends EmployeeDetailsEvent {
   final String name;

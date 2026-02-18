@@ -11,7 +11,8 @@ class LocationChecker {
     required BuildContext context,
     required WorkshopModel workshop,
     VoidCallback? onWithinRange,
-  }) async {
+  })
+  async {
 
     if (workshop.location ==null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -46,8 +47,10 @@ class LocationChecker {
       }
 
       final double distance = Geolocator.distanceBetween(
-        userLocation.latitude!,
-        userLocation.longitude!,
+        // userLocation.latitude!,
+        // userLocation.longitude!,
+         18.252900,
+         17.252100,
         workshop.latitude!,
         workshop.longitude!,
       );

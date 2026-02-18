@@ -25,6 +25,14 @@ class AdminRemoteDataSourceImpl with HandlingApiManager {
     jsonConvert: getAllEmployeeResponseFromJson,
   );
 
+  Future<GetAllEmployeeResponse> getAllArchiveEmployees() async => wrapHandlingApi(
+    tryCall: () => _baseApi.get(ApiVariables.employeesArchived()),
+    jsonConvert: getAllEmployeeResponseFromJson,
+  );
+
+
+
+
   Future<GetEmployeeResponse> getEmployeeDetails(String id) async =>
       wrapHandlingApi(
         tryCall: () => _baseApi.get(ApiVariables.employeeDetails(id)),
@@ -93,13 +101,23 @@ class AdminRemoteDataSourceImpl with HandlingApiManager {
     );
   }
 
-  Future<void> toggleEmployeeArchive(String id, bool isArchived) async {
+  Future<void> toggleEmployeeArchive(String id) async {
     return wrapHandlingApi(
       tryCall:
-          () => _baseApi.put(
+          () => _baseApi.delete(
             ApiVariables.archiveEmployee(id),
-            data: {'is_archived': isArchived},
           ),
+
+      jsonConvert: (_) {},
+    );
+  }
+
+  Future<void> restoreEmployeeArchive(String id) async {
+    return wrapHandlingApi(
+      tryCall:
+          () => _baseApi.post(
+        ApiVariables.archiveEmployee(id),
+      ),
 
       jsonConvert: (_) {},
     );
