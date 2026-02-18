@@ -214,7 +214,7 @@ class _AttendanceHistoryPageState extends State<AttendanceHistoryPage> {
       physics: const BouncingScrollPhysics(),
       child: Column(
         children: [
-          _buildQuickStats(theme)
+          _buildQuickStats(theme, records)
               .animate()
               .fadeIn(duration: 600.ms)
               .scale(
@@ -267,7 +267,32 @@ class _AttendanceHistoryPageState extends State<AttendanceHistoryPage> {
     ).animate().fadeIn();
   }
 
-  Widget _buildQuickStats(ThemeData theme) {
+  Widget _buildQuickStats(ThemeData theme, List<GetAttendanceResponse> records) {
+    // 1. تعريف متغيرات المجموع وتصفيرها
+    double actualTotalHours = 0.0;
+    double actualTotalSalery = 0.0;
+
+    // 2. الحلقة التكرارية لجمع الساعات والمستحقات من كل أسبوع
+    for (var week in records) {
+      if (week.attendances != null) {
+        for (var day in week.attendances!) {
+          // حساب الساعات لهذا اليوم بدقة
+          double dayHours = calculateHoursDifference(day.checkIn, day.checkOut);
+          actualTotalHours += dayHours;
+
+          // حساب مستحقات هذا اليوم بناءً على المنطق البرمجي الخاص بك
+          final dayType = DayTypeHelper.getDayType(day.date ?? DateTime.now());
+          final earnings = EarningsCalculator.calculateEarnings(
+            totalHours: dayHours,
+            hourlyRate: AppVariables.user!.userable!.hourlyRate!,
+            overtimeRate: AppVariables.user!.userable!.overtimeRate!,
+            dayType: dayType,
+          );
+          actualTotalSalery += (earnings['totalEarnings'] ?? 0);
+        }
+      }
+    }
+
     return Container(
       padding: EdgeInsets.all(20.w),
       decoration: BoxDecoration(
@@ -285,31 +310,22 @@ class _AttendanceHistoryPageState extends State<AttendanceHistoryPage> {
           ),
         ],
       ),
-      child: BlocBuilder<AttendanceBloc, AttendanceState>(
-        builder: (context, state) {
-          return Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              _statItem(
-                "الساعات المنجزة",
-                state.totalHours == null
-                    ? '00'
-                    : state.totalHours!.toStringAsFixed(1),
-                Icons.timer_outlined,
-                theme,
-              ),
-              _statItem(
-                "إجمالي المستحقات",
-                state.totalSalery == null
-                    ? '00'
-                    : state.totalSalery!.toStringAsFixed(1),
-
-                Icons.account_balance_wallet_outlined,
-                theme,
-              ),
-            ],
-          );
-        },
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          _statItem(
+            "الساعات المنجزة",
+            actualTotalHours.toStringAsFixed(2), // عرض الساعات برقمين بعد الفاصلة
+            Icons.timer_outlined,
+            theme,
+          ),
+          _statItem(
+            " \$إجمالي المستحقات",
+            actualTotalSalery.toStringAsFixed(2), // عرض المبالغ برقمين بعد الفاصلة
+            Icons.account_balance_wallet_outlined,
+            theme,
+          ),
+        ],
       ),
     );
   }
@@ -396,13 +412,33 @@ class _AttendanceHistoryPageState extends State<AttendanceHistoryPage> {
                 fontWeight: FontWeight.bold,
               ),
             ),
-            trailing: Text(
-              "\$${getWeekSallery(totalWeekExtraHours: records.totalRegularHours!, totalWeekHours: records.totalOvertimeHours!)}",
-              style: TextStyle(
-                color: Colors.green,
-                fontWeight: FontWeight.w900,
-                fontSize: 15.sp,
-              ),
+            // داخل كلاس _AttendanceHistoryPageState ابحث عن ListTile في دالة _buildWeekSection
+
+            trailing: Builder(
+                builder: (context) {
+                  // حساب المجموع الكلي لهذا الأسبوع بناءً على سجلات الحضور
+                  double totalWeekEarnings = 0;
+
+                  for (var r in records.attendances ?? []) {
+                    final dayType = DayTypeHelper.getDayType(r.date ?? DateTime.now());
+                    final earnings = EarningsCalculator.calculateEarnings(
+                      totalHours: calculateHoursDifference(r.checkIn, r.checkOut),
+                      hourlyRate: AppVariables.user!.userable!.hourlyRate!,
+                      overtimeRate: AppVariables.user!.userable!.overtimeRate!,
+                      dayType: dayType,
+                    );
+                    totalWeekEarnings += (earnings['totalEarnings'] ?? 0);
+                  }
+
+                  return Text(
+                    "\$${totalWeekEarnings.toStringAsFixed(1)}",
+                    style: TextStyle(
+                      color: Colors.green,
+                      fontWeight: FontWeight.w900,
+                      fontSize: 15.sp,
+                    ),
+                  );
+                }
             ),
           ),
           if (isExpanded)

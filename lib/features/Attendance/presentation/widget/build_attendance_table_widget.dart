@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:intl/intl.dart';
 
 import '../../../../common/helper/src/app_varibles.dart';
 import '../../../admin/presentation/bloc/workshops/workshops_bloc.dart';
@@ -93,10 +94,10 @@ class BuildAttendanceTableWidget extends StatelessWidget {
                           theme: theme,
                         ),
                         TableCellsWidget(
-                          text:   calculateHoursDifference(
+                          text: calculateHoursDifference(
                             r.checkIn,
                             r.checkOut,
-                          ).toString(),
+                          ).toStringAsFixed(2), // أضفنا هذه الدالة لتحديد رقمين فقط بعد الفاصلة
                           theme: theme,
                           isBold: true,
                         ),
@@ -130,6 +131,10 @@ class BuildAttendanceTableWidget extends StatelessWidget {
 Widget _buildDayCell(AttendanceModel r, DayType type, ThemeData theme) {
   final label = DayTypeHelper.getLabel(type);
 
+  // 1. استخراج اسم اليوم باللغة العربية
+  // 'EEEE' تعطي اسم اليوم كاملاً، و 'ar' للغة العربية
+  String dayName = DateFormat('EEEE', 'ar').format(r.date ?? DateTime.now());
+
   return Padding(
     padding: EdgeInsets.all(10.w),
     child: Row(
@@ -143,10 +148,10 @@ Widget _buildDayCell(AttendanceModel r, DayType type, ThemeData theme) {
                 text: TextSpan(
                   children: [
                     TextSpan(
-                      text: r.date!.day.toString(),
+                      text: dayName, // عرض اسم اليوم هنا (الأربعاء مثلاً)
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
-                        fontSize: 11.sp,
+                        fontSize: 10.sp, // صغرنا الخط قليلاً ليتناسب مع الكلمة الطويلة
                         color: theme.textTheme.bodyLarge?.color,
                       ),
                     ),
@@ -155,8 +160,7 @@ Widget _buildDayCell(AttendanceModel r, DayType type, ThemeData theme) {
                         text: label,
                         style: TextStyle(
                           fontSize: 9.sp,
-                          color:
-                          type == DayType.festival
+                          color: type == DayType.festival
                               ? Colors.redAccent
                               : theme.disabledColor,
                           fontWeight: FontWeight.bold,
@@ -165,8 +169,9 @@ Widget _buildDayCell(AttendanceModel r, DayType type, ThemeData theme) {
                   ],
                 ),
               ),
+              // عرض التاريخ الرقمي تحت الاسم بشكل أصغر (اختياري)
               Text(
-                r.date!.day.toString(),
+                "${r.date!.day}/${r.date!.month}",
                 style: TextStyle(
                   fontSize: 8.sp,
                   color: theme.disabledColor,
@@ -211,25 +216,35 @@ Widget _buildSyncIcon(String status, ThemeData theme) {
 class EarningsCalculator {
   static Map<String, double> calculateEarnings({
     required double totalHours,
-    required double hourlyRate,
-    required double overtimeRate,
+    required double hourlyRate, // هناhourlyRate تعني "أجر الـ 8 ساعات"
+    required double overtimeRate, // سعر الساعة الإضافية الواحدة
     DayType dayType = DayType.normal,
   }) {
+    // 1. تحديد المعامل (ضعف الأجر يوم الجمعة 2.0)
     double multiplier = 1.0;
-    if (dayType == DayType.holiday) multiplier = 1.5;
-    if (dayType == DayType.festival) multiplier = 2.0;
+    if (dayType == DayType.holiday || dayType == DayType.festival) {
+      multiplier = 2.0;
+    }
 
-    double basic =
-    totalHours <= PricingConfig.BASIC_HOURS
-        ? (totalHours / PricingConfig.BASIC_HOURS) *
-        (PricingConfig.BASIC_HOURS * hourlyRate)
-        : (PricingConfig.BASIC_HOURS * hourlyRate);
+    // 2. حساب الأساسي (على اعتبار أن الـ hourlyRate هي أجر الـ 8 ساعات كاملة)
+    // المعادلة: (الساعات الفعلية / 8) * أجر النوبة الثابت
+    double basic;
+    if (totalHours <= PricingConfig.BASIC_HOURS) {
+      // إذا عمل أقل من أو يساوي 8 ساعات، يأخذ نسبة من المبلغ
+      basic = (totalHours / PricingConfig.BASIC_HOURS) * hourlyRate;
+    } else {
+      // إذا تجاوز الـ 8، الأساسي يتوقف عند أجر النوبة الكامل (مثلاً الـ 10$)
+      basic = hourlyRate;
+    }
 
-    double overtime =
-    totalHours > PricingConfig.BASIC_HOURS
-        ? (totalHours - PricingConfig.BASIC_HOURS) * overtimeRate
-        : 0.0;
+    // 3. حساب الإضافي (هنا الإضافي يُحسب بالساعة)
+    double overtime = 0.0;
+    if (totalHours > PricingConfig.BASIC_HOURS) {
+      double overtimeHours = totalHours - PricingConfig.BASIC_HOURS;
+      overtime = overtimeHours * overtimeRate;
+    }
 
+    // 4. تطبيق المضاعفة على الإجمالي (الأساسي والإضافي)
     basic *= multiplier;
     overtime *= multiplier;
 

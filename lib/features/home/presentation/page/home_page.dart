@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:intl/intl.dart';
 import 'package:untitled8/common/helper/src/app_varibles.dart';
 import 'package:untitled8/features/Attendance/presentation/bloc/attendance_bloc.dart';
 import 'package:untitled8/features/home/presentation/page/widgets/CardAttendanceStatus.dart';
@@ -212,6 +213,11 @@ class _HomePageState extends State<HomePage> {
           return _buildEmptyState(theme).animate().fadeIn(delay: 800.ms);
         }
 
+        // استيراد المكتبة في أعلى الملف إذا لم تكن موجودة
+
+
+// ... داخل ويدجيت _buildTodayRecordsList ...
+
         return ListView.builder(
           shrinkWrap: true,
           padding: EdgeInsets.zero,
@@ -219,10 +225,14 @@ class _HomePageState extends State<HomePage> {
           itemCount: records.length,
           itemBuilder: (context, index) {
             final r = records[index];
+            // تحويل التاريخ إلى اسم اليوم باللغة العربية
+            // 'EEEE' تعني اسم اليوم الكامل (الأحد، الاثنين...)
+            String dayName = DateFormat('EEEE', 'ar').format(r.date ?? DateTime.now());
+
             return Padding(
               padding: EdgeInsets.only(bottom: 12.h),
               child: CardTodRecord(
-                day: r.date!.day.toString(),
+                day: dayName, // نمرر اسم اليوم هنا بدلاً من الرقم
                 checkIn: r.checkIn!,
                 checkOut: r.checkOut,
                 workshop: r.workshop!.name!,
