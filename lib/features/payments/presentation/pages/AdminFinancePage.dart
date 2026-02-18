@@ -76,7 +76,7 @@ class _FinancialDashboardState extends State<FinancialDashboard> {
                           child: ListTile(
                             leading: CircleAvatar(child: Text(emp.id.toString())),
                             title: Text(emp.fullName),
-                            subtitle: Text("المستحقات: ${emp.totalEarned}\$"),
+                            subtitle: Text("المستحقات: ${emp.totalEarned.toInt()}\$"),
                             trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                             onTap: () {
                               Navigator.push(

@@ -96,13 +96,14 @@ class Employee {
       );
 
   factory Employee.fromJson(Map<String, dynamic> json) => Employee(
-    id: json["id"],
-    fullName: json["full_name"],
-    totalEarned: json["total_earned"]?.toDouble(),
-    totalPaid: json["total_paid"],
-    remainingDue: json["remaining_due"]?.toDouble(),
-    totalHours: json["total_hours"]?.toDouble(),
+    id: json["id"] as int,
+    fullName: json["full_name"] as String,
+    totalEarned: (json["total_earned"] as num).toDouble(),
+    totalPaid: (json["total_paid"] as num).toDouble(),
+    remainingDue: (json["remaining_due"] as num).toDouble(),
+    totalHours: (json["total_hours"] as num).toDouble(),
   );
+
 
   Map<String, dynamic> toJson() => {
     "id": id,
@@ -134,7 +135,7 @@ class Summary {
 
   factory Summary.fromJson(Map<String, dynamic> json) => Summary(
     totalEmployeesCount: json["total_employees_count"],
-    grandTotalDebt: json["grand_total_debt"]?.toDouble(),
+    grandTotalDebt: (json['grand_total_debt'] as num).toDouble(),
   );
 
   Map<String, dynamic> toJson() => {
