@@ -8,6 +8,7 @@ import '../../../../core/utils/app_strings.dart';
 import '../bloc/employees/employees_bloc.dart';
 import '../bloc/employees/employees_event.dart';
 import '../bloc/employees/employees_state.dart';
+import '../widgets/employees_widget.dart';
 import 'AddEmployeePage.dart';
 import 'EmployeeDetailsPage.dart';
 
@@ -23,9 +24,6 @@ class _EmployeesPageState extends State<EmployeesPage> {
 
   @override
   void initState() {
-
-
-
     WidgetsBinding.instance.addPostFrameCallback((_) {
       context.read<EmployeesBloc>()
         ..add(GetAllEmployeeEvent())
@@ -35,7 +33,6 @@ class _EmployeesPageState extends State<EmployeesPage> {
     // TODO: implement initState
     super.initState();
   }
-
 
   @override
   void dispose() {
@@ -73,7 +70,7 @@ class _EmployeesPageState extends State<EmployeesPage> {
               builder: (context, state) {
                 return state.employeesData.builder(
                   onSuccess: (result) {
-                    final data= result!.data!;
+                    final data = result!.data!;
                     return data.isEmpty
                         ? Center(
                           child: Text(
@@ -96,11 +93,10 @@ class _EmployeesPageState extends State<EmployeesPage> {
                                 theme,
                               ).animate().fadeIn(delay: 400.ms),
                               ...data.asMap().entries.map(
-                                (entry) => _buildEmployeeCard(
-                                      context,
-                                      entry.value,
-                                      theme,
-                                      false,
+                                (entry) => EmployeesWidget(
+                                      theme: theme,
+                                      emp: entry.value,
+                                      isFromArchived: false,
                                     )
                                     .animate()
                                     .fadeIn(
@@ -133,7 +129,7 @@ class _EmployeesPageState extends State<EmployeesPage> {
               builder: (context, state) {
                 return state.employeesArchivedData.builder(
                   onSuccess: (result) {
-                    final data =result!.data!;
+                    final data = result!.data!;
                     return data!.isEmpty
                         ? Center(
                           child: Text(
@@ -156,11 +152,10 @@ class _EmployeesPageState extends State<EmployeesPage> {
                                 theme,
                               ).animate().fadeIn(delay: 400.ms),
                               ...data.asMap().entries.map(
-                                (entry) => _buildEmployeeCard(
-                                      context,
-                                      entry.value,
-                                      theme,
-                                      true,
+                                (entry) => EmployeesWidget(
+                                      theme: theme,
+                                      emp: entry.value,
+                                      isFromArchived: true,
                                     )
                                     .animate()
                                     .fadeIn(
@@ -206,10 +201,7 @@ class _EmployeesPageState extends State<EmployeesPage> {
               icon: Icon(Icons.person_add_alt_1_rounded, size: 20.sp),
               label: Text(
                 "إضافة موظف",
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 14.sp,
-                ),
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14.sp),
               ),
             ).animate().scale(
               delay: 1200.ms,
@@ -290,91 +282,6 @@ class _EmployeesPageState extends State<EmployeesPage> {
             vertical: 10.h,
             horizontal: 15.w,
           ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildEmployeeCard(
-    BuildContext context,
-    EmployeeModel emp,
-    ThemeData theme,
-    bool isFromArchived,
-  ) {
-    final bool isArchived = isFromArchived;
-    return Card(
-      margin: EdgeInsets.only(bottom: 12.h),
-      elevation: isArchived ? 0 : 1,
-      color:
-          isArchived ? theme.disabledColor.withOpacity(0.05) : theme.cardColor,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16.r),
-        side: BorderSide(
-          color: theme.dividerColor.withOpacity(isArchived ? 0.1 : 0.05),
-        ),
-      ),
-      child: ListTile(
-        onTap: () async {
-          await Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder:
-                  (_) => EmployeeDetailsPage(
-                    employeeModel: emp,
-                    isArchived: isArchived,
-                  ),
-            ),
-          );
-
-        },
-        leading: CircleAvatar(
-          radius: 22.r,
-          backgroundColor: theme.primaryColor.withOpacity(0.1),
-          child:
-              emp.user?.profileImageUrl != null
-                  ? ClipRRect(
-                    borderRadius: BorderRadius.circular(22.r),
-                    child: Image.network(
-                      emp.user!.profileImageUrl!,
-                      fit: BoxFit.cover,
-                      errorBuilder:
-                          (_, __, ___) =>
-                              Icon(Icons.person, color: theme.primaryColor),
-                    ),
-                  )
-                  : Icon(Icons.person, color: theme.primaryColor, size: 24.sp),
-        ),
-
-        title: Text(
-          emp.user?.fullName ?? '',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 14.sp,
-            decoration: isArchived ? TextDecoration.lineThrough : null,
-            color:
-                isArchived
-                    ? theme.disabledColor
-                    : theme.textTheme.bodyLarge?.color,
-          ),
-        ),
-        subtitle: Row(
-          children: [
-            Icon(
-              Icons.location_on_outlined,
-              size: 12.sp,
-              color: theme.disabledColor,
-            ),
-            SizedBox(width: 4.w),
-            Text(
-              emp.position.toString(),
-              style: TextStyle(color: theme.disabledColor, fontSize: 12.sp),
-            ),
-          ],
-        ),
-        trailing: Icon(
-          Icons.arrow_forward_ios_rounded,
-          size: 14.sp,
-          color: theme.disabledColor.withOpacity(0.5),
         ),
       ),
     );

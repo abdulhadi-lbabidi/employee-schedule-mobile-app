@@ -18,7 +18,7 @@ class _SendNotificationPageState extends State<SendNotificationPage> {
   final _formKey = GlobalKey<FormState>();
   final _titleController = TextEditingController();
   final _bodyController = TextEditingController();
-  
+
   // نستخدم الـ ID بدلاً من الاسم
   String? _selectedWorkshopId;
 
@@ -33,7 +33,8 @@ class _SendNotificationPageState extends State<SendNotificationPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(AppStrings.sendNewNotification, style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold)),
+        title: Text(AppStrings.sendNewNotification,
+            style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold)),
         centerTitle: true,
       ),
       body: SingleChildScrollView(
@@ -44,69 +45,82 @@ class _SendNotificationPageState extends State<SendNotificationPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Center(
-                child: Icon(Icons.notification_add, size: 80.sp, color: Colors.blueAccent),
+                child: Icon(Icons.notification_add, size: 80.sp,
+                    color: Colors.blueAccent),
               ),
               SizedBox(height: 30.h),
-              
+
               TextFormField(
                 controller: _titleController,
                 decoration: InputDecoration(
                   labelText: AppStrings.notificationTitleLabel,
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12.r)),
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12.r)),
                   prefixIcon: const Icon(Icons.title),
                 ),
-                validator: (val) => val == null || val.isEmpty ? AppStrings.fillAllFields : null,
+                validator: (val) =>
+                val == null || val.isEmpty ? AppStrings.fillAllFields : null,
               ),
               SizedBox(height: 20.h),
-              
+
               TextFormField(
                 controller: _bodyController,
                 maxLines: 4,
                 decoration: InputDecoration(
                   labelText: AppStrings.notificationBodyLabel,
                   alignLabelWithHint: true,
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12.r)),
+                  border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12.r)),
                   prefixIcon: const Icon(Icons.message),
                 ),
-                validator: (val) => val == null || val.isEmpty ? AppStrings.fillAllFields : null,
+                validator: (val) =>
+                val == null || val.isEmpty ? AppStrings.fillAllFields : null,
               ),
               SizedBox(height: 20.h),
-              
+
               // اختيار الورشة من البيانات الحقيقية
-              BlocBuilder<WorkshopsBloc, WorkshopsState>(
-                builder: (context, state) {
-                  final workshops = state.getAllWorkShopData.data ?? [];
-                  return DropdownButtonFormField<String>(
-                    value: _selectedWorkshopId,
-                    decoration: InputDecoration(
-                      labelText: "الجمهور المستهدف",
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12.r)),
-                      prefixIcon: const Icon(Icons.people_alt),
-                    ),
-                    items: [
-                      const DropdownMenuItem(value: null, child: Text("جميع الموظفين")),
-                      ...workshops.map((w) => DropdownMenuItem(
-                        value: w.id.toString(),
-                        child: Text(w.name),
-                      )),
-                    ],
-                    onChanged: (val) => setState(() => _selectedWorkshopId = val),
-                  );
-                },
-              ),
+              // BlocBuilder<WorkshopsBloc, WorkshopsState>(
+              //   builder: (context, state) {
+              //
+              //
+              //     final workshops = state.getAllWorkShopData.data ?? [];
+              //     return DropdownButtonFormField<String>(
+              //       value: _selectedWorkshopId,
+              //       decoration: InputDecoration(
+              //         labelText: "الجمهور المستهدف",
+              //         border: OutlineInputBorder(
+              //             borderRadius: BorderRadius.circular(12.r)),
+              //         prefixIcon: const Icon(Icons.people_alt),
+              //       ),
+              //       items: [
+              //         const DropdownMenuItem(
+              //             value: null, child: Text("جميع الموظفين")),
+              //         ...workshops.map((w) =>
+              //             DropdownMenuItem(
+              //               value: w.id.toString(),
+              //               child: Text(w.name),
+              //             )),
+              //       ],
+              //       onChanged: (val) =>
+              //           setState(() => _selectedWorkshopId = val),
+              //     );
+              //   },
+              // ),
               SizedBox(height: 40.h),
-              
+
               SizedBox(
                 width: double.infinity,
                 height: 55.h,
                 child: ElevatedButton.icon(
                   onPressed: () => _sendNotification(context),
                   icon: const Icon(Icons.send),
-                  label: Text("إرسال التنبيه الآن", style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold)),
+                  label: Text("إرسال التنبيه الآن", style: TextStyle(
+                      fontSize: 16.sp, fontWeight: FontWeight.bold)),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.blue,
                     foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.r)),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12.r)),
                   ),
                 ),
               ),
@@ -128,9 +142,10 @@ class _SendNotificationPageState extends State<SendNotificationPage> {
       );
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("جاري الإرسال..."), backgroundColor: Colors.blue),
+        const SnackBar(
+            content: Text("جاري الإرسال..."), backgroundColor: Colors.blue),
       );
-      
+
       Navigator.pop(context);
     }
   }

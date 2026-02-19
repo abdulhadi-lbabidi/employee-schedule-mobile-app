@@ -116,7 +116,7 @@ class AdminRemoteDataSourceImpl with HandlingApiManager {
     return wrapHandlingApi(
       tryCall:
           () => _baseApi.post(
-        ApiVariables.archiveEmployee(id),
+        ApiVariables.restoreEmployee(id),
       ),
 
       jsonConvert: (_) {},

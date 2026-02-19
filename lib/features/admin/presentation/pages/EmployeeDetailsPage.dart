@@ -17,16 +17,13 @@ import '../widgets/employee_build_date_selector.dart';
 import '../widgets/totals_widgets.dart';
 import '../widgets/week_details_widget.dart';
 import 'EditEmployeePage.dart';
-import 'EmployeesPage.dart';
 
 class EmployeeDetailsPage extends StatefulWidget {
   final EmployeeModel employeeModel;
-  final bool isArchived;
 
   const EmployeeDetailsPage({
     super.key,
     required this.employeeModel,
-    required this.isArchived,
   });
 
   @override
@@ -35,12 +32,10 @@ class EmployeeDetailsPage extends StatefulWidget {
 
 class _EmployeeDetailsPageState extends State<EmployeeDetailsPage> {
   late ValueNotifier<Week?> selectedWeek;
-  late ValueNotifier<bool> isArchivedNotifier;
 
   @override
   void initState() {
     selectedWeek = ValueNotifier(null);
-    isArchivedNotifier = ValueNotifier(widget.isArchived);
     super.initState();
   }
 
@@ -76,18 +71,18 @@ class _EmployeeDetailsPageState extends State<EmployeeDetailsPage> {
       ),
       centerTitle: true,
       actions: [
-        ValueListenableBuilder<bool>(
-          valueListenable: isArchivedNotifier,
-          builder: (context, isArchived, _) {
-            return IconButton(
-              icon: Icon(
-                isArchived ? Icons.unarchive_outlined : Icons.archive_outlined,
-                color: isArchived ? Colors.green : Colors.orange,
-              ),
-              onPressed: () => _showArchiveConfirmation(context, widget.employeeModel, isArchived),
-            );
-          },
-        ),
+        // ValueListenableBuilder<bool>(
+        //   valueListenable: isArchivedNotifier,
+        //   builder: (context, isArchived, _) {
+        //     return IconButton(
+        //       icon: Icon(
+        //         isArchived ? Icons.unarchive_outlined : Icons.archive_outlined,
+        //         color: isArchived ? Colors.green : Colors.orange,
+        //       ),
+        //       onPressed: () => _showArchiveConfirmation(context, widget.employeeModel, isArchived),
+        //     );
+        //   },
+        // ),
         IconButton(
           icon: const Icon(Icons.edit_note_rounded, color: Colors.blueAccent),
           onPressed: () => Navigator.push(
@@ -142,10 +137,10 @@ class _EmployeeDetailsPageState extends State<EmployeeDetailsPage> {
               padding: EdgeInsets.all(16.w),
               child: Column(
                 children: [
-                  ValueListenableBuilder<bool>(
-                    valueListenable: isArchivedNotifier,
-                    builder: (context, isArchived, _) => isArchived ? _buildArchivedBanner(theme) : const SizedBox.shrink(),
-                  ),
+                  // ValueListenableBuilder<bool>(
+                  //   valueListenable: isArchivedNotifier,
+                  //   builder: (context, isArchived, _) => isArchived ? _buildArchivedBanner(theme) : const SizedBox.shrink(),
+                  // ),
                   _EmployeeHeader(widget.employeeModel, theme),
                   SizedBox(height: 24.h),
                   TotalsWidget(theme: theme, totals: state.employee.grandTotals!),
@@ -203,28 +198,6 @@ class _EmployeeDetailsPageState extends State<EmployeeDetailsPage> {
     );
   }
 
-  void _showArchiveConfirmation(BuildContext context, EmployeeModel employee, bool isArchived) {
-    final bool willArchive = !isArchived;
-    showDialog(
-      context: context,
-      builder: (d) => AlertDialog(
-        title: Text(willArchive ? 'أرشفة الموظف' : 'إلغاء الأرشفة'),
-        content: Text(willArchive ? 'هل أنت متأكد من أرشفة الموظف ${employee.user?.fullName ?? 'المستخدم'}؟' : 'هل تريد إعادة تنشيط الموظف ${employee.user?.fullName ?? 'المستخدم'}؟'),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(d), child: const Text("إلغاء")),
-          TextButton(
-            onPressed: () {
-               context.read<EmployeesBloc>().add(
-                 isArchived ? RestoreArchiveEmployeeEvent(employee.id.toString()) : ToggleArchiveEmployeeEvent(employee.id.toString()),
-               );
-               Navigator.pop(d); 
-            },
-            child: Text(willArchive ? "أرشفة" : "تنشيط", style: TextStyle(color: willArchive ? Colors.orange : Colors.green)),
-          ),
-        ],
-      ),
-    );
-  }
 }
 
 class _EmployeeHeader extends StatelessWidget {
