@@ -381,7 +381,6 @@ class _WorkshopDetailsPageState extends State<WorkshopDetailsPage> {
                 builder:
                     (_) => EmployeeDetailsPage(
                       employeeModel: emp.employee!,
-                      isArchived: false,
                     ),
               ),
             ),
