@@ -75,7 +75,8 @@ class _SendNotificationPageState extends State<SendNotificationPage> {
               // اختيار الورشة من البيانات الحقيقية
               BlocBuilder<WorkshopsBloc, WorkshopsState>(
                 builder: (context, state) {
-                  final workshops = state.getAllWorkShopData.data ?? [];
+                  // 🔹 يجب التأكد من مصدر البيانات الصحيح هنا
+                  final workshops = state.getAllWorkshopData.data?.data ?? [];
                   return DropdownButtonFormField<String>(
                     value: _selectedWorkshopId,
                     decoration: InputDecoration(
@@ -87,10 +88,10 @@ class _SendNotificationPageState extends State<SendNotificationPage> {
                       const DropdownMenuItem(value: null, child: Text("جميع الموظفين")),
                       ...workshops.map((w) => DropdownMenuItem(
                         value: w.id.toString(),
-                        child: Text(w.name),
-                      )),
+                        child: Text(w.name.toString()),
+                      )).toList(), // 🔹 تم إضافة .toList() هنا
                     ],
-                    onChanged: (val) => setState(() => _selectedWorkshopId = val),
+                    onChanged: (val) => setState(() => _selectedWorkshopId = val), //  الاستدعاء الصحيح لـ setState
                   );
                 },
               ),
@@ -100,7 +101,7 @@ class _SendNotificationPageState extends State<SendNotificationPage> {
                 width: double.infinity,
                 height: 55.h,
                 child: ElevatedButton.icon(
-                  onPressed: () => _sendNotification(context),
+                  onPressed: () => _sendNotification(context), // الاستدعاء الصحيح
                   icon: const Icon(Icons.send),
                   label: Text("إرسال التنبيه الآن", style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold)),
                   style: ElevatedButton.styleFrom(
@@ -131,7 +132,7 @@ class _SendNotificationPageState extends State<SendNotificationPage> {
         const SnackBar(content: Text("جاري الإرسال..."), backgroundColor: Colors.blue),
       );
       
-      Navigator.pop(context);
+      Navigator.pop(context); //  الاستدعاء الصحيح (لا نستخدم قيمته)
     }
   }
 }

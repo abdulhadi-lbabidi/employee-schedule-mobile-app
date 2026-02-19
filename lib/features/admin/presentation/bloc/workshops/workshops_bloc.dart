@@ -98,7 +98,8 @@ class WorkshopsBloc extends Bloc<WorkshopsEvent, WorkshopsState> {
   Future<void> _getAll(
     WorkshopsEvent event,
     Emitter<WorkshopsState> emit,
-  ) async {
+  ) async
+  {
     emit(
       state.copyWith(getAllWorkshopData: state.getAllWorkshopData.setLoading()),
     );
@@ -128,7 +129,8 @@ class WorkshopsBloc extends Bloc<WorkshopsEvent, WorkshopsState> {
   Future<void> _getArchived(
     GetAllArchivedWorkShopEvent event,
     Emitter<WorkshopsState> emit,
-  ) async {
+  ) async
+  {
     emit(
       state.copyWith(
         getAllArchivedWorkshopData:
@@ -160,7 +162,8 @@ class WorkshopsBloc extends Bloc<WorkshopsEvent, WorkshopsState> {
   Future<void> _getWorkshopEmployeeDetails(
     GetWorkShopEmployeeDetailsEvent event,
     Emitter<WorkshopsState> emit,
-  ) async {
+  ) async
+  {
     emit(
       state.copyWith(
         getWorkshopEmployeeDetailsData:
@@ -190,7 +193,8 @@ class WorkshopsBloc extends Bloc<WorkshopsEvent, WorkshopsState> {
   Future<void> _onAddWorkshop(
     AddWorkshopEvent event,
     Emitter<WorkshopsState> emit,
-  ) async {
+  ) async
+  {
     emit(state.copyWith(addWorkshopData: state.addWorkshopData.setLoading()));
     final result = await addWorkshopUseCase(event.params);
 
@@ -213,7 +217,8 @@ class WorkshopsBloc extends Bloc<WorkshopsEvent, WorkshopsState> {
   Future<void> _onDeleteWorkshop(
     DeleteWorkshopEvent event,
     Emitter<WorkshopsState> emit,
-  ) async {
+  ) async
+  {
     emit(
       state.copyWith(deleteWorkshopData: state.deleteWorkshopData.setLoading()),
     );

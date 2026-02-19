@@ -9,7 +9,7 @@ import 'package:injectable/injectable.dart';
 @injectable
 class RewardAdminBloc extends Bloc<RewardAdminEvent, RewardAdminState> {
   final GetAdminRewardsUseCase getAdminRewardsUseCase;
-  final IssueRewardUseCase issueRewardUseCase;
+  late final IssueRewardUseCase issueRewardUseCase;
   final GetAllEmployeesUseCase getAllEmployeesUseCase; // To get a list of employees for issuing rewards
 
   RewardAdminBloc({
@@ -46,11 +46,10 @@ class RewardAdminBloc extends Bloc<RewardAdminEvent, RewardAdminState> {
 
     try {
       await issueRewardUseCase(
+       amount: event.amount,
+        adminId:event.adminId ,
+        date: event.date,
         employeeId: event.employeeId,
-        // employeeName: event.employeeName,
-        // adminId: event.adminId,
-        // adminName: event.adminName,
-        amount: event.amount,
         reason: event.reason,
       );
       emit(const RewardAdminActionSuccess('تم صرف المكافأة بنجاح.'));

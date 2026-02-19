@@ -1,9 +1,11 @@
 import 'package:dartz/dartz.dart';
+import 'package:intl/intl.dart';
 import 'package:untitled8/core/unified_api/error_handler.dart';
 import 'package:untitled8/core/unified_api/failures.dart';
 import '../../domain/entities/reward_entity.dart';
 import '../../domain/repositories/reward_repository.dart';
 import '../datasources/reward_remote_data_source.dart'; // This was causing the undefined class error
+import '../models/get_all_rewards.dart';
 import '../models/reward_model.dart';
 import 'package:injectable/injectable.dart';
 
@@ -24,11 +26,15 @@ class RewardRepositoryImpl with HandlingException implements RewardRepository {
   }
 
   @override
-  Future<Either<Failure, List<RewardEntity>>> getAdminRewards() async {
+  @override
+  Future<Either<Failure, List<Rewards>>> getAdminRewards() async { // تعديل النوع هنا أيضاً
     return wrapHandlingException(
       tryCall: () async {
+        // response هنا هو كائن من نوع GetAllRewards
         final response = await remoteDataSource.getAdminRewards();
-        return response.data;
+
+        // الوصول لبيانات القائمة الفعلية (List<Rewards>) داخل الكائن
+        return response.data ?? [];
       },
     );
   }
@@ -36,14 +42,18 @@ class RewardRepositoryImpl with HandlingException implements RewardRepository {
   @override
   Future<Either<Failure, void>> issueReward({
     required int employeeId,
+    required int adminId,
     required double amount,
     required String reason,
+    required String  date,
   }) async {
     return wrapHandlingException(
       tryCall: () => remoteDataSource.issueReward(
         employeeId: employeeId,
+        adminId: adminId,
         amount: amount,
         reason: reason,
+        dateissued: date,
       ),
     );
   }

@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import '../../../../core/unified_api/api_variables.dart';
+import '../models/get_all_rewards.dart';
 import 'reward_remote_data_source.dart';
 import '../models/reward_model.dart';
 import 'package:injectable/injectable.dart';
@@ -10,20 +11,20 @@ class RewardRemoteDataSourceImpl {
 
   RewardRemoteDataSourceImpl({required this.dio});
 
-  Future<List<RewardModel>> getAdminRewards() async {
-    try {
-      final response = await dio.getUri(ApiVariables.adminRewards());
-      if (response.statusCode == 200) {
-        return (response.data['data'] as List)
-            .map((json) => RewardModel.fromJson(json))
-            .toList();
-      } else {
-        throw Exception('فشل جلب المكافآت');
-      }
-    } catch (e) {
-      throw Exception('خطأ في الاتصال: $e');
-    }
-  }
+  // Future<List<Rewards>> getAdminRewards() async {
+  //   try {
+  //     final response = await dio.getUri(ApiVariables.adminRewards());
+  //     if (response.statusCode == 200) {
+  //       return (response as List<Rewards>)
+  //           .map((json) => Rewards.fromJson(json))
+  //           .toList();
+  //     } else {
+  //       throw Exception('فشل جلب المكافآت');
+  //     }
+  //   } catch (e) {
+  //     throw Exception('خطأ في الاتصال: $e');
+  //   }
+  // }
 
   Future<List<RewardModel>> getEmployeeRewards(int employeeId) async {
     try {

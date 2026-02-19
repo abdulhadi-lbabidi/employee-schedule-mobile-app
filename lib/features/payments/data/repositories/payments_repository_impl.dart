@@ -2,6 +2,7 @@ import 'package:dartz/dartz.dart';
 import 'package:injectable/injectable.dart';
 
 import '../ model/dues-report.dart';
+import '../ model/get_all_payments.dart';
 import '../ model/get_unpaid_weeks.dart';
 import '../ model/put_update_payments.dart';
 import '../../../../core/unified_api/error_handler.dart';
@@ -24,6 +25,12 @@ class PaymentsRepositoryImpl
   Future<Either<Failure, DuesReportModel>> getDuesReport() async {
     return wrapHandlingException(
       tryCall: () => remote.getDuesReport(),
+    );
+  }
+  @override
+  Future<Either<Failure, GetAllPayments>> getallpayments() async {
+    return wrapHandlingException(
+      tryCall: () => remote.getallpayments(),
     );
   }
 

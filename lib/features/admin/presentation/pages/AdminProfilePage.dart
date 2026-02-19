@@ -7,7 +7,7 @@ import '../bloc/admin_profile/admin_profile_bloc.dart';
 import 'package:untitled8/features/auth/presentation/bloc/login_Cubit/login_cubit.dart';
 import 'package:untitled8/features/SplashScreen/presentation/page/splashScareen.dart';
 import 'AdminAuditLogPage.dart'; 
-import 'AdminRewardsPage.dart';
+import '../../../reward/presentation/AdminRewardsPage.dart';
 
 class AdminProfilePage extends StatelessWidget {
   const AdminProfilePage({super.key});

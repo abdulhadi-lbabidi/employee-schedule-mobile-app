@@ -5,6 +5,7 @@ import '../../../../core/di/injection.dart';
 import '../../../loan/presentation/bloc/loan_bloc.dart';
 import '../../../loan/presentation/pages/admin_loan_page.dart';
 import '../../../payments/presentation/pages/AdminFinancePage.dart';
+import '../../../payments/presentation/pages/financial_main_dashboard.dart';
 import '../bloc/employees/employees_bloc.dart';
 import '../bloc/employees/employees_event.dart';
 import '../bloc/workshops/workshops_bloc.dart';
@@ -30,7 +31,7 @@ class _AdminHomePageState extends State<AdminHomePage> {
   final List<Widget> _pages = [
     const AdminDashboardPage(),
     const EmployeesPage(),
-    const FinancialDashboard(),
+    const FinancialMainDashboard(),
     const AdminLoanPage(),
     const WorkshopsPage(),
     const AdminNotificationsPage(),

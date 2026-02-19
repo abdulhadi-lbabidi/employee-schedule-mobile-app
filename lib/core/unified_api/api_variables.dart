@@ -126,6 +126,7 @@ class ApiVariables {
   static Uri postPayLoans(int id) => _mainUri('/api/loans/$id/pay');
 
   static Uri loanPayments(int id) => _mainUri('/api/loans/$id/pay');
+  static Uri getPayments() => _mainUri('/api/payments');
 
   // --- Rewards ---
   static Uri adminRewards() => _mainUri(

@@ -13,7 +13,7 @@ import '../bloc/admin_dashboard/admin_dashboard_state.dart';
 
 import 'AdminNotificationsPage.dart';
 import 'AdminProfilePage.dart';
-import 'AdminRewardsPage.dart';
+import '../../../reward/presentation/AdminRewardsPage.dart';
 import 'EmployeesPage.dart';
 import '../widgets/EmployeeStatusCard.dart';
 

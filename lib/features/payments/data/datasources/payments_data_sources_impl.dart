@@ -2,6 +2,7 @@ import 'package:injectable/injectable.dart';
 import 'package:untitled8/core/unified_api/handling_api_manager.dart';
 
 import '../ model/dues-report.dart';
+import '../ model/get_all_payments.dart';
 import '../ model/get_unpaid_weeks.dart';
 import '../ model/put_update_payments.dart';
 import '../../../../core/unified_api/api_variables.dart';
@@ -22,6 +23,19 @@ class PaymentsDataSourcesImpl with HandlingApiManager{
       tryCall: () => _baseApi.get(ApiVariables.getDuesReport()),
       jsonConvert: (json) => DuesReportModel.fromJson(json),
 
+    );
+  }
+  Future<GetAllPayments> getallpayments() async {
+    return wrapHandlingApi(
+      tryCall: () => _baseApi.get(ApiVariables.getPayments()),
+      jsonConvert: (json) {
+        // إذا كان الـ json عبارة عن قائمة List مباشرة، نضعه داخل خريطة بمفتاح data
+        if (json is List) {
+          return GetAllPayments.fromJson({"data": json});
+        }
+        // إذا كان خريطة Map أصلاً، نمرره كما هو
+        return GetAllPayments.fromJson(json);
+      },
     );
   }
 
