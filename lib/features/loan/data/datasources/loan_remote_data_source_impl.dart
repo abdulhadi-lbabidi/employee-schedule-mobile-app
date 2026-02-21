@@ -5,16 +5,18 @@ import '../../domain/usecases/add_loan_usecase.dart';
 import '../models/get_all_loan_response.dart';
 import 'package:injectable/injectable.dart';
 
+import '../models/get_all_loane.dart';
+
 @lazySingleton
 class LoanRemoteDataSourceImpl with HandlingApiManager {
   final BaseApi _baseApi;
 
   LoanRemoteDataSourceImpl({required BaseApi baseApi}) : _baseApi = baseApi;
 
-  Future<GetAllLoansResponse> getAllLoans() async {
-    return wrapHandlingApi(
+  Future<GetAllLoane> getAllLoans() async {
+    return wrapHandlingApi<GetAllLoane>(
       tryCall: () => _baseApi.get(ApiVariables.adminLoans()),
-      jsonConvert: getAllLoansResponseFromJson
+      jsonConvert: (json) => GetAllLoane.fromJson(json),
     );
   }
 

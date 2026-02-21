@@ -56,7 +56,7 @@ class _EmployeeLoanPageState extends State<EmployeeLoanPage> {
              return Center(child: Text(state.getAllLoansData.errorMessage, style: TextStyle(color: theme.colorScheme.error)));
           }
 
-          final loans = state.getAllLoansData.data?.data ?? [];
+          final loans = state.getEmployeeAllLoansData.data?.data ?? [];
 
           if (loans.isEmpty) {
             return Center(

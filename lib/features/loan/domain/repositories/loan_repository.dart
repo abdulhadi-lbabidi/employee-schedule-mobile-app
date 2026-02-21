@@ -1,9 +1,10 @@
 import 'package:untitled8/common/helper/src/typedef.dart';
 import 'package:untitled8/features/loan/data/models/get_all_loan_response.dart';
+import '../../data/models/get_all_loane.dart';
 import '../usecases/add_loan_usecase.dart';
 
 abstract class LoanRepository {
-  DataResponse<GetAllLoansResponse> getAllLoans();
+  DataResponse<GetAllLoane> getAllLoans();
   DataResponse<GetAllLoansResponse> getEmployeeLoans(int employeeId);
   DataResponse<void> addLoan(AddLoanParams loan);
   DataResponse<void> approveLoan(int loanId);

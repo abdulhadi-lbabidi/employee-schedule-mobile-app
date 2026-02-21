@@ -1,7 +1,7 @@
 part of 'loan_bloc.dart';
 
  class LoanState {
-  final DataStateModel<GetAllLoansResponse?> getAllLoansData;
+  final DataStateModel<List<Loane>?> getAllLoansData;
   final DataStateModel<GetAllLoansResponse?> getEmployeeAllLoansData;
 
   const LoanState({
@@ -14,7 +14,7 @@ part of 'loan_bloc.dart';
   });
 
   LoanState copyWith({
-    DataStateModel<GetAllLoansResponse?>? getAllLoansData,
+    DataStateModel<List<Loane>?>? getAllLoansData,
     DataStateModel<GetAllLoansResponse?>? getEmployeeAllLoansData,
   }) {
     return LoanState(

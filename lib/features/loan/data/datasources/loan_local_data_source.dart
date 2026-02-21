@@ -1,5 +1,6 @@
 import 'package:hive/hive.dart';
 import 'package:injectable/injectable.dart';
+import '../models/get_all_loane.dart';
 import '../models/loan_model.dart';
 
 import 'dart:convert';
@@ -8,6 +9,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 @lazySingleton
 class LoanLocalDataSource {
   static const String _loansKey = "cached_loans";
+  static const String _loansallKey = "cached_all_loans";
 
   final SharedPreferences prefs;
 
@@ -33,6 +35,27 @@ class LoanLocalDataSource {
 
     return decoded
         .map((e) => LoanModel.fromJson(Map<String, dynamic>.from(e)))
+        .toList();
+  }
+  Future<void> cacheallLoans(List<Loane> loans) async {
+    final List<Map<String, dynamic>> jsonListt =
+    loans.map((loan) => loan.toJson()).toList();
+
+    final String encoded = jsonEncode(jsonListt);
+
+    await prefs.setString(_loansallKey, encoded);
+  }
+
+  /// جلب كل القروض المخزنة
+  List<Loane> getCachedallLoans() {
+    final String? jsonString = prefs.getString(_loansallKey);
+
+    if (jsonString == null) return [];
+
+    final List<dynamic> decoded = jsonDecode(jsonString);
+
+    return decoded
+        .map((e) => Loane.fromJson(Map<String, dynamic>.from(e)))
         .toList();
   }
 

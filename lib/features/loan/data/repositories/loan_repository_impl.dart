@@ -5,6 +5,7 @@ import '../../domain/usecases/add_loan_usecase.dart';
 import '../datasources/loan_local_data_source.dart';
 import '../datasources/loan_remote_data_source_impl.dart';
 import '../models/get_all_loan_response.dart';
+import '../models/get_all_loane.dart';
 import '../models/loan_model.dart';
 import 'package:injectable/injectable.dart';
 
@@ -19,18 +20,22 @@ class LoanRepositoryImpl with HandlingException implements LoanRepository {
   });
 
   @override
-  DataResponse<GetAllLoansResponse> getAllLoans() async =>
-      wrapHandlingException(
+  DataResponse<GetAllLoane> getAllLoans() async =>
+      wrapHandlingException<GetAllLoane>(
         tryCall: () async {
           final response = await remoteDataSource.getAllLoans();
+
           if (response.data != null) {
-            await localDataSource.cacheLoans(response.data!);
+
+            await localDataSource.cacheallLoans(response.data!);
           }
+
           return response;
         },
-        otherCall: () async { // Added async back
-          final cached = localDataSource.getCachedLoans();
-          return GetAllLoansResponse(data: cached);
+        otherCall: () async {
+          final cached = await localDataSource.getCachedallLoans();
+
+          return GetAllLoane(data: cached);
         },
       );
 

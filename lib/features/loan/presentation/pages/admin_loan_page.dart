@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
+import '../../data/models/get_all_loane.dart';
 import '../../data/models/loan_model.dart';
 import '../bloc/loan_bloc.dart';
-import '../../domain/entities/loan_entity.dart';
+import '../../domain/entities/loan_entity.dart' hide LoanStatus;
 import '../widget/accepted_loans_page.dart';
 
 class AdminLoanPage extends StatefulWidget {
@@ -43,12 +44,17 @@ class _AdminLoanPageState extends State<AdminLoanPage> {
             return const Center(child: CircularProgressIndicator());
           }
 
-          final allLoans = state.getAllLoansData.data?.data ?? [];
+          final  List<Loane>allLoans = state.getAllLoansData.data ?? [];
 
           // تصفية السلف المقبولة للعرض في الكارت العلوي
-          final acceptedLoans = allLoans.where((l) => l.role != LoanStatus.unpaid).toList();
+          final acceptedLoans = allLoans
+              .where((l) =>
+          l.status == LoanStatus.approved ||
+              l.status == LoanStatus.completed ||
+              l.status == LoanStatus.partially)
+              .toList();
           // تصفية السلف الجديدة (التي تحتاج قرار)
-          final pendingLoans = allLoans.where((l) => l.role == LoanStatus.unpaid).toList();
+          final pendingLoans = allLoans.where((l) => l.status == LoanStatus.waiting).toList();
 
           return SingleChildScrollView(
             padding: EdgeInsets.all(16.w),
@@ -88,7 +94,7 @@ class _AdminLoanPageState extends State<AdminLoanPage> {
   }
 
   // كارت الملخص العلوي
-  Widget _buildSummaryCard(BuildContext context, ThemeData theme, List<LoanModel> accepted) {
+  Widget _buildSummaryCard(BuildContext context, ThemeData theme, List<Loane> accepted) {
     double totalAccepted = accepted.fold(0, (sum, item) => sum + item.amount);
 
     return GestureDetector(
@@ -124,7 +130,7 @@ class _AdminLoanPageState extends State<AdminLoanPage> {
   }
 
   // ويدجت السلفة التي تنتظر القرار
-  Widget _buildPendingLoanItem(LoanModel loan, ThemeData theme) {
+  Widget _buildPendingLoanItem(Loane loan, ThemeData theme) {
     return Card(
       margin: EdgeInsets.only(bottom: 12.h),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.r)),
@@ -140,7 +146,7 @@ class _AdminLoanPageState extends State<AdminLoanPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(loan.employeeName, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15.sp)),
+                      Text(loan.employee.fullName, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15.sp)),
                       Text(DateFormat('yyyy/MM/dd').format(loan.date), style: TextStyle(color: Colors.grey, fontSize: 11.sp)),
                     ],
                   ),

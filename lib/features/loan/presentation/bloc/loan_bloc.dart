@@ -2,6 +2,8 @@ import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:untitled8/features/loan/data/models/get_all_loan_response.dart';
 import '../../../../core/data_state_model.dart';
+import '../../data/models/get_all_loane.dart';
+import '../../data/models/loan_model.dart';
 import '../../domain/usecases/add_loan_usecase.dart';
 import '../../domain/usecases/get_all_loans_usecase.dart';
 import '../../domain/usecases/get_employee_loans_usecase.dart';
@@ -40,12 +42,45 @@ class LoanBloc extends Bloc<LoanEvent, LoanState> {
     on<AddLoanEvent>(_onAddLoan); // تفعيل حدث الإضافة
   }
 
-  FutureOr<void> _getAllLoan(GetAllLoansEvent event, Emitter<LoanState> emit) async {
-    emit(state.copyWith(getAllLoansData: state.getAllLoansData.setLoading()));
-    final val = await getAllLoansUseCase();
-    val.fold(
-      (l) => emit(state.copyWith(getAllLoansData: state.getAllLoansData.setFaild(errorMessage: l.message))),
-      (r) => emit(state.copyWith(getAllLoansData: state.getAllLoansData.setSuccess(data: r))),
+  FutureOr<void> _getAllLoan(
+      GetAllLoansEvent event,
+      Emitter<LoanState> emit,
+      ) async {
+    emit(
+      state.copyWith(
+        getAllLoansData: state.getAllLoansData.setLoading(),
+      ),
+    );
+
+    final result = await getAllLoansUseCase();
+
+    result.fold(
+          (failure) {
+        emit(
+          state.copyWith(
+            getAllLoansData: state.getAllLoansData
+                .setFaild(errorMessage: failure.message),
+          ),
+        );
+      },
+          (response) {
+        /// 🔁 تحويل من API Model → UI Model
+        final loans = response.data.map((e) => Loane(
+          id: e.id,
+          employee: e.employee,
+          amount: e.amount,
+          paidAmount: e.paidAmount,
+          date: e.date,
+          status: e.status,
+        )).toList();
+
+        emit(
+          state.copyWith(
+            getAllLoansData:
+            state.getAllLoansData.setSuccess(data: loans),
+          ),
+        );
+      },
     );
   }
 

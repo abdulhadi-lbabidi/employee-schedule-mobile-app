@@ -1,5 +1,6 @@
 import '../../../../common/helper/src/typedef.dart';
 import '../../data/models/get_all_loan_response.dart';
+import '../../data/models/get_all_loane.dart';
 import '../repositories/loan_repository.dart';
 import 'package:injectable/injectable.dart';
 @lazySingleton
@@ -8,7 +9,7 @@ class GetAllLoansUseCase {
 
   GetAllLoansUseCase(this.repository);
 
-  DataResponse<GetAllLoansResponse> call() async {
+  DataResponse<GetAllLoane> call() async {
     return await repository.getAllLoans();
   }
 }

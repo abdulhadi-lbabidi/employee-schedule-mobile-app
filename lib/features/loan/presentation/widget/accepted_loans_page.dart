@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
 
+import '../../data/models/get_all_loane.dart';
 import '../../data/models/loan_model.dart';
 
 class AcceptedLoansPage extends StatelessWidget {
-  final List<LoanModel> loans;
+  final List<Loane> loans;
   const AcceptedLoansPage({super.key, required this.loans});
 
   @override
@@ -22,7 +23,7 @@ class AcceptedLoansPage extends StatelessWidget {
             margin: EdgeInsets.only(bottom: 12.h),
             child: ListTile(
               leading: const CircleAvatar(child: Icon(Icons.check, color: Colors.green)),
-              title: Text(loan.employeeName, style: const TextStyle(fontWeight: FontWeight.bold)),
+              title: Text(loan.employee.fullName, style: const TextStyle(fontWeight: FontWeight.bold)),
               subtitle: Text(DateFormat('yyyy/MM/dd HH:mm').format(loan.date)),
               trailing: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
