@@ -11,18 +11,23 @@ class RewardModel extends RewardEntity {
   });
 
   factory RewardModel.fromJson(Map<String, dynamic> json) {
-    // استخراج الاسم من هيكلية الـ JSON المعقدة التي أرسلتها
     String name = "Unknown";
     if (json['employee'] != null && json['employee']['user'] != null) {
       name = json['employee']['user']['full_name'] ?? "Unknown";
     }
 
+    // ✅ حل مشكلة amount
+    final amountValue = json['amount'];
+    final double parsedAmount = amountValue is num
+        ? amountValue.toDouble()
+        : double.tryParse(amountValue.toString()) ?? 0.0;
+
     return RewardModel(
       id: json['id'] as int,
-      amount: (json['amount'] as num).toDouble(),
+      amount: parsedAmount,
       reason: json['reason'] as String,
       dateIssued: DateTime.parse(json['date_issued']),
-      employeeName: name, // استخدام الاسم المستخرج
+      employeeName: name,
       adminName: json['admin_name'] as String?,
     );
   }
