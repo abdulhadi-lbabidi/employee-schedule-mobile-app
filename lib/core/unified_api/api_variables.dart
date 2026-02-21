@@ -43,6 +43,8 @@ class ApiVariables {
   static Uri getEmployeesStatus() => _mainUri('/api/admin/employees/is_online');
 
   static Uri employees() => _mainUri('/api/employees');
+
+  static Uri getDashbordData() => _mainUri('/api/dashboard/statistics');
   static Uri employeesArchived() => _mainUri('/api/employees-archived');
 
   static Uri addEmployee() => _mainUri('/api/employees');

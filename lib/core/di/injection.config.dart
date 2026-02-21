@@ -46,6 +46,8 @@ import '../../features/admin/domain/usecases/get_all_archived_workshop_use_case.
 import '../../features/admin/domain/usecases/get_all_employees.dart' as _i345;
 import '../../features/admin/domain/usecases/get_all_workshop_use_case.dart'
     as _i217;
+import '../../features/admin/domain/usecases/get_dashboard_data_usecase.dart'
+    as _i462;
 import '../../features/admin/domain/usecases/get_employee_details.dart'
     as _i253;
 import '../../features/admin/domain/usecases/get_employee_details_hours_use_case.dart'
@@ -412,6 +414,8 @@ _i174.GetIt $initGetIt(
       () => _i345.GetAllEmployeesUseCase(gh<_i583.AdminRepository>()));
   gh.lazySingleton<_i351.GetAllArchiveEmployeeUseCase>(
       () => _i351.GetAllArchiveEmployeeUseCase(gh<_i583.AdminRepository>()));
+  gh.lazySingleton<_i462.GetDashboardDataUsecase>(
+      () => _i462.GetDashboardDataUsecase(gh<_i583.AdminRepository>()));
   gh.factory<_i668.UpdateEmployeeFullDetailsUseCase>(() =>
       _i668.UpdateEmployeeFullDetailsUseCase(gh<_i583.AdminRepository>()));
   gh.lazySingleton<_i541.AddEmployeeUseCase>(
@@ -471,10 +475,6 @@ _i174.GetIt $initGetIt(
         issueRewardUseCase: gh<_i679.IssueRewardUseCase>(),
         getAllEmployeesUseCase: gh<_i345.GetAllEmployeesUseCase>(),
       ));
-  gh.factory<_i371.AdminDashboardBloc>(() => _i371.AdminDashboardBloc(
-        gh<_i940.GetOnlineEmployeesUseCase>(),
-        gh<_i345.GetAllEmployeesUseCase>(),
-      ));
   gh.factory<_i331.WorkshopsBloc>(() => _i331.WorkshopsBloc(
         gh<_i217.GetAllWorkshopUseCase>(),
         gh<_i982.AddWorkshopUseCase>(),
@@ -515,6 +515,8 @@ _i174.GetIt $initGetIt(
         gh<_i351.GetAllArchiveEmployeeUseCase>(),
         gh<_i539.RestoreEmployeeArchiveUseCase>(),
       ));
+  gh.factory<_i371.AdminDashboardBloc>(
+      () => _i371.AdminDashboardBloc(gh<_i462.GetDashboardDataUsecase>()));
   gh.factory<_i427.PaymentActionBloc>(() => _i427.PaymentActionBloc(
         gh<_i992.PostPayRecordsUseCase>(),
         gh<_i1029.UpdatePaymentUseCase>(),

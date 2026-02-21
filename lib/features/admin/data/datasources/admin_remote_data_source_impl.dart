@@ -6,6 +6,7 @@ import '../../../../core/unified_api/api_variables.dart';
 import '../../domain/usecases/add_employee.dart';
 import '../models/employee model/employee_model.dart';
 import '../models/employee model/get_employee_details_hours_details_response.dart';
+import '../models/get_dashboard_data.dart';
 
 @lazySingleton
 class AdminRemoteDataSourceImpl with HandlingApiManager {
@@ -17,6 +18,12 @@ class AdminRemoteDataSourceImpl with HandlingApiManager {
     return wrapHandlingApi(
       tryCall: () => _baseApi.get(ApiVariables.employees()),
       jsonConvert: getAllEmployeeResponseFromJson,
+    );
+  }
+  Future<GetDashboardData> getDashbordData() async {
+    return wrapHandlingApi(
+      tryCall: () => _baseApi.get(ApiVariables.getDashbordData()),
+      jsonConvert: (json) => GetDashboardData.fromJson(json),
     );
   }
 

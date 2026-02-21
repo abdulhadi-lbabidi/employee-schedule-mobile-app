@@ -7,6 +7,7 @@ import 'package:untitled8/features/admin/data/models/employee%20model/get_employ
 import '../../domain/repositories/admin_repository.dart';
 import '../../domain/usecases/add_employee.dart';
 import '../models/employee model/employee_model.dart';
+import '../models/get_dashboard_data.dart';
 
 @LazySingleton(as: AdminRepository)
 class AdminRepositoryImpl with HandlingException implements AdminRepository {
@@ -41,6 +42,9 @@ class AdminRepositoryImpl with HandlingException implements AdminRepository {
   @override
   DataResponse<GetAllEmployeeResponse> getOnlineEmployees() async =>
       wrapHandlingException(tryCall: () => remote.getOnlineEmployees());
+
+  DataResponse<GetDashboardData> getDashbordData() async =>
+      wrapHandlingException(tryCall: () => remote.getDashbordData());
 
   @override
   DataResponse<void> toggleEmployeeArchive(String id) async =>

@@ -2,11 +2,13 @@ import 'package:untitled8/common/helper/src/typedef.dart';
 import 'package:untitled8/features/admin/data/models/employee%20model/employee_model.dart';
 import 'package:untitled8/features/admin/data/models/employee%20model/get_employee_response.dart';
 import '../../data/models/employee model/get_employee_details_hours_details_response.dart';
+import '../../data/models/get_dashboard_data.dart';
 import '../../data/models/workshop_models/get_all_workshop_response.dart';
 import '../usecases/add_employee.dart';
 
 abstract class AdminRepository {
   DataResponse<GetAllEmployeeResponse> getOnlineEmployees();
+  DataResponse<GetDashboardData> getDashbordData();
   DataResponse<GetAllEmployeeResponse> getAllEmployees();
   DataResponse<GetAllEmployeeResponse> getAllArchiveEmployees();
 

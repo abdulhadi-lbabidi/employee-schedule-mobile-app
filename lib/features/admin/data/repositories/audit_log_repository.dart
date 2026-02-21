@@ -13,7 +13,7 @@ class AuditLogRepository {
 
   AuditLogRepository(this._prefs);
 
-  /// 🔹 تسجيل نشاط جديد في السجل
+  ///  تسجيل نشاط جديد في السجل
   Future<void> logAction({
     required String actionType,
     required String targetName,
