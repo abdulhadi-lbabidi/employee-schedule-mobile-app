@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import '../../data/models/loan_model.dart';
 import '../bloc/loan_bloc.dart';
 import '../../domain/entities/loan_entity.dart';
+import '../widget/accepted_loans_page.dart';
 
 class AdminLoanPage extends StatefulWidget {
   const AdminLoanPage({super.key});
@@ -24,13 +25,11 @@ class _AdminLoanPageState extends State<AdminLoanPage> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Scaffold(
-      backgroundColor:theme.scaffoldBackgroundColor,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        title: const Text("طلبات السلف", style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text("إدارة السلف", style: TextStyle(fontWeight: FontWeight.bold)),
         centerTitle: true,
-        backgroundColor: theme.scaffoldBackgroundColor,
         elevation: 0,
-        foregroundColor: Colors.black,
         actions: [
           IconButton(
             onPressed: () => context.read<LoanBloc>().add(GetAllLoansEvent()),
@@ -43,193 +42,155 @@ class _AdminLoanPageState extends State<AdminLoanPage> {
           if (state.getAllLoansData.isLoading) {
             return const Center(child: CircularProgressIndicator());
           }
-          
-          final loans = state.getAllLoansData.data?.data ?? [];
-          
-          if (loans.isEmpty) {
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.money_off, size: 80.sp, color: Colors.grey),
-                  SizedBox(height: 16.h),
-                  const Text("لا توجد طلبات سلف حالياً", style: TextStyle(color: Colors.grey)),
-                ],
-              ),
-            );
-          }
 
-          return ListView.builder(
+          final allLoans = state.getAllLoansData.data?.data ?? [];
+
+          // تصفية السلف المقبولة للعرض في الكارت العلوي
+          final acceptedLoans = allLoans.where((l) => l.role != LoanStatus.unpaid).toList();
+          // تصفية السلف الجديدة (التي تحتاج قرار)
+          final pendingLoans = allLoans.where((l) => l.role == LoanStatus.unpaid).toList();
+
+          return SingleChildScrollView(
             padding: EdgeInsets.all(16.w),
-            itemCount: loans.length,
-            itemBuilder: (context, index) {
-              final loan = loans[index];
-              return _buildLoanCard(loan, theme);
-            },
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // 1. كارت السلف المقبولة
+                _buildSummaryCard(context, theme, acceptedLoans),
+
+                SizedBox(height: 24.h),
+
+                // عنوان القائمة
+                Text(
+                  "طلبات السلف الجديدة",
+                  style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold),
+                ),
+                SizedBox(height: 12.h),
+
+                // 2. قائمة الطلبات الجديدة
+                if (pendingLoans.isEmpty)
+                  _buildEmptyState()
+                else
+                  ListView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: pendingLoans.length,
+                    itemBuilder: (context, index) {
+                      return _buildPendingLoanItem(pendingLoans[index], theme);
+                    },
+                  ),
+              ],
+            ),
           );
         },
       ),
     );
   }
 
-  Widget _buildLoanCard(LoanModel loan, ThemeData theme) {
-    return Card(
-      elevation: 2,
-      margin: EdgeInsets.only(bottom: 16.h),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.r)),
-      child: Padding(
-        padding: EdgeInsets.all(16.w),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+  // كارت الملخص العلوي
+  Widget _buildSummaryCard(BuildContext context, ThemeData theme, List<LoanModel> accepted) {
+    double totalAccepted = accepted.fold(0, (sum, item) => sum + item.amount);
+
+    return GestureDetector(
+      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => AcceptedLoansPage(loans: accepted))),
+      child: Container(
+        width: double.infinity,
+        padding: EdgeInsets.all(20.w),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(colors: [theme.primaryColor, theme.primaryColor.withOpacity(0.7)]),
+          borderRadius: BorderRadius.circular(20.r),
+          boxShadow: [BoxShadow(color: theme.primaryColor.withOpacity(0.3), blurRadius: 10, offset: const Offset(0, 5))],
+        ),
+        child: Row(
           children: [
-            Row(
-              children: [
-                CircleAvatar(
-                  backgroundColor: theme.primaryColor.withOpacity(0.1),
-                  child: Icon(Icons.person, color: theme.primaryColor),
-                ),
-                SizedBox(width: 12.w),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        loan.employeeName,
-                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16.sp),
-                      ),
-                      Text(
-                        DateFormat('yyyy/MM/dd').format(loan.date),
-                        style: TextStyle(color: Colors.grey, fontSize: 12.sp),
-                      ),
-                    ],
-                  ),
-                ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Container(
-                      padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
-                      decoration: BoxDecoration(
-                        color: Colors.green.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(20.r),
-                      ),
-                      child: Text(
-                        "${NumberFormat.decimalPattern().format(loan.amount)} \$",
-                        style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold, fontSize: 14.sp),
-                      ),
-                    ),
-                    SizedBox(height: 4.h),
-                    Text(
-                      "المسدد: ${loan.paidAmount}",
-                      style: TextStyle(fontSize: 10.sp, color: Colors.blueGrey),
-                    )
-                  ],
-                ),
-              ],
-            ),
-            SizedBox(height: 20.h),
-            Row(
-              children: [
-                if (loan.role == LoanStatus.unpaid) ...[
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: () {
-                      _showActionDialog(context, "قبول السلفة", "هل أنت متأكد من قبول هذه السلفة؟", () {
-                        context.read<LoanBloc>().add(ApproveLoanEvent(loanId: loan.id));
-                      });
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green,
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
-                    ),
-                    child: const Text("قبول"),
-                  ),
-                ),
-                SizedBox(width: 8.w),
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: () {
-                      _showActionDialog(context, "رفض السلفة", "هل أنت متأكد من رفض هذه السلفة؟", () {
-                        context.read<LoanBloc>().add(RejectLoanEvent(loanId: loan.id));
-                      });
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.red,
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
-                    ),
-                    child: const Text("رفض"),
-                  ),
-                ),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text("إجمالي السلف المقبولة", style: TextStyle(color: Colors.white, fontWeight: FontWeight.w500)),
+                  SizedBox(height: 8.h),
+                  Text("${NumberFormat.decimalPattern().format(totalAccepted)} \$",
+                      style: TextStyle(color: Colors.white, fontSize: 24.sp, fontWeight: FontWeight.bold)),
+                  SizedBox(height: 4.h),
+                  Text("عدد السلف: ${accepted.length}", style: const TextStyle(color: Colors.white70)),
                 ],
-                if (loan.role != LoanStatus.unpaid) 
-                Expanded(
-                  child: ElevatedButton(
-                    onPressed: () {
-                      _showPayDialog(context, loan);
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue,
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.r)),
-                    ),
-                    child: const Text("تسديد دفعة"),
-                  ),
-                ),
-              ],
+              ),
             ),
+            const Icon(Icons.arrow_forward_ios, color: Colors.white, size: 20),
           ],
         ),
       ),
     );
   }
 
-  void _showActionDialog(BuildContext context, String title, String content, VoidCallback onConfirm) {
+  // ويدجت السلفة التي تنتظر القرار
+  Widget _buildPendingLoanItem(LoanModel loan, ThemeData theme) {
+    return Card(
+      margin: EdgeInsets.only(bottom: 12.h),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.r)),
+      child: Padding(
+        padding: EdgeInsets.all(16.w),
+        child: Column(
+          children: [
+            Row(
+              children: [
+                CircleAvatar(backgroundColor: Colors.orange.withOpacity(0.1), child: const Icon(Icons.person, color: Colors.orange)),
+                SizedBox(width: 12.w),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(loan.employeeName, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15.sp)),
+                      Text(DateFormat('yyyy/MM/dd').format(loan.date), style: TextStyle(color: Colors.grey, fontSize: 11.sp)),
+                    ],
+                  ),
+                ),
+                Text("${loan.amount} \$", style: TextStyle(fontWeight: FontWeight.bold, color: theme.primaryColor, fontSize: 16.sp)),
+              ],
+            ),
+            SizedBox(height: 16.h),
+            Row(
+              children: [
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () => _showActionDialog(context, "قبول", Colors.green, () {
+                      context.read<LoanBloc>().add(ApproveLoanEvent(loanId: loan.id));
+                    }),
+                    style: ElevatedButton.styleFrom(backgroundColor: Colors.green, foregroundColor: Colors.white),
+                    child: const Text("قبول"),
+                  ),
+                ),
+                SizedBox(width: 10.w),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: () => _showActionDialog(context, "رفض", Colors.red, () {
+                      context.read<LoanBloc>().add(RejectLoanEvent(loanId: loan.id));
+                    }),
+                    style: ElevatedButton.styleFrom(backgroundColor: Colors.red, foregroundColor: Colors.white),
+                    child: const Text("رفض"),
+                  ),
+                ),
+              ],
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showActionDialog(BuildContext context, String action, Color color, VoidCallback onConfirm) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: Text(title),
-        content: Text(content),
+      builder: (d) => AlertDialog(
+        title: Text("$action الطلب"),
+        content: Text("هل أنت متأكد من $action هذا الطلب؟"),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text("إلغاء")),
-          TextButton(
-            onPressed: () {
-              onConfirm();
-              Navigator.pop(context);
-            },
-            child: const Text("تأكيد"),
-          ),
+          TextButton(onPressed: () => Navigator.pop(d), child: const Text("إلغاء")),
+          TextButton(onPressed: () { onConfirm(); Navigator.pop(d); }, child: Text("تأكيد", style: TextStyle(color: color))),
         ],
       ),
     );
   }
 
-  void _showPayDialog(BuildContext context, LoanModel loan) {
-    final controller = TextEditingController();
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text("تسديد سلفة"),
-        content: TextField(
-          controller: controller,
-          keyboardType: TextInputType.number,
-          decoration: const InputDecoration(labelText: "المبلغ المراد تسديده", suffixText: "\$"),
-        ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text("إلغاء")),
-          TextButton(
-            onPressed: () {
-              final amount = double.tryParse(controller.text);
-              if (amount != null && amount > 0) {
-                context.read<LoanBloc>().add(PayLoanEvent(loanId: loan.id, amount: amount));
-                Navigator.pop(context);
-              }
-            },
-            child: const Text("تسديد"),
-          ),
-        ],
-      ),
-    );
-  }
+  Widget _buildEmptyState() => const Center(child: Padding(padding: EdgeInsets.all(20), child: Text("لا توجد طلبات جديدة حالياً", style: TextStyle(color: Colors.grey))));
 }

@@ -61,7 +61,7 @@ class _EmployeesWidgetState extends State<EmployeesWidget> {
                 context,
                 MaterialPageRoute(
                   builder:
-                      (_) => EmployeeDetailsPage(employeeModel: widget.emp),
+                      (_) => EmployeeDetailsPage(employeeModel: widget.emp, isArchived: false,),
                 ),
               );
             },

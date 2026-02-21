@@ -380,7 +380,7 @@ class _WorkshopDetailsPageState extends State<WorkshopDetailsPage> {
               MaterialPageRoute(
                 builder:
                     (_) => EmployeeDetailsPage(
-                      employeeModel: emp.employee!,
+                      employeeModel: emp.employee!, isArchived: false,
                     ),
               ),
             ),

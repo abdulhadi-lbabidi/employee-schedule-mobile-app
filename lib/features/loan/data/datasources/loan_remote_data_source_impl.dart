@@ -53,19 +53,19 @@ class LoanRemoteDataSourceImpl with HandlingApiManager {
     );
   }
 
-  @Deprecated('Use approveLoan or rejectLoan')
-  Future<void> updateLoanStatus(int loanId, int amount) async {
-    return wrapHandlingApi(
-      tryCall: () => _baseApi.put(ApiVariables.loanStatus(loanId), data: {'amount': amount}),
-      jsonConvert: (_) {},
-    );
-  }
-
-  @Deprecated('Use payLoan')
-  Future<void> recordPayment(int loanId, double amount) async {
-    return wrapHandlingApi(
-      tryCall: () => _baseApi.post(ApiVariables.loanPayments(loanId), data: {'amount': amount}),
-      jsonConvert: (_) {},
-    );
-  }
-}
+//   @Deprecated('Use approveLoan or rejectLoan')
+//   Future<void> updateLoanStatus(int loanId, int amount) async {
+//     return wrapHandlingApi(
+//       tryCall: () => _baseApi.put(ApiVariables.loanStatus(loanId), data: {'amount': amount}),
+//       jsonConvert: (_) {},
+//     );
+//   }
+//
+//   @Deprecated('Use payLoan')
+//   Future<void> recordPayment(int loanId, double amount) async {
+//     return wrapHandlingApi(
+//       tryCall: () => _baseApi.post(ApiVariables.loanPayments(loanId), data: {'amount': amount}),
+//       jsonConvert: (_) {},
+//     );
+//   }
+ }
