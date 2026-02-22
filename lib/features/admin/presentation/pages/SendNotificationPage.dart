@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../../../core/utils/app_strings.dart';
+import '../../../Notification/domain/usecases/send_notification_use_case.dart';
 import '../../../Notification/presentation/bloc/notification_bloc.dart';
 import '../../../Notification/presentation/bloc/notification_event.dart';
 import '../bloc/workshops/workshops_bloc.dart';
@@ -20,7 +21,7 @@ class _SendNotificationPageState extends State<SendNotificationPage> {
   final _bodyController = TextEditingController();
 
   // نستخدم الـ ID بدلاً من الاسم
-  String? _selectedWorkshopId;
+  int? _selectedWorkshopId;
 
   @override
   void dispose() {
@@ -134,10 +135,12 @@ class _SendNotificationPageState extends State<SendNotificationPage> {
   void _sendNotification(BuildContext context) {
     if (_formKey.currentState!.validate()) {
       context.read<NotificationBloc>().add(
-        AdminSendNotificationEvent(
-          title: _titleController.text,
-          body: _bodyController.text,
-          targetWorkshop: _selectedWorkshopId, // نرسل الـ ID الحقيقي
+        SendNotificationsEvent(
+            params: SendNotificationParams(
+              title: _titleController.text,
+              body: _bodyController.text,
+              targetWorkshop: _selectedWorkshopId??0,
+            )
         ),
       );
 

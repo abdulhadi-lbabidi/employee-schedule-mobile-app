@@ -23,6 +23,17 @@ class AppVariables {
     }
   }
 
+  static String? get fcmToken => _pref.getString(PrefsKeys.fcmToken);
+
+  static set fcmToken(String? value) {
+    if (value == null) {
+      _pref.remove(PrefsKeys.fcmToken);
+    } else {
+      _pref.setString(PrefsKeys.fcmToken, value);
+    }
+  }
+
+
   // ------------------- Role -------------------
   static String? get role => _pref.getString(PrefsKeys.role);
 

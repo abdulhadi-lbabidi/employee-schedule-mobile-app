@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:untitled8/features/admin/data/models/employee%20model/employee_model.dart';
 import '../../../../core/di/injection.dart';
 import '../../../../core/utils/app_strings.dart';
+import '../../../Notification/domain/usecases/send_notification_use_case.dart';
 import '../../../Notification/presentation/bloc/notification_bloc.dart';
 import '../../../Notification/presentation/bloc/notification_event.dart';
 import '../../data/models/employee model/get_employee_details_hours_details_response.dart';
@@ -458,10 +459,13 @@ class _WeeklyWorkSection extends StatelessWidget {
         ),
       );
       context.read<NotificationBloc>().add(
-        AdminSendNotificationEvent(
-          title: "دفع مالي",
-          body: "تم صرف ${amount.toInt()} \$ للأسبوع $weekNumber",
-          targetEmployeeId: emp.user!.id,
+        SendNotificationsEvent(
+
+          params: SendNotificationParams(
+            body: "تم صرف ${amount.toInt()} \$ للأسبوع $weekNumber",
+            title: "دفع مالي",
+            targetEmployeeId:emp.user!.id
+          ),
         ),
       );
     }

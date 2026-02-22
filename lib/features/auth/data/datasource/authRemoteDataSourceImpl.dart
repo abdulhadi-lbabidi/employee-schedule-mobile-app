@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:dio/dio.dart';
 import 'package:untitled8/core/unified_api/handling_api_manager.dart';
+import '../../../../common/helper/src/app_varibles.dart';
 import '../../../../core/unified_api/api_variables.dart';
 import '../../../../core/unified_api/base_api.dart';
 import '../model/login_response.dart';
@@ -23,6 +24,7 @@ class AuthRemoteDataSourceImpl with HandlingApiManager {
           () => _baseApi.post(
             ApiVariables.login(),
             data: {'email': email, 'password': password},
+            options: Options(headers: {'fcm_token': AppVariables.fcmToken}),
           ),
       jsonConvert: loginResponseFromJson,
     );

@@ -1,4 +1,5 @@
 import 'package:injectable/injectable.dart';
+import '../../../../common/helper/src/typedef.dart';
 import '../repositories/notification_repository.dart';
 import '../../data/model/notification_model.dart';
 
@@ -19,36 +20,6 @@ class MarkNotificationAsReadUseCase {
 
   Future<void> call(String id) async {
     return await repository.markNotificationAsRead(id);
-  }
-}
-
-@injectable
-class SendNotificationUseCase {
-  final NotificationRepository repository;
-  SendNotificationUseCase(this.repository);
-
-  Future<void> call({
-    required String title,
-    required String body,
-    String? targetWorkshop,
-    int? targetEmployeeId, // هذا النوع أصبح صحيحاً الآن
-  }) async {
-    return await repository.sendNotification(
-      title: title,
-      body: body,
-      targetWorkshop: targetWorkshop,
-      targetEmployeeId: targetEmployeeId,
-    );
-  }
-}
-
-@injectable
-class SyncNotificationsUseCase {
-  final NotificationRepository repository;
-  SyncNotificationsUseCase(this.repository);
-
-  Future<void> call() async {
-    return await repository.syncNotifications();
   }
 }
 

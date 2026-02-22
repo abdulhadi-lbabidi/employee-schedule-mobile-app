@@ -66,7 +66,7 @@ class _EmployeesPageState extends State<EmployeesPage> {
             _buildSearchField(
               theme,
             ).animate().fadeIn(duration: 600.ms).slideY(begin: -0.1, end: 0),
-            BlocBuilder<EmployeesBloc, EmployeesState>(
+            BlocConsumer<EmployeesBloc, EmployeesState>(
               builder: (context, state) {
                 return state.employeesData.builder(
                   onSuccess: (result) {
@@ -124,8 +124,15 @@ class _EmployeesPageState extends State<EmployeesPage> {
                   ),
                 );
               },
+              listener: (context, state) {
+                state.setEmployeeArchivedData.listenerFunction(onSuccess: (){});
+
+                // TODO: implement listener
+              },
+              listenWhen:(pre,cur)=>pre.setEmployeeArchivedData.status !=cur.setEmployeeArchivedData.status,
+
             ),
-            BlocBuilder<EmployeesBloc, EmployeesState>(
+            BlocConsumer<EmployeesBloc, EmployeesState>(
               builder: (context, state) {
                 return state.employeesArchivedData.builder(
                   onSuccess: (result) {
@@ -183,6 +190,12 @@ class _EmployeesPageState extends State<EmployeesPage> {
                   ),
                 );
               },
+              listener: (context, state) {
+                state.restoreEmployeeArchivedData.listenerFunction(onSuccess: (){});
+                // TODO: implement listener
+              },
+              listenWhen:(pre,cur)=>pre.restoreEmployeeArchivedData.status !=cur.restoreEmployeeArchivedData.status,
+
             ),
           ],
         ),

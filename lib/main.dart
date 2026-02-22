@@ -38,45 +38,11 @@ import 'features/admin/presentation/bloc/workshops/workshops_bloc.dart';
 import 'features/loan/presentation/bloc/loan_bloc.dart';
 import 'features/reward/presentation/bloc/reward_admin/reward_admin_bloc.dart';
 
-@pragma('vm:entry-point')
-Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  await Firebase.initializeApp();
-  debugPrint("Handling a background message: ${message.messageId}");
-}
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  // 🔹 تهيئة Hive تتم الآن عبر HiveService المحقون
   await Hive.initFlutter();
-  // Hive.registerAdapter(AuditLogModelAdapter()); // ❌ إزالة التسجيل المكرر من هنا
-
   await configureInjection();
-
-  try {
-    await Firebase.initializeApp();
-    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-  } catch (e) {
-    debugPrint("Firebase Initialize Error: $e");
-  }
-
-  final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
-  NotificationSettings settings = await _firebaseMessaging.requestPermission(
-    alert: true, announcement: false, badge: true, carPlay: false,
-    criticalAlert: false, provisional: false, sound: true,
-  );
-  debugPrint('User granted permission: ${settings.authorizationStatus}');
-
-  FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-    if (message.notification != null) {
-      NotificationService().showNotification(
-        title: message.notification?.title ?? 'إشعار جديد',
-        body: message.notification?.body ?? 'لديك إشعار جديد.',
-      );
-    }
-  });
-
-  await NotificationService().init();
+  await NotificationUtils().initAllNotifications();
 
   runApp(const MyApp());
 }

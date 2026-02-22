@@ -1,3 +1,6 @@
+import 'package:untitled8/features/Notification/domain/usecases/check_in_use_case.dart';
+import 'package:untitled8/features/Notification/domain/usecases/send_notification_use_case.dart';
+
 import '../../data/model/notification_model.dart';
 
 abstract class NotificationEvent {}
@@ -9,26 +12,14 @@ class MarkNotificationAsRead extends NotificationEvent {
   MarkNotificationAsRead(this.id);
 }
 
-class SyncNotificationsEvent extends NotificationEvent {}
+// class SyncNotificationsEvent extends NotificationEvent {}
 
 class AddLocalNotificationEvent extends NotificationEvent {
   final NotificationModel notification;
   AddLocalNotificationEvent(this.notification);
 }
 
-class AdminSendNotificationEvent extends NotificationEvent {
-  final String title;
-  final String body;
-  final String? targetWorkshop; 
-  final int? targetEmployeeId; // تم التعديل من String إلى int ليتوافق مع بقية المشروع
 
-  AdminSendNotificationEvent({
-    required this.title,
-    required this.body,
-    this.targetWorkshop,
-    this.targetEmployeeId,
-  });
-}
 
 class DeleteNotificationEvent extends NotificationEvent {
   final String id;
@@ -36,3 +27,23 @@ class DeleteNotificationEvent extends NotificationEvent {
 }
 
 class DeleteAllNotificationsEvent extends NotificationEvent {}
+
+
+class SendNotificationsEvent extends NotificationEvent{
+   final SendNotificationParams params;
+
+  SendNotificationsEvent({required this.params});
+
+}
+class CheckInEvent extends NotificationEvent{
+   final CheckInParams params;
+
+  CheckInEvent({required this.params});
+
+}
+class CheckOutEvent extends NotificationEvent{
+   final CheckInParams params;
+
+  CheckOutEvent({required this.params});
+
+}

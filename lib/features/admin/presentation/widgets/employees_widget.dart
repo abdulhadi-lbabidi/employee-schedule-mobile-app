@@ -5,6 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../data/models/employee model/employee_model.dart';
 import '../bloc/employees/employees_bloc.dart';
 import '../bloc/employees/employees_event.dart';
+import '../bloc/employees/employees_state.dart';
 import '../pages/EmployeeDetailsPage.dart';
 
 class EmployeesWidget extends StatefulWidget {
@@ -141,40 +142,40 @@ void _showArchiveConfirmation(
   BuildContext context,
   EmployeeModel employee,
   bool isArchived,
-) {
+)
+{
   final bool willArchive = !isArchived;
   showDialog(
     context: context,
-    builder:
-        (d) => AlertDialog(
-          title: Text(willArchive ? 'أرشفة الموظف' : 'إلغاء الأرشفة'),
-          content: Text(
-            willArchive
-                ? 'هل أنت متأكد من أرشفة الموظف ${employee.user?.fullName ?? 'المستخدم'}؟'
-                : 'هل تريد إعادة تنشيط الموظف ${employee.user?.fullName ?? 'المستخدم'}؟',
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(d),
-              child: const Text("إلغاء"),
+    builder: (d) => AlertDialog(
+            title: Text(willArchive ? 'أرشفة الموظف' : 'إلغاء الأرشفة'),
+            content: Text(
+              willArchive
+                  ? 'هل أنت متأكد من أرشفة الموظف ${employee.user?.fullName ?? 'المستخدم'}؟'
+                  : 'هل تريد إعادة تنشيط الموظف ${employee.user?.fullName ?? 'المستخدم'}؟',
             ),
-            TextButton(
-              onPressed: () {
-                context.read<EmployeesBloc>().add(
-                  isArchived
-                      ? RestoreArchiveEmployeeEvent(employee.id.toString())
-                      : ToggleArchiveEmployeeEvent(employee.id.toString()),
-                );
-                Navigator.pop(d);
-              },
-              child: Text(
-                willArchive ? "أرشفة" : "تنشيط",
-                style: TextStyle(
-                  color: willArchive ? Colors.orange : Colors.green,
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(d),
+                child: const Text("إلغاء"),
+              ),
+              TextButton(
+                onPressed: () {
+                  context.read<EmployeesBloc>().add(
+                    isArchived
+                        ? RestoreArchiveEmployeeEvent(employee.id.toString())
+                        : ToggleArchiveEmployeeEvent(employee.id.toString()),
+                  );
+                  Navigator.pop(d);
+                },
+                child: Text(
+                  willArchive ? "أرشفة" : "تنشيط",
+                  style: TextStyle(
+                    color: willArchive ? Colors.orange : Colors.green,
+                  ),
                 ),
               ),
-            ),
-          ],
-        ),
+            ],
+          ),
   );
 }

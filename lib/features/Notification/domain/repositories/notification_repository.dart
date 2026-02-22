@@ -1,4 +1,4 @@
-import '../entities/notification_entity.dart';
+import 'package:untitled8/common/helper/src/typedef.dart';
 import '../../data/model/notification_model.dart';
 
 abstract class NotificationRepository {
@@ -8,11 +8,16 @@ abstract class NotificationRepository {
   Future<void> deleteAllNotifications();
   Future<void> syncNotifications();
   Future<void> addLocalNotification(NotificationModel notification);
-  
-  Future<void> sendNotification({
-    required String title,
-    required String body,
-    String? targetWorkshop,
-    int? targetEmployeeId, // تم التغيير من String? إلى int?
-  });
+
+  DataResponse<void> sendNotification(BodyMap params);
+
+
+
+  DataResponse<void> checkInWorkshop(BodyMap params);
+  DataResponse<void> checkOutWorkshop(BodyMap params);
+
+
+
 }
+
+

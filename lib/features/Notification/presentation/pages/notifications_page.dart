@@ -21,7 +21,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
   void initState() {
     super.initState();
     context.read<NotificationBloc>().add(LoadNotifications());
-    context.read<NotificationBloc>().add(SyncNotificationsEvent());
+    // context.read<NotificationBloc>().add(SyncNotificationsEvent());
   }
 
   void _showDeleteAllDialog(BuildContext context) {
@@ -30,7 +30,9 @@ class _NotificationsPageState extends State<NotificationsPage> {
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text("مسح جميع التنبيهات"),
-          content: const Text("هل أنت متأكد من رغبتك في حذف كافة التنبيهات؟ لا يمكن التراجع عن هذا الإجراء."),
+          content: const Text(
+            "هل أنت متأكد من رغبتك في حذف كافة التنبيهات؟ لا يمكن التراجع عن هذا الإجراء.",
+          ),
           actions: <Widget>[
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
@@ -38,13 +40,18 @@ class _NotificationsPageState extends State<NotificationsPage> {
             ),
             TextButton(
               onPressed: () {
-                context.read<NotificationBloc>().add(DeleteAllNotificationsEvent());
+                context.read<NotificationBloc>().add(
+                  DeleteAllNotificationsEvent(),
+                );
                 Navigator.of(context).pop();
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text('تم مسح جميع التنبيهات')),
                 );
               },
-              child: const Text("حذف الكل", style: TextStyle(color: Colors.red)),
+              child: const Text(
+                "حذف الكل",
+                style: TextStyle(color: Colors.red),
+              ),
             ),
           ],
         );
@@ -63,7 +70,11 @@ class _NotificationsPageState extends State<NotificationsPage> {
         centerTitle: true,
         actions: [
           IconButton(
-            icon: Icon(Icons.delete_sweep_outlined, size: 24.sp, color: Colors.redAccent),
+            icon: Icon(
+              Icons.delete_sweep_outlined,
+              size: 24.sp,
+              color: Colors.redAccent,
+            ),
             onPressed: () => _showDeleteAllDialog(context),
             tooltip: "حذف الكل",
           ),
@@ -72,83 +83,104 @@ class _NotificationsPageState extends State<NotificationsPage> {
       ),
       body: BlocBuilder<NotificationBloc, NotificationState>(
         builder: (context, state) {
-          if (state is NotificationLoading) {
-            return const Center(child: CircularProgressIndicator(color: Colors.blueAccent));
-          }
+          return state.getNotificationsData.builder(
+            onSuccess: (_) {
+              if (state.getNotificationsData.data!.isEmpty) {
+                return const EmptyNotifications().animate().fadeIn(
+                  duration: 800.ms,
+                );
+              }
 
-          if (state is NotificationLoaded) {
-            if (state.notifications.isEmpty) {
-              return const EmptyNotifications().animate().fadeIn(duration: 800.ms);
-            }
+              final sortedNotifications = List.from(
+                state.getNotificationsData.data!,
+              )..sort((a, b) => b.createdAt.compareTo(a.createdAt));
 
-            final sortedNotifications = List.from(state.notifications)
-              ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
-
-            return RefreshIndicator(
-              onRefresh: () async {
-                context.read<NotificationBloc>().add(SyncNotificationsEvent());
-              },
-              child: ListView.builder(
-                padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 20.h),
-                itemCount: sortedNotifications.length,
-                itemBuilder: (context, index) {
-                  final notification = sortedNotifications[index];
-                  return Padding(
-                    padding: EdgeInsets.only(bottom: 12.h),
-                    child: Dismissible(
-                      key: Key(notification.id),
-                      direction: DismissDirection.endToStart,
-                      background: Container(
-                        alignment: Alignment.centerLeft,
-                        padding: EdgeInsets.symmetric(horizontal: 20.w),
-                        decoration: BoxDecoration(
-                          color: Colors.red.shade400,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Icon(Icons.delete_outline, color: Colors.white, size: 24.sp),
-                      ),
-                      onDismissed: (direction) {
-                        context.read<NotificationBloc>().add(DeleteNotificationEvent(notification.id));
-                      },
-                      child: NotificationItem(
-                        notification: notification,
-                        onTap: () {
-                          context.read<NotificationBloc>().add(
-                            MarkNotificationAsRead(notification.id),
-                          );
-                        },
-                      ),
-                    )
-                    .animate()
-                    .fadeIn(delay: (index * 100).ms, duration: 400.ms)
-                    .slideX(begin: 0.1, end: 0, curve: Curves.easeOutQuad),
-                  );
+              return RefreshIndicator(
+                onRefresh: () async {
+                  // context.read<NotificationBloc>().add(
+                  //   SyncNotificationsEvent(),
+                  // );
                 },
-              ),
-            );
-          }
-
-          if (state is NotificationError) {
-            return Center(
+                child: ListView.builder(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 16.w,
+                    vertical: 20.h,
+                  ),
+                  itemCount: sortedNotifications.length,
+                  itemBuilder: (context, index) {
+                    final notification = sortedNotifications[index];
+                    return Padding(
+                      padding: EdgeInsets.only(bottom: 12.h),
+                      child: Dismissible(
+                            key: Key(notification.id),
+                            direction: DismissDirection.endToStart,
+                            background: Container(
+                              alignment: Alignment.centerLeft,
+                              padding: EdgeInsets.symmetric(horizontal: 20.w),
+                              decoration: BoxDecoration(
+                                color: Colors.red.shade400,
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Icon(
+                                Icons.delete_outline,
+                                color: Colors.white,
+                                size: 24.sp,
+                              ),
+                            ),
+                            onDismissed: (direction) {
+                              context.read<NotificationBloc>().add(
+                                DeleteNotificationEvent(notification.id),
+                              );
+                            },
+                            child: NotificationItem(
+                              notification: notification,
+                              onTap: () {
+                                context.read<NotificationBloc>().add(
+                                  MarkNotificationAsRead(notification.id),
+                                );
+                              },
+                            ),
+                          )
+                          .animate()
+                          .fadeIn(delay: (index * 100).ms, duration: 400.ms)
+                          .slideX(
+                            begin: 0.1,
+                            end: 0,
+                            curve: Curves.easeOutQuad,
+                          ),
+                    );
+                  },
+                ),
+              );
+            },
+            loadingWidget: const Center(
+              child: CircularProgressIndicator(color: Colors.blueAccent),
+            ),
+            failedWidget: Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(Icons.wifi_off_rounded, color: Colors.grey, size: 50.sp),
                   SizedBox(height: 16.h),
                   Text(
-                    state.message,
+                    state.getNotificationsData.errorMessage,
                     style: TextStyle(color: Colors.black54, fontSize: 14.sp),
                   ),
                   TextButton(
-                    onPressed: () => context.read<NotificationBloc>().add(SyncNotificationsEvent()),
-                    child: Text("إعادة المحاولة", style: TextStyle(fontSize: 13.sp)),
-                  )
+                    onPressed:
+                        // () => context.read<NotificationBloc>().add(
+                        //   SyncNotificationsEvent(),
+                    (){},
+
+                    child: Text(
+                      "إعادة المحاولة",
+                      style: TextStyle(fontSize: 13.sp),
+                    ),
+                  ),
                 ],
               ),
-            );
-          }
-
-          return const SizedBox.shrink();
+            ),
+          );
         },
       ),
     );

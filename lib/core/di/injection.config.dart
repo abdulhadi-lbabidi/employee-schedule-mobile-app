@@ -148,16 +148,20 @@ import '../../features/loan/domain/usecases/reject_loan_usecase.dart' as _i579;
 import '../../features/loan/domain/usecases/update_loan_status_usecase.dart'
     as _i226;
 import '../../features/loan/presentation/bloc/loan_bloc.dart' as _i408;
-import '../../features/Notification/data/datasources/notification_notification_remote_data_source_mock.dart'
-    as _i1064;
 import '../../features/Notification/data/datasources/notification_remote_data_source.dart'
     as _i306;
 import '../../features/Notification/data/repositories/notification_repository_impl.dart'
     as _i558;
 import '../../features/Notification/domain/repositories/notification_repository.dart'
     as _i697;
+import '../../features/Notification/domain/usecases/check_in_use_case.dart'
+    as _i516;
+import '../../features/Notification/domain/usecases/check_out_use_case.dart'
+    as _i351;
 import '../../features/Notification/domain/usecases/get_notifications.dart'
     as _i585;
+import '../../features/Notification/domain/usecases/send_notification_use_case.dart'
+    as _i17;
 import '../../features/Notification/presentation/bloc/notification_bloc.dart'
     as _i23;
 import '../../features/payments/data/datasources/payments_data_sources_impl.dart'
@@ -220,7 +224,6 @@ import '../../features/reward/presentation/bloc/reward_employee/reward_employee_
 import '../../features/SplashScreen/presentation/bloc/onboarding_bloc.dart'
     as _i653;
 import '../hive_service.dart' as _i351;
-import '../services/notification_service.dart' as _i941;
 import '../unified_api/base_api.dart' as _i893;
 import '../unified_api/logger_interceptor.dart' as _i424;
 import 'injection.dart' as _i464;
@@ -247,11 +250,7 @@ _i174.GetIt $initGetIt(
   gh.singleton<_i558.FlutterSecureStorage>(
       () => injectableModule.secureStorage);
   gh.lazySingleton<_i351.HiveService>(() => _i351.HiveService());
-  gh.lazySingleton<_i941.NotificationService>(
-      () => _i941.NotificationService());
   gh.lazySingleton<_i424.LoggerInterceptor>(() => _i424.LoggerInterceptor());
-  gh.lazySingleton<_i1064.NotificationRemoteDataSourceMock>(
-      () => _i1064.NotificationRemoteDataSourceMock());
   gh.lazySingleton<_i251.LoanLocalDataSource>(
       () => _i251.LoanLocalDataSource(gh<_i460.SharedPreferences>()));
   gh.lazySingleton<_i184.AuditLogRepository>(
@@ -285,14 +284,14 @@ _i174.GetIt $initGetIt(
   gh.lazySingleton<_i241.AttendanceLocaleDataSource>(() =>
       _i241.AttendanceLocaleDataSource(
           sharedPreferences: gh<_i460.SharedPreferences>()));
+  gh.lazySingleton<_i704.FcmRemoteDataSource>(
+      () => _i704.FcmRemoteDataSource(gh<_i893.BaseApi>()));
   gh.lazySingleton<_i921.EmployeeSummaryRemoteDataSource>(
       () => _i921.EmployeeSummaryRemoteDataSource(gh<_i893.BaseApi>()));
   gh.lazySingleton<_i138.UpdatePasswordRemoteDataSource>(
       () => _i138.UpdatePasswordRemoteDataSource(gh<_i893.BaseApi>()));
   gh.lazySingleton<_i777.RewardRemoteDataSource>(
       () => _i777.RewardRemoteDataSource(gh<_i893.BaseApi>()));
-  gh.lazySingleton<_i704.FcmRemoteDataSource>(
-      () => _i704.FcmRemoteDataSource(gh<_i893.BaseApi>()));
   gh.factory<_i699.PostPayRecordsParams>(() => _i699.PostPayRecordsParams(
         employeeId: gh<int>(),
         attendanceIds: gh<List<int>>(),
@@ -392,28 +391,40 @@ _i174.GetIt $initGetIt(
       ));
   gh.factory<_i474.FcmBloc>(
       () => _i474.FcmBloc(gh<_i53.UpdateFcmTokenUseCase>()));
+  gh.factory<_i516.CheckInUseCase>(
+      () => _i516.CheckInUseCase(gh<_i697.NotificationRepository>()));
+  gh.factory<_i351.CheckOutUseCase>(
+      () => _i351.CheckOutUseCase(gh<_i697.NotificationRepository>()));
   gh.factory<_i585.GetNotificationsUseCase>(
       () => _i585.GetNotificationsUseCase(gh<_i697.NotificationRepository>()));
   gh.factory<_i585.MarkNotificationAsReadUseCase>(() =>
       _i585.MarkNotificationAsReadUseCase(gh<_i697.NotificationRepository>()));
-  gh.factory<_i585.SendNotificationUseCase>(
-      () => _i585.SendNotificationUseCase(gh<_i697.NotificationRepository>()));
-  gh.factory<_i585.SyncNotificationsUseCase>(
-      () => _i585.SyncNotificationsUseCase(gh<_i697.NotificationRepository>()));
   gh.factory<_i585.AddLocalNotificationUseCase>(() =>
       _i585.AddLocalNotificationUseCase(gh<_i697.NotificationRepository>()));
   gh.factory<_i585.DeleteNotificationUseCase>(() =>
       _i585.DeleteNotificationUseCase(gh<_i697.NotificationRepository>()));
   gh.factory<_i585.DeleteAllNotificationsUseCase>(() =>
       _i585.DeleteAllNotificationsUseCase(gh<_i697.NotificationRepository>()));
+  gh.factory<_i17.SendNotificationUseCase>(
+      () => _i17.SendNotificationUseCase(gh<_i697.NotificationRepository>()));
+  gh.factory<_i23.NotificationBloc>(() => _i23.NotificationBloc(
+        gh<_i585.GetNotificationsUseCase>(),
+        gh<_i585.AddLocalNotificationUseCase>(),
+        gh<_i585.DeleteNotificationUseCase>(),
+        gh<_i585.DeleteAllNotificationsUseCase>(),
+        gh<_i585.MarkNotificationAsReadUseCase>(),
+        gh<_i17.SendNotificationUseCase>(),
+        gh<_i516.CheckInUseCase>(),
+        gh<_i351.CheckOutUseCase>(),
+      ));
   gh.lazySingleton<_i200.WorkshopRepository>(() => _i429.WorkshopRepositoryImpl(
         remoteDataSource: gh<_i1069.WorkshopRemoteDataSource>(),
         localeDataSource: gh<_i573.WorkshopLocaleDataSource>(),
       ));
-  gh.lazySingleton<_i345.GetAllEmployeesUseCase>(
-      () => _i345.GetAllEmployeesUseCase(gh<_i583.AdminRepository>()));
   gh.lazySingleton<_i351.GetAllArchiveEmployeeUseCase>(
       () => _i351.GetAllArchiveEmployeeUseCase(gh<_i583.AdminRepository>()));
+  gh.lazySingleton<_i345.GetAllEmployeesUseCase>(
+      () => _i345.GetAllEmployeesUseCase(gh<_i583.AdminRepository>()));
   gh.lazySingleton<_i462.GetDashboardDataUsecase>(
       () => _i462.GetDashboardDataUsecase(gh<_i583.AdminRepository>()));
   gh.factory<_i668.UpdateEmployeeFullDetailsUseCase>(() =>
@@ -426,18 +437,18 @@ _i174.GetIt $initGetIt(
       () => _i381.DeleteEmployeeUseCase(gh<_i583.AdminRepository>()));
   gh.lazySingleton<_i253.GetEmployeeDetailsUseCase>(
       () => _i253.GetEmployeeDetailsUseCase(gh<_i583.AdminRepository>()));
+  gh.lazySingleton<_i47.GetEmployeeDetailsHoursUseCase>(
+      () => _i47.GetEmployeeDetailsHoursUseCase(gh<_i583.AdminRepository>()));
   gh.lazySingleton<_i940.GetOnlineEmployeesUseCase>(
       () => _i940.GetOnlineEmployeesUseCase(gh<_i583.AdminRepository>()));
+  gh.lazySingleton<_i539.RestoreEmployeeArchiveUseCase>(
+      () => _i539.RestoreEmployeeArchiveUseCase(gh<_i583.AdminRepository>()));
   gh.lazySingleton<_i368.ToggleEmployeeArchiveUseCase>(
       () => _i368.ToggleEmployeeArchiveUseCase(gh<_i583.AdminRepository>()));
   gh.lazySingleton<_i547.UpdateHourlyRateUseCase>(
       () => _i547.UpdateHourlyRateUseCase(gh<_i583.AdminRepository>()));
   gh.lazySingleton<_i949.UpdateOvertimeRateUseCase>(
       () => _i949.UpdateOvertimeRateUseCase(gh<_i583.AdminRepository>()));
-  gh.lazySingleton<_i47.GetEmployeeDetailsHoursUseCase>(
-      () => _i47.GetEmployeeDetailsHoursUseCase(gh<_i583.AdminRepository>()));
-  gh.lazySingleton<_i539.RestoreEmployeeArchiveUseCase>(
-      () => _i539.RestoreEmployeeArchiveUseCase(gh<_i583.AdminRepository>()));
   gh.lazySingleton<_i951.AttendanceBloc>(() => _i951.AttendanceBloc(
         gh<_i538.GetEmployeeAttendanceUseCase>(),
         gh<_i0.SyncAttendanceUseCase>(),
@@ -454,10 +465,10 @@ _i174.GetIt $initGetIt(
       () => _i982.AddWorkshopUseCase(gh<_i200.WorkshopRepository>()));
   gh.lazySingleton<_i173.DeleteWorkshopUseCase>(
       () => _i173.DeleteWorkshopUseCase(gh<_i200.WorkshopRepository>()));
-  gh.lazySingleton<_i849.ToggleWorkshopArchiveUseCase>(
-      () => _i849.ToggleWorkshopArchiveUseCase(gh<_i200.WorkshopRepository>()));
   gh.lazySingleton<_i19.RestoreWorkshopUseCase>(
       () => _i19.RestoreWorkshopUseCase(gh<_i200.WorkshopRepository>()));
+  gh.lazySingleton<_i849.ToggleWorkshopArchiveUseCase>(
+      () => _i849.ToggleWorkshopArchiveUseCase(gh<_i200.WorkshopRepository>()));
   gh.factory<_i125.EmployeeDetailsBloc>(() => _i125.EmployeeDetailsBloc(
         gh<_i47.GetEmployeeDetailsHoursUseCase>(),
         gh<_i253.GetEmployeeDetailsUseCase>(),
@@ -486,16 +497,17 @@ _i174.GetIt $initGetIt(
       ));
   gh.factory<_i424.LoginCubit>(
       () => _i424.LoginCubit(repository: gh<_i675.AuthRepository>()));
-  gh.factory<_i23.NotificationBloc>(() => _i23.NotificationBloc(
-        getNotificationsUseCase: gh<_i585.GetNotificationsUseCase>(),
-        addLocalNotificationUseCase: gh<_i585.AddLocalNotificationUseCase>(),
-        syncNotificationsUseCase: gh<_i585.SyncNotificationsUseCase>(),
-        sendNotificationUseCase: gh<_i585.SendNotificationUseCase>(),
-        deleteNotificationUseCase: gh<_i585.DeleteNotificationUseCase>(),
-        deleteAllNotificationsUseCase:
-            gh<_i585.DeleteAllNotificationsUseCase>(),
-        markAsReadUseCase: gh<_i585.MarkNotificationAsReadUseCase>(),
+  gh.factory<_i408.LoanBloc>(() => _i408.LoanBloc(
+        gh<_i150.GetAllLoansUseCase>(),
+        gh<_i363.GetEmployeeLoansUseCase>(),
+        gh<_i28.AddLoanUseCase>(),
+        gh<_i941.ApproveLoanUseCase>(),
+        gh<_i579.RejectLoanUseCase>(),
+        gh<_i560.PayLoanUseCase>(),
+        gh<_i23.NotificationBloc>(),
       ));
+  gh.lazySingleton<_i5.GetAllPaymentsUescese>(
+      () => _i5.GetAllPaymentsUescese(gh<_i88.PaymenysRepository>()));
   gh.lazySingleton<_i879.GetDuesReport>(
       () => _i879.GetDuesReport(gh<_i88.PaymenysRepository>()));
   gh.lazySingleton<_i133.GetUnpaidWeeksUseCase>(
@@ -504,8 +516,6 @@ _i174.GetIt $initGetIt(
       () => _i992.PostPayRecordsUseCase(gh<_i88.PaymenysRepository>()));
   gh.lazySingleton<_i1029.UpdatePaymentUseCase>(
       () => _i1029.UpdatePaymentUseCase(gh<_i88.PaymenysRepository>()));
-  gh.lazySingleton<_i5.GetAllPaymentsUescese>(
-      () => _i5.GetAllPaymentsUescese(gh<_i88.PaymenysRepository>()));
   gh.factory<_i467.DuesReportBloc>(
       () => _i467.DuesReportBloc(gh<_i879.GetDuesReport>()));
   gh.factory<_i934.EmployeesBloc>(() => _i934.EmployeesBloc(
@@ -523,15 +533,6 @@ _i174.GetIt $initGetIt(
       ));
   gh.factory<_i84.UnpaidWeeksBloc>(
       () => _i84.UnpaidWeeksBloc(gh<_i133.GetUnpaidWeeksUseCase>()));
-  gh.factory<_i408.LoanBloc>(() => _i408.LoanBloc(
-        gh<_i150.GetAllLoansUseCase>(),
-        gh<_i363.GetEmployeeLoansUseCase>(),
-        gh<_i28.AddLoanUseCase>(),
-        gh<_i941.ApproveLoanUseCase>(),
-        gh<_i579.RejectLoanUseCase>(),
-        gh<_i560.PayLoanUseCase>(),
-        gh<_i23.NotificationBloc>(),
-      ));
   gh.factory<_i705.AllPaymentsBloc>(
       () => _i705.AllPaymentsBloc(gh<_i5.GetAllPaymentsUescese>()));
   return getIt;

@@ -1,6 +1,7 @@
 class PrefsKeys {
   PrefsKeys._();
   static const token = "token";
+  static const fcmToken = "fcmToken";
   static const isFirstTime = "isFirstTime";
   static const role = "role";
   static const appTheme = 'app_theme';
