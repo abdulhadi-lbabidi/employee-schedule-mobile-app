@@ -159,7 +159,7 @@ class _EmployeeDetailsPageState extends State<EmployeeDetailsPagePayments> {
                                 widget.employeeId, // أو المعرف المطلوب للـ API
                                 UpdatePaymentParams(
                                   paymentId: widget.employeeId,
-                                  totalAmount: totalEstimated,
+                                 // totalAmount: totalEstimated,
                                   amountPaid: amountEntered,
                                   paymentDate:DateFormat('yyyy-MM-dd').format(DateTime.now()),
                                 ),
@@ -172,7 +172,7 @@ class _EmployeeDetailsPageState extends State<EmployeeDetailsPagePayments> {
                                 PostPayRecordsParams(
                                   employeeId: int.parse(widget.employeeId),
                                   attendanceIds: week.ids ?? [],
-                                  totalAmount: totalEstimated,
+                                 // totalAmount: totalEstimated,
                                   amountPaid: amountEntered,
                                   paymentDate:DateFormat('yyyy-MM-dd').format(DateTime.now()),
                                 ),

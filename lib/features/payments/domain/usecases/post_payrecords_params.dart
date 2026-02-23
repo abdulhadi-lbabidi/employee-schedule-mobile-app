@@ -7,14 +7,14 @@ import 'package:injectable/injectable.dart';
 class PostPayRecordsParams {
   final int employeeId;
   final List<int> attendanceIds;
-  final double totalAmount;
+  // final double totalAmount;
   final double amountPaid;
   final String paymentDate;
 
   PostPayRecordsParams({
     required this.employeeId,
     required this.attendanceIds,
-    required this.totalAmount,
+   // required this.totalAmount,
     required this.amountPaid,
     required this.paymentDate,
   });
@@ -23,7 +23,7 @@ class PostPayRecordsParams {
     return {
       "employee_id": employeeId,
       "attendance_ids": attendanceIds,
-      "total_amount": totalAmount,
+     // "total_amount": totalAmount,
       "amount_paid": amountPaid,
       "payment_date": paymentDate,
     };

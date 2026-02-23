@@ -118,7 +118,7 @@ class AdminDashboardPage extends StatelessWidget {
       toolbarHeight: 90.h,
       leading: IconButton(
         icon: Container(
-          padding: EdgeInsets.all(8.w),
+          padding: EdgeInsets.all(4.5.w),
           decoration: BoxDecoration(
             color: theme.primaryColor.withOpacity(0.1),
             shape: BoxShape.circle,

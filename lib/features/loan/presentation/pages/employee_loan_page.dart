@@ -4,8 +4,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:intl/intl.dart';
+import '../../data/models/get_all_loane.dart';
 import '../../data/models/loan_model.dart';
-import '../../domain/entities/loan_entity.dart';
+import '../../domain/entities/loan_entity.dart' hide LoanStatus;
 import '../../domain/usecases/add_loan_usecase.dart';
 import '../bloc/loan_bloc.dart';
 
@@ -52,11 +53,11 @@ class _EmployeeLoanPageState extends State<EmployeeLoanPage> {
              return Center(child: CircularProgressIndicator(color: theme.primaryColor));
           }
           
-          if (state.getAllLoansData.isFailed) { // Corrected: isFailed instead of isFaild
+          if (state.getAllLoansData.isFailed) {
              return Center(child: Text(state.getAllLoansData.errorMessage, style: TextStyle(color: theme.colorScheme.error)));
           }
 
-          final loans = state.getEmployeeAllLoansData.data?.data ?? [];
+          final loans = state.getAllLoansData.data ?? [];
 
           if (loans.isEmpty) {
             return Center(
@@ -88,22 +89,30 @@ class _EmployeeLoanPageState extends State<EmployeeLoanPage> {
     );
   }
 
-  Widget _buildLoanCard(LoanModel loan, ThemeData theme) {
+  Widget _buildLoanCard(Loane loan, ThemeData theme) {
     late Color statusColor;
     late String statusText;
     
-    switch (loan.role) {
-      case LoanStatus.unpaid:
+    switch (loan.status) {
+      case LoanStatus.waiting:
         statusColor = Colors.red.shade600;
         statusText = "غير مسددة";
         break;
-      case LoanStatus.partiallyPaid:
+      case LoanStatus.partially:
         statusColor = Colors.orange.shade800;
         statusText = "مسددة جزئياً";
         break;
-      case LoanStatus.fullyPaid:
+      case LoanStatus.completed:
         statusColor = Colors.green.shade700;
         statusText = "مسددة بالكامل";
+        break;
+      case LoanStatus.approved:
+        statusColor = Colors.green.shade700;
+        statusText = "مقبولة";
+        break;
+      case LoanStatus.rejected:
+        statusColor = Colors.green.shade700;
+        statusText = "مرفوضة";
         break;
     }
 
