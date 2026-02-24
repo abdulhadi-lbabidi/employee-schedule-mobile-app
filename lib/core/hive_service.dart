@@ -36,7 +36,7 @@ class HiveService {
   void _registerAdapters() {
     if (!Hive.isAdapterRegistered(0)) Hive.registerAdapter(AttendanceRecordAdapter());
    // if (!Hive.isAdapterRegistered(1)) Hive.registerAdapter(WorkshopModelAdapter());
-    if (!Hive.isAdapterRegistered(2)) Hive.registerAdapter(NotificationModelAdapter());
+   //  if (!Hive.isAdapterRegistered(2)) Hive.registerAdapter(NotificationModelAdapter());
   //  if (!Hive.isAdapterRegistered(3)) Hive.registerAdapter(AuditLogModelAdapter());
   }
 

@@ -213,6 +213,7 @@ class AttendanceModel {
   final double? regularHours;
   final double? overtimeHours;
   final String? status;
+  final bool? isOnline;
   final dynamic note;
 
   AttendanceModel({
@@ -227,6 +228,7 @@ class AttendanceModel {
     this.overtimeHours,
     this.status,
     this.note,
+    this.isOnline=false,
   });
 
   AttendanceModel copyWith({
@@ -240,6 +242,7 @@ class AttendanceModel {
     double? regularHours,
     double? overtimeHours,
     String? status,
+    bool? isOnline,
     dynamic note,
   }) =>
       AttendanceModel(
@@ -254,6 +257,7 @@ class AttendanceModel {
         overtimeHours: overtimeHours ?? this.overtimeHours,
         status: status ?? this.status,
         note: note ?? this.note,
+        isOnline: isOnline ?? this.isOnline,
       );
 
   factory AttendanceModel.fromJson(Map<String, dynamic> json) => AttendanceModel(
@@ -276,6 +280,7 @@ class AttendanceModel {
         : null,
     status: json["status"],
     note: json["note"],
+    isOnline: json["isOnline"],
   );
 
   Map<String, dynamic> toJson() => {
@@ -290,6 +295,7 @@ class AttendanceModel {
     "overtime_hours": overtimeHours,
     "status": status,
     "note": note,
+    "isOnline": isOnline,
   };
 }
 

@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:untitled8/features/Notification/domain/usecases/check_in_use_case.dart';
 import 'package:untitled8/features/Notification/domain/usecases/check_out_use_case.dart';
@@ -12,25 +14,27 @@ import 'package:injectable/injectable.dart';
 @injectable
 class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
   final GetNotificationsUseCase getNotificationsUseCase;
-  final AddLocalNotificationUseCase addLocalNotificationUseCase;
+
+  // final AddLocalNotificationUseCase addLocalNotificationUseCase;
   // final SyncNotificationsUseCase syncNotificationsUseCase;
   final SendNotificationUseCase sendNotificationUseCase;
   final CheckInUseCase checkInUseCase;
   final CheckOutUseCase checkOutUseCase;
-  final DeleteNotificationUseCase deleteNotificationUseCase;
-  final DeleteAllNotificationsUseCase deleteAllNotificationsUseCase;
-  final MarkNotificationAsReadUseCase markAsReadUseCase;
+
+  // final DeleteNotificationUseCase deleteNotificationUseCase;
+  // final DeleteAllNotificationsUseCase deleteAllNotificationsUseCase;
+  // final MarkNotificationAsReadUseCase markAsReadUseCase;
 
   NotificationBloc(
-     this.getNotificationsUseCase,
-     this.addLocalNotificationUseCase,
-    // required this.syncNotificationsUseCase,
-     this.deleteNotificationUseCase,
-     this.deleteAllNotificationsUseCase,
-     this.markAsReadUseCase,
-      this.sendNotificationUseCase,
-     this.checkInUseCase,
-     this.checkOutUseCase,
+    this.getNotificationsUseCase,
+    //  this.addLocalNotificationUseCase,
+    // // required this.syncNotificationsUseCase,
+    //  this.deleteNotificationUseCase,
+    //  this.deleteAllNotificationsUseCase,
+    //  this.markAsReadUseCase,
+    this.sendNotificationUseCase,
+    this.checkInUseCase,
+    this.checkOutUseCase,
   ) : super(NotificationState()) {
     on<LoadNotifications>(_onLoad);
     on<MarkNotificationAsRead>(_onMarkRead);
@@ -41,15 +45,12 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
     on<SendNotificationsEvent>(_onSend);
     on<CheckInEvent>(_checkIn);
     on<CheckOutEvent>(_checkOut);
-
   }
 
-
   Future<void> _onSend(
-      SendNotificationsEvent event,
-      Emitter<NotificationState> emit,
-      )
-  async {
+    SendNotificationsEvent event,
+    Emitter<NotificationState> emit,
+  ) async {
     emit(
       state.copyWith(
         sendNotificationData: state.sendNotificationData.setLoading(),
@@ -58,14 +59,14 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
 
     final result = await sendNotificationUseCase(event.params);
     result.fold(
-          (l) => emit(
+      (l) => emit(
         state.copyWith(
           sendNotificationData: state.sendNotificationData.setFaild(
             errorMessage: l.message,
           ),
         ),
       ),
-          (r) => emit(
+      (r) => emit(
         state.copyWith(
           sendNotificationData: state.sendNotificationData.setSuccess(),
         ),
@@ -74,99 +75,78 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
   }
 
   Future<void> _checkIn(
-      CheckInEvent event,
-      Emitter<NotificationState> emit,
-      )
-  async {
-    emit(
-      state.copyWith(
-        checkInData: state.checkInData.setLoading(),
-      ),
-    );
+    CheckInEvent event,
+    Emitter<NotificationState> emit,
+  ) async {
+    emit(state.copyWith(checkInData: state.checkInData.setLoading()));
 
     final result = await checkInUseCase(event.params);
     result.fold(
-          (l) => emit(
+      (l) => emit(
         state.copyWith(
-          checkInData: state.checkInData.setFaild(
-            errorMessage: l.message,
-          ),
+          checkInData: state.checkInData.setFaild(errorMessage: l.message),
         ),
       ),
-          (r) => emit(
-        state.copyWith(
-          checkInData: state.checkInData.setSuccess(),
-        ),
-      ),
+      (r) {
+        emit(state.copyWith(checkInData: state.checkInData.setSuccess()));
+      },
     );
   }
 
   Future<void> _checkOut(
-      CheckOutEvent event,
-      Emitter<NotificationState> emit,
-      )
-  async {
-    emit(
-      state.copyWith(
-        checkOutData: state.checkOutData.setLoading(),
-      ),
-    );
+    CheckOutEvent event,
+    Emitter<NotificationState> emit,
+  ) async {
+    emit(state.copyWith(checkOutData: state.checkOutData.setLoading()));
 
     final result = await checkOutUseCase(event.params);
     result.fold(
-          (l) => emit(
+      (l) => emit(
         state.copyWith(
-          checkOutData: state.checkOutData.setFaild(
-            errorMessage: l.message,
-          ),
+          checkOutData: state.checkOutData.setFaild(errorMessage: l.message),
         ),
       ),
-          (r) => emit(
-        state.copyWith(
-          checkOutData: state.checkOutData.setSuccess(),
-        ),
-      ),
+      (r) =>
+          emit(state.copyWith(checkOutData: state.checkOutData.setSuccess())),
     );
   }
-
 
   Future<void> _onLoad(
     LoadNotifications event,
     Emitter<NotificationState> emit,
-  )
-  async {
+  ) async {
     emit(
       state.copyWith(
         getNotificationsData: state.getNotificationsData.setLoading(),
       ),
     );
-    try {
-      final data = await getNotificationsUseCase();
-      emit(
-        state.copyWith(
-          getNotificationsData: state.getNotificationsData.setSuccess(
-            data: data,
-          ),
-        ),
-      );
-    } catch (e) {
-      emit(
+
+    final result = await getNotificationsUseCase();
+
+    result.fold(
+      (l) => emit(
         state.copyWith(
           getNotificationsData: state.getNotificationsData.setFaild(
-            errorMessage: 'فشل جلب التنبيهات',
+            errorMessage: l.message,
           ),
         ),
-      );
-    }
+      ),
+      (r) => emit(
+        state.copyWith(
+          getNotificationsData: state.getNotificationsData.setSuccess(
+            data: r.data,
+          ),
+        ),
+      ),
+    );
   }
 
   Future<void> _onAddLocal(
     AddLocalNotificationEvent event,
     Emitter<NotificationState> emit,
-  )
-  async {
+  ) async {
     try {
-      await addLocalNotificationUseCase(event.notification);
+      // await addLocalNotificationUseCase(event.notification);
       add(LoadNotifications());
     } catch (e) {
       print('Error adding local notification: $e');
@@ -185,13 +165,10 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
   //   }
   // }
 
-
   Future<void> _onDelete(
     DeleteNotificationEvent event,
     Emitter<NotificationState> emit,
-  )
-  async {
-
+  ) async {
     // try {
     //   await deleteNotificationUseCase(event.id);
     //   add(LoadNotifications());

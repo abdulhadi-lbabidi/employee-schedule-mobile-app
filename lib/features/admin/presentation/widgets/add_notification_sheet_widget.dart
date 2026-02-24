@@ -280,7 +280,7 @@ class _AddNotificationSheetWidgetState
                             params: SendNotificationParams(
                               title: titleController.text,
                               body: bodyController.text,
-                              targetEmployeeId: emp?.id,
+                              targetEmployeeId: emp?.user?.id,
                               targetWorkshop: workshop?.id,
                             ),
                           ),

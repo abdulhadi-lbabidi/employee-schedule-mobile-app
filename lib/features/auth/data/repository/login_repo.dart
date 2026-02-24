@@ -46,12 +46,6 @@ class AuthRepository with HandlingException {
     );
   }
 
-  // 🔹 إضافة دوال تحديث وحذف رمز FCM
-  Future<Either<Failure, void>> updateFCMToken(String? token) async {
-    return wrapHandlingException(
-      tryCall: () => remoteDataSource.updateFCMToken(token: token),
-    );
-  }
 
   Future<Either<Failure, void>> deleteFCMToken() async {
     return wrapHandlingException(

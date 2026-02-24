@@ -112,7 +112,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
                     return Padding(
                       padding: EdgeInsets.only(bottom: 12.h),
                       child: Dismissible(
-                            key: Key(notification.id),
+                            key: Key(notification.id.toString()),
                             direction: DismissDirection.endToStart,
                             background: Container(
                               alignment: Alignment.centerLeft,

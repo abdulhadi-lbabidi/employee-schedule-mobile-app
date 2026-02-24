@@ -36,7 +36,8 @@ class DropdownCubit extends Cubit<DropdownState> {
   void changeAttendance({
     required AttendanceModel newValue,
     required WorkshopModel workshopEntity,
-  }) {
+  })
+  {
     AppVariables.localeAttendance = newValue;
     AppVariables.selectedWorkShop = workshopEntity;
 

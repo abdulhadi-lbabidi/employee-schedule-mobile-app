@@ -143,9 +143,10 @@ class ApiVariables {
   // --- Notifications ---
   static Uri notifications() => _mainUri('/api/notifications');
 
+  static Uri getNotification() => _mainUri('/api/notifications');
   static Uri sendNotification() => _mainUri('/api/notifications/send');
-  static Uri checkInNotification() => _mainUri('/api/notifications/check-in');
-  static Uri checkOutNotification() => _mainUri('/api/notifications/check-out');
+  static Uri checkInNotification() => _mainUri('/api/notifications/user-check-in');
+  static Uri checkOutNotification() => _mainUri('/api/notifications/user-check-out');
 
 
   static Uri deleteNotification(String id) =>

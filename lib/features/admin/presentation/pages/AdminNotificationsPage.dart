@@ -74,7 +74,7 @@ class _AdminNotificationsPageState extends State<AdminNotificationsPage> {
                   return Padding(
                         padding: EdgeInsets.only(bottom: 15.h),
                         child: Dismissible(
-                          key: Key(notification.id),
+                          key: Key(notification.id.toString()),
                           direction: DismissDirection.startToEnd,
                           confirmDismiss: (direction) async {
                             return await showDialog(
@@ -117,7 +117,7 @@ class _AdminNotificationsPageState extends State<AdminNotificationsPage> {
                           },
                           onDismissed: (_) {
                             context.read<NotificationBloc>().add(
-                              DeleteNotificationEvent(notification.id),
+                              DeleteNotificationEvent(notification.id.toString()),
                             );
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(

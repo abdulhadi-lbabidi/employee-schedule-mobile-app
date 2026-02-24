@@ -35,7 +35,6 @@ class LoginCubit extends Cubit<LoginState> {
       ));
       },
       (response) async {
-        print('success');
 
         if (response.token != null && response.user != null) {
           emit(state.copyWith(
@@ -43,29 +42,14 @@ class LoginCubit extends Cubit<LoginState> {
             user: response.user,
             message: 'تم تسجيل الدخول بنجاح',
           ));
-          print(response.token);
-          print(response.user);
-          print(response.role);
+
           AppVariables.token = response.token;
           AppVariables.user = response.user!;
           AppVariables.role = response.role;
           sl<BaseApi>().resetHeader();
 
-          // 🔹 الحصول على رمز FCM وإرساله إلى الخادم
-          final fcmToken = await FirebaseMessaging.instance.getToken();
-          if (fcmToken != null) {
-            await repository.updateFCMToken(fcmToken);
-            print("FCM Token updated: $fcmToken");
-          } else {
-            print("FCM Token is null, cannot update.");
-          }
 
-        } else {
-          // هذا الجزء يتعامل مع حالة الفشل حيث يعود response ولكنه null token/user
-          emit(state.copyWith(
-            status: LoginStatus.failure,
-            message: response.status == 401 ? 'بيانات الاعتماد غير صحيحة' : 'فشل تسجيل الدخول',
-          ));
+
         }
       },
     );

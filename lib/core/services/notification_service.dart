@@ -5,28 +5,72 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import '../../common/helper/src/app_varibles.dart';
 
-/// ---------------- BACKGROUND HANDLER ----------------
+/// =====================================================
+/// ================= DEBUG PRINTER =====================
+/// =====================================================
+
+void debugPrintRemoteMessage(RemoteMessage message, {required String from}) {
+  print("\n════════════════════════════════════════════");
+  print("📦 MESSAGE DEBUG FROM: $from");
+  print("🆔 Message ID: ${message.messageId}");
+  print("📤 From: ${message.from}");
+  print("📅 Sent Time: ${message.sentTime}");
+  print("⌛ TTL: ${message.ttl}");
+  print("📂 Category: ${message.category}");
+  print("📦 CollapseKey: ${message.collapseKey}");
+
+  print("------------ NOTIFICATION ------------");
+  print("🔹 Title: ${message.notification?.title}");
+  print("🔹 Body: ${message.notification?.body}");
+  print("🔹 Android: ${message.notification?.android}");
+  print("🔹 Apple: ${message.notification?.apple}");
+
+  print("------------ DATA ------------");
+  if (message.data.isEmpty) {
+    print("⚠️ No data payload");
+  } else {
+    message.data.forEach((key, value) {
+      print("🔑 $key : $value");
+    });
+  }
+
+  print("════════════════════════════════════════════\n");
+}
+
+/// =====================================================
+/// =============== BACKGROUND HANDLER ==================
+/// =====================================================
+
 @pragma('vm:entry-point')
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
-  print("📩 Terminated message received: ${message.data}");
-
-  // خزّن البيانات فقط
+  debugPrintRemoteMessage(message, from: "TERMINATED BACKGROUND HANDLER");
 }
 
-/// ---------------- AWESOME ACTION LISTENER ----------------
+/// =====================================================
+/// =============== AWESOME ACTION LISTENER =============
+/// =====================================================
+
 @pragma('vm:entry-point')
 Future<void> onActionReceivedMethod(ReceivedAction action) async {
-  print("🔔 Notification clicked: ${action.payload}");
+  print("\n════════════════════════════════════════════");
+  print("🔔 AWESOME NOTIFICATION CLICKED");
+  print("🆔 ID: ${action.id}");
+  print("📦 ChannelKey: ${action.channelKey}");
+  print("📌 Title: ${action.title}");
+  print("📝 Body: ${action.body}");
+  print("📂 Payload: ${action.payload}");
+  print("════════════════════════════════════════════\n");
 
   if (action.payload != null && action.payload!.isNotEmpty) {
-    print('nav from sector 1');
+    print('➡️ nav from sector 1');
   }
 }
 
 /// =====================================================
 /// ================= Notification Utils =================
 /// =====================================================
+
 class NotificationUtils {
   NotificationUtils._();
   static final NotificationUtils _instance = NotificationUtils._();
@@ -34,7 +78,6 @@ class NotificationUtils {
 
   static final AwesomeNotifications _awesome = AwesomeNotifications();
 
-  /// 🔢 عدّاد الإشعارات غير المقروءة (الحقيقة هنا)
   static int _unreadCount = 0;
 
   /// ---------------- INIT ALL ----------------
@@ -51,10 +94,10 @@ class NotificationUtils {
   Future<void> _initFirebase() async {
     await Firebase.initializeApp();
 
-    final token  = await FirebaseMessaging.instance.getToken();
+    final token = await FirebaseMessaging.instance.getToken();
     if (token != null) {
       AppVariables.fcmToken = token;
-      print("FCM Token: $token");
+      print("✅ FCM Token: $token");
     }
   }
 
@@ -92,13 +135,13 @@ class NotificationUtils {
   }
 
   void _registerListeners() {
-    // Foreground
+    /// Foreground
     FirebaseMessaging.onMessage.listen(_handleForegroundMessage);
 
-    // Background (tap)
+    /// Background (when tapped)
     FirebaseMessaging.onMessageOpenedApp.listen(_handleBackgroundTap);
 
-    // Terminated
+    /// Terminated (background isolate)
     FirebaseMessaging.onBackgroundMessage(
       firebaseMessagingBackgroundHandler,
     );
@@ -106,30 +149,34 @@ class NotificationUtils {
 
   /// ---------------- FOREGROUND ----------------
   Future<void> _handleForegroundMessage(RemoteMessage message) async {
+    debugPrintRemoteMessage(message, from: "FOREGROUND");
+
     final payload = message.data.map(
           (k, v) => MapEntry(k.toString(), v.toString()),
     );
 
-    _unreadCount++; // ✅ زيادة العداد الحقيقي
+    _unreadCount++;
 
     await _awesome.createNotification(
       content: NotificationContent(
         id: DateTime.now().millisecondsSinceEpoch.remainder(100000),
         channelKey: 'basic_channel',
-        title: message.notification?.title ?? message.data['title'] ?? '',
-        body: message.notification?.body ?? message.data['body'] ?? '',
+        title: message.notification?.title ??
+            message.data['title'] ??
+            '',
+        body: message.notification?.body ??
+            message.data['body'] ??
+            '',
         payload: payload,
-        badge: _unreadCount, // ✅ إرسال العدد الحقيقي
+        badge: _unreadCount,
       ),
     );
   }
 
   /// ---------------- BACKGROUND TAP ----------------
   void _handleBackgroundTap(RemoteMessage message) {
-    print("📩 Background notification tapped: ${message.data}");
-    print('nav from sector 2');
-
-    // NotificationNavigator.navigateFromData(message.data);
+    debugPrintRemoteMessage(message, from: "BACKGROUND TAP");
+    print("➡️ nav from sector 2");
   }
 
   /// ---------------- TERMINATED CHECK ----------------
@@ -138,10 +185,7 @@ class NotificationUtils {
     await FirebaseMessaging.instance.getInitialMessage();
 
     if (initialMessage != null) {
-      print("📩 Terminated notification data: ${initialMessage.data}");
-
-
+      debugPrintRemoteMessage(initialMessage, from: "TERMINATED TAP");
     }
   }
-
 }

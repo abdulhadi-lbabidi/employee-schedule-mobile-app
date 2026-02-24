@@ -101,16 +101,7 @@ class AuthRemoteDataSourceImpl with HandlingApiManager {
     );
   }
 
-  // 🔹 تنفيذ دوال تحديث وحذف رمز FCM
-  Future<void> updateFCMToken({String? token}) async {
-    return wrapHandlingApi(
-      tryCall: () => _baseApi.post(
-        ApiVariables.updateFCMToken(),
-        data: {'fcm_token': token},
-      ),
-      jsonConvert: (_) {},
-    );
-  }
+
 
   Future<void> deleteFCMToken() async {
     return wrapHandlingApi(

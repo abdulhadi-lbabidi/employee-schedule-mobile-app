@@ -4,6 +4,7 @@ import '../../../../common/helper/src/typedef.dart';
 import '../../../../core/unified_api/api_variables.dart';
 import '../../../../core/unified_api/base_api.dart';
 import '../../../../core/unified_api/handling_api_manager.dart';
+import '../model/get_all_notifications_response.dart';
 import '../model/notification_model.dart';
 import 'package:injectable/injectable.dart';
 
@@ -84,5 +85,11 @@ class NotificationRemoteDataSourceImpl with HandlingApiManager{
       },
     );
   }
+
+  Future<GetAllNotificationsResponse> getAllNotifications() async => await wrapHandlingApi(
+    tryCall:
+        () => _baseApi.get(ApiVariables.getNotification()),
+    jsonConvert: getAllNotificationsResponseFromJson,
+  );
 
 }

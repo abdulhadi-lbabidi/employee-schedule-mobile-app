@@ -11,7 +11,6 @@ import '../../data/models/attendance_model.dart';
 import '../../data/models/get_attendance_response.dart';
 import '../../domin/use_cases/get_employee_attendance_use_case.dart';
 import '../../domin/use_cases/sync_attendance_use_case.dart';
-import 'package:untitled8/features/auth/presentation/bloc/fcm/fcm_bloc.dart'; // 🔹 استيراد FcmBloc
 
 part 'attendance_event.dart';
 
@@ -160,7 +159,6 @@ class AttendanceBloc extends Bloc<AttendanceEvent, AttendanceState> {
             ),
           );
           // 🔹 استدعاء تحديث التوكن بعد مزامنة ناجحة
-          sl<FcmBloc>().add(UpdateFcmTokenEvent());
           return;
         }
 
@@ -413,7 +411,6 @@ class AttendanceBloc extends Bloc<AttendanceEvent, AttendanceState> {
         add(GetAllAttendanceEvent(isAfterSync: true,params: GetEmployeeAttendanceParams(month: DateTime.now().month)));
         
         // 🔹 استدعاء تحديث التوكن بعد مزامنة ناجحة
-        sl<FcmBloc>().add(UpdateFcmTokenEvent());
       },
     );
   }
