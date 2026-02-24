@@ -267,15 +267,16 @@ _i174.GetIt $initGetIt(
       () => _i36.ActiveUnactiveCubit(gh<_i351.HiveService>()));
   gh.factory<_i492.ButtonCubit>(
       () => _i492.ButtonCubit(gh<_i351.HiveService>()));
-  gh.factory<_i803.UpdatePaymentParams>(() => _i803.UpdatePaymentParams(
-        paymentId: gh<String>(),
-        amountPaid: gh<double>(),
-        paymentDate: gh<String>(),
-      ));
   gh.lazySingleton<_i976.WorkshopsRepository>(() => _i976.WorkshopsRepository(
         dio: gh<_i361.Dio>(),
         workshopsBox: gh<_i979.Box<_i493.WorkshopModel>>(),
         connectivity: gh<_i895.Connectivity>(),
+      ));
+  gh.factory<_i803.UpdatePaymentParams>(() => _i803.UpdatePaymentParams(
+        paymentId: gh<String>(),
+        amountPaid: gh<double>(),
+        paymentDate: gh<String>(),
+        attendanceIds: gh<List<int>>(),
       ));
   gh.lazySingleton<_i893.BaseApi>(() => _i893.BaseApi(
         gh<_i361.Dio>(),

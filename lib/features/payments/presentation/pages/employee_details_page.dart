@@ -160,6 +160,7 @@ class _EmployeeDetailsPageState extends State<EmployeeDetailsPagePayments> {
                                 UpdatePaymentParams(
                                   paymentId: widget.employeeId,
                                  // totalAmount: totalEstimated,
+                                  attendanceIds: week.ids ?? [],
                                   amountPaid: amountEntered,
                                   paymentDate:DateFormat('yyyy-MM-dd').format(DateTime.now()),
                                 ),
