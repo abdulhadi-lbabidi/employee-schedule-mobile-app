@@ -1,7 +1,3 @@
-// To parse this JSON data, do
-//
-//     final updatePayments = updatePaymentsFromJson(jsonString);
-
 import 'dart:convert';
 
 UpdatePayments updatePaymentsFromJson(String str) => UpdatePayments.fromJson(json.decode(str));
@@ -14,13 +10,6 @@ class UpdatePayments {
   UpdatePayments({
     this.data,
   });
-
-  UpdatePayments copyWith({
-    Data? data,
-  }) =>
-      UpdatePayments(
-        data: data ?? this.data,
-      );
 
   factory UpdatePayments.fromJson(Map<String, dynamic> json) => UpdatePayments(
     data: json["data"] == null ? null : Data.fromJson(json["data"]),
@@ -35,7 +24,7 @@ class Data {
   final int? id;
   final String? employeeName;
   final String? adminName;
-  final int? totalAmount;
+  final double? totalAmount; // تم التغيير إلى double
   final double? amountPaid;
   final double? remainingAmount;
   final String? status;
@@ -52,34 +41,13 @@ class Data {
     this.paymentDate,
   });
 
-  Data copyWith({
-    int? id,
-    String? employeeName,
-    String? adminName,
-    int? totalAmount,
-    double? amountPaid,
-    double? remainingAmount,
-    String? status,
-    String? paymentDate,
-  }) =>
-      Data(
-        id: id ?? this.id,
-        employeeName: employeeName ?? this.employeeName,
-        adminName: adminName ?? this.adminName,
-        totalAmount: totalAmount ?? this.totalAmount,
-        amountPaid: amountPaid ?? this.amountPaid,
-        remainingAmount: remainingAmount ?? this.remainingAmount,
-        status: status ?? this.status,
-        paymentDate: paymentDate ?? this.paymentDate,
-      );
-
   factory Data.fromJson(Map<String, dynamic> json) => Data(
     id: json["id"],
     employeeName: json["employee_name"],
     adminName: json["admin_name"],
-    totalAmount: json["total_amount"],
-    amountPaid: json["amount_paid"]?.toDouble(),
-    remainingAmount: json["remaining_amount"]?.toDouble(),
+    totalAmount: (json["total_amount"] as num?)?.toDouble(), // استخدام .toDouble() بشكل آمن
+    amountPaid: (json["amount_paid"] as num?)?.toDouble(),
+    remainingAmount: (json["remaining_amount"] as num?)?.toDouble(),
     status: json["status"],
     paymentDate: json["payment_date"],
   );

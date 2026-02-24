@@ -1,45 +1,69 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_animate/flutter_animate.dart'; // 🔹 إضافة مكتبة الانميشن
+import 'package:flutter_animate/flutter_animate.dart';
+import 'package:untitled8/common/helper/src/app_varibles.dart';
 import '../../../../core/di/injection.dart';
-import '../bloc/admin_profile/admin_profile_bloc.dart';
-import 'package:untitled8/features/auth/presentation/bloc/login_Cubit/login_cubit.dart';
-import 'package:untitled8/features/SplashScreen/presentation/page/splashScareen.dart';
+import '../../../auth/data/model/login_response.dart';
+import '../../../profile/presentation/bloc/Profile/_profile_bloc.dart';
+import '../../../profile/presentation/bloc/Profile/_profile_event.dart';
+import '../../../profile/presentation/bloc/Profile/_profile_state.dart';
+import '../../../auth/presentation/bloc/login_Cubit/login_cubit.dart';
+import '../../../SplashScreen/presentation/page/splashScareen.dart';
 import 'AdminAuditLogPage.dart'; 
 import '../../../reward/presentation/AdminRewardsPage.dart';
 
-class AdminProfilePage extends StatelessWidget {
+class AdminProfilePage extends StatefulWidget {
   const AdminProfilePage({super.key});
+
+  @override
+  State<AdminProfilePage> createState() => _AdminProfilePageState();
+}
+
+class _AdminProfilePageState extends State<AdminProfilePage> {
+  late final ProfileBloc profileBloc;
+
+  @override
+  void initState() {
+    profileBloc = sl<ProfileBloc>()..add(LoadProfile());
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return BlocProvider(
-      create: (_) => sl<AdminProfileBloc>()..add(LoadAdminProfileEvent()),
-      child: Scaffold(
-        backgroundColor: theme.scaffoldBackgroundColor, 
-        appBar: AppBar(
-          backgroundColor: theme.scaffoldBackgroundColor,
-          elevation: 0,
-          title: Text("إدارة الحساب", style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold, color: theme.primaryColor)),
-          centerTitle: true,
-        ),
-        body: BlocBuilder<AdminProfileBloc, AdminProfileState>(
-          builder: (context, state) {
-            if (state is AdminProfileLoading) {
-              return Center(child: CircularProgressIndicator(color: theme.primaryColor));
-            }
-
-            if (state is AdminProfileLoaded) {
-              final profile = state.profile;
-              return SingleChildScrollView(
+    return BlocConsumer<ProfileBloc, ProfileState>(
+      bloc: profileBloc,
+      listener: (context, state) {
+        state.logOutData.listenerFunction(
+          onSuccess: () {
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (_) => const Splashscareen()),
+              (route) => false,
+            );
+          },
+        );
+      },
+      builder: (context, state) {
+        return state.profile.builder(
+          onSuccess: (profileData) {
+            final user = profileData?.user;
+            return Scaffold(
+              backgroundColor: theme.scaffoldBackgroundColor, 
+              appBar: AppBar(
+                backgroundColor: theme.scaffoldBackgroundColor,
+                elevation: 0,
+                title: Text("إدارة الحساب", style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold, color: theme.primaryColor)),
+                centerTitle: true,
+              ),
+              body: SingleChildScrollView(
                 physics: const BouncingScrollPhysics(),
                 padding: EdgeInsets.all(24.w),
                 child: Column(
                   children: [
-                    _buildIdentityHeader(profile, theme)
+                    _buildIdentityHeader(user, profileData?.role ?? "Admin", theme)
                         .animate()
                         .fadeIn(duration: 800.ms)
                         .scale(begin: const Offset(0.9, 0.9), end: const Offset(1, 1), curve: Curves.easeOutBack),
@@ -69,26 +93,33 @@ class AdminProfilePage extends StatelessWidget {
                     ).animate().fadeIn(delay: 550.ms, duration: 600.ms).slideY(begin: 0.1, end: 0),
                     
                     SizedBox(height: 20.h),
-                    _buildInfoSection(profile, theme)
+                    _buildInfoSection(user, theme)
                         .animate()
                         .fadeIn(delay: 700.ms, duration: 800.ms),
                     
                     SizedBox(height: 40.h),
-                    _buildLogoutButton(context, theme)
+                    _buildLogoutButton(context, theme, profileBloc)
                         .animate()
                         .fadeIn(delay: 900.ms, duration: 600.ms),
                   ],
                 ),
-              );
-            }
-            return Center(child: Text("فشل تحميل البيانات", style: TextStyle(fontSize: 14.sp, color: theme.disabledColor)));
+              ),
+            );
           },
-        ),
-      ),
+          loadingWidget: Scaffold(
+            backgroundColor: theme.scaffoldBackgroundColor,
+            body: Center(child: CircularProgressIndicator(color: theme.primaryColor)),
+          ),
+          failedWidget: Scaffold(
+            backgroundColor: theme.scaffoldBackgroundColor,
+            body: Center(child: Text("فشل تحميل البيانات", style: TextStyle(fontSize: 14.sp, color: theme.disabledColor))),
+          ),
+        );
+      },
     );
   }
 
-  Widget _buildIdentityHeader(dynamic profile, ThemeData theme) {
+  Widget _buildIdentityHeader(User? user, String role, ThemeData theme) {
     return Column(
       children: [
         Container(
@@ -104,20 +135,18 @@ class AdminProfilePage extends StatelessWidget {
           ),
           child: CircleAvatar(
             radius: 60.r,
-            backgroundColor: Colors.black, 
-            child: ClipOval(
-              child: Image.asset(
-                'assets/image/log/logo.png',
-                width: 100.r,
-                height: 100.r,
-                fit: BoxFit.cover,
-              ),
-            ),
+            backgroundColor: theme.primaryColor.withOpacity(0.1), 
+            backgroundImage: (user?.profileImageUrl != null && user!.profileImageUrl!.isNotEmpty)
+                ? NetworkImage(user.profileImageUrl!)
+                : null,
+            child: (user?.profileImageUrl == null || user!.profileImageUrl!.isEmpty)
+                ? Icon(Icons.person, size: 60.sp, color: theme.primaryColor)
+                : null,
           ),
         ),
         SizedBox(height: 16.h),
-        Text(profile.fullName, style: TextStyle(fontSize: 22.sp, fontWeight: FontWeight.w900, color: theme.textTheme.bodyLarge?.color)),
-        Text(profile.position, style: TextStyle(fontSize: 15.sp, color: theme.disabledColor, fontWeight: FontWeight.bold)),
+        Text(user?.fullName ?? "اسم المدير", style: TextStyle(fontSize: 22.sp, fontWeight: FontWeight.w900, color: theme.textTheme.bodyLarge?.color)),
+        Text(role, style: TextStyle(fontSize: 15.sp, color: theme.disabledColor, fontWeight: FontWeight.bold)),
       ],
     );
   }
@@ -154,7 +183,7 @@ class AdminProfilePage extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoSection(dynamic profile, ThemeData theme) {
+  Widget _buildInfoSection(User? user, ThemeData theme) {
     return Container(
       padding: EdgeInsets.all(20.w),
       decoration: BoxDecoration(
@@ -164,11 +193,11 @@ class AdminProfilePage extends StatelessWidget {
       ),
       child: Column(
         children: [
-          _infoRow(Icons.email_outlined, "البريد الإلكتروني", profile.email, theme),
+          _infoRow(Icons.email_outlined, "البريد الإلكتروني", user?.email ?? "---", theme),
           Divider(height: 30.h, color: theme.dividerColor.withOpacity(0.1)),
-          _infoRow(Icons.phone_android_outlined, "رقم الهاتف", profile.phoneNumber, theme),
+          _infoRow(Icons.phone_android_outlined, "رقم الهاتف", user?.phoneNumber ?? "---", theme),
           Divider(height: 30.h, color: theme.dividerColor.withOpacity(0.1)),
-          _infoRow(Icons.lan_outlined, "القسم الوظيفي", profile.department, theme),
+          _infoRow(Icons.lan_outlined, "القسم الوظيفي", user?.userableType ?? "مدير", theme),
         ],
       ),
     );
@@ -179,18 +208,24 @@ class AdminProfilePage extends StatelessWidget {
       children: [
         Icon(icon, color: theme.primaryColor, size: 22.sp),
         SizedBox(width: 15.w),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(label, style: TextStyle(color: theme.disabledColor, fontSize: 11.sp, fontWeight: FontWeight.bold)),
-            Text(value, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14.sp, color: theme.textTheme.bodyLarge?.color)),
-          ],
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(label, style: TextStyle(color: theme.disabledColor, fontSize: 9.sp, fontWeight: FontWeight.bold)),
+              Text(
+                value, 
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14.sp, color: theme.textTheme.bodyLarge?.color),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
         ),
       ],
     );
   }
 
-  Widget _buildLogoutButton(BuildContext context, ThemeData theme) {
+  Widget _buildLogoutButton(BuildContext context, ThemeData theme, ProfileBloc bloc) {
     return SizedBox(
       width: double.infinity,
       child: OutlinedButton.icon(
@@ -199,14 +234,14 @@ class AdminProfilePage extends StatelessWidget {
           side: const BorderSide(color: Colors.redAccent, width: 1.5),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15.r)),
         ),
-        onPressed: () => _showLogoutDialog(context, theme),
+        onPressed: () => _showLogoutDialog(context, theme, bloc),
         icon: Icon(Icons.logout_rounded, color: Colors.redAccent, size: 20.sp),
         label: Text("خروج آمن من النظام", style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.w900, fontSize: 14.sp)),
       ),
     );
   }
 
-  void _showLogoutDialog(BuildContext context, ThemeData theme) {
+  void _showLogoutDialog(BuildContext context, ThemeData theme, ProfileBloc bloc) {
     showDialog(
       context: context,
       builder: (d) => AlertDialog(
@@ -220,8 +255,7 @@ class AdminProfilePage extends StatelessWidget {
             style: ElevatedButton.styleFrom(backgroundColor: Colors.redAccent, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.r))), 
             onPressed: () {
               Navigator.pop(d);
-              context.read<LoginCubit>().logout();
-              Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_) => const Splashscareen()), (route) => false);
+              bloc.add(LogOutEvent());
             }, 
             child: Text("تأكيد", style: TextStyle(color: Colors.white, fontSize: 13.sp, fontWeight: FontWeight.bold)),
           ),

@@ -1,11 +1,9 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter/material.dart';import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../bloc/All-Payments/all_payments_bloc.dart';
 import '../bloc/All-Payments/all_payments_event.dart';
 import '../bloc/All-Payments/all_payments_state.dart';
-
 
 class PaymentsHistoryPage extends StatefulWidget {
   const PaymentsHistoryPage({super.key});
@@ -15,6 +13,8 @@ class PaymentsHistoryPage extends StatefulWidget {
 }
 
 class _PaymentsHistoryPageState extends State<PaymentsHistoryPage> {
+  String? _selectedEmployeeName; // متغير لتخزين الموظف المختار
+
   @override
   void initState() {
     super.initState();
@@ -29,6 +29,14 @@ class _PaymentsHistoryPageState extends State<PaymentsHistoryPage> {
       appBar: AppBar(
         title: const Text("سجل المدفوعات الكامل"),
         centerTitle: true,
+        actions: [
+          // زر لإعادة ضبط التصفية
+          if (_selectedEmployeeName != null)
+            IconButton(
+              icon: const Icon(Icons.filter_list_off),
+              onPressed: () => setState(() => _selectedEmployeeName = null),
+            ),
+        ],
       ),
       body: BlocBuilder<AllPaymentsBloc, AllPaymentsState>(
         builder: (context, state) {
@@ -40,19 +48,84 @@ class _PaymentsHistoryPageState extends State<PaymentsHistoryPage> {
             if (state.payments.isEmpty) {
               return const Center(child: Text("لا توجد عمليات دفع مسجلة"));
             }
-            return ListView.builder(
-              padding: EdgeInsets.all(16.w),
-              itemCount: state.payments.length,
-              itemBuilder: (context, index) {
-                final payment = state.payments[index];
-                return _buildPaymentCard(payment, theme);
-              },
+
+            // 1. استخراج قائمة فريدة بأسماء الموظفين للتصفية
+            final allEmployees = state.payments
+                .map((p) => p.employeeName.toString())
+                .toSet()
+                .toList();
+
+            // 2. تصفية القائمة بناءً على الاختيار
+            final filteredPayments = _selectedEmployeeName == null
+                ? state.payments
+                : state.payments
+                .where((p) => p.employeeName.toString() == _selectedEmployeeName)
+                .toList();
+
+            return Column(
+              children: [
+                // 3. إضافة القائمة المنسدلة للتصفية
+                _buildFilterDropdown(allEmployees, theme),
+
+                Expanded(
+                  child: filteredPayments.isEmpty
+                      ? const Center(child: Text("لا توجد نتائج لهذا الموظف"))
+                      : ListView.builder(
+                    padding: EdgeInsets.all(16.w),
+                    itemCount: filteredPayments.length,
+                    itemBuilder: (context, index) {
+                      final payment = filteredPayments[index];
+                      return _buildPaymentCard(payment, theme);
+                    },
+                  ),
+                ),
+              ],
             );
           }
           return const SizedBox();
         },
       ),
     );
+  }
+
+  // وجت بناء القائمة المنسدلة
+  Widget _buildFilterDropdown(List<String> employeeNames, ThemeData theme) {
+    return Container(
+      margin: EdgeInsets.all(16.w),
+      padding: EdgeInsets.symmetric(horizontal: 12.w),
+      decoration: BoxDecoration(
+        color: theme.cardColor,
+        borderRadius: BorderRadius.circular(12.r),
+        border: Border.all(color: theme.dividerColor.withOpacity(0.2)),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          value: _selectedEmployeeName,
+          hint: const Text("تصفية حسب اسم الموظف"),
+          isExpanded: true,
+          items: [
+            const DropdownMenuItem(
+              value: null,
+              child: Text("عرض الكل"),
+            ),
+            ...employeeNames.map((name) => DropdownMenuItem(
+              value: name,
+              child: Text(_formatName(name)),
+            )),
+          ],
+          onChanged: (value) {
+            setState(() {
+              _selectedEmployeeName = value;
+            });
+          },
+        ),
+      ),
+    );
+  }
+
+  // دالة مساعدة لتنسيق الاسم (نفس المنطق المستخدم في البطاقة)
+  String _formatName(String rawName) {
+    return rawName.split('.').last.replaceAll('_', ' ');
   }
 
   Widget _buildPaymentCard(dynamic payment, ThemeData theme) {
@@ -69,7 +142,7 @@ class _PaymentsHistoryPageState extends State<PaymentsHistoryPage> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  payment.employeeName.toString().split('.').last.replaceAll('_', ' '),
+                  _formatName(payment.employeeName.toString()),
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16.sp),
                 ),
                 Container(
