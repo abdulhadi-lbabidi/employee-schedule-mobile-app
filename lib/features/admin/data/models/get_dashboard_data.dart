@@ -1,7 +1,3 @@
-// To parse this JSON data, do
-//
-//     final getDashboardData = getDashboardDataFromJson(jsonString);
-
 import 'dart:convert';
 
 GetDashboardData getDashboardDataFromJson(String str) => GetDashboardData.fromJson(json.decode(str));
@@ -23,21 +19,6 @@ class GetDashboardData {
     this.attendanceEarnings,
   });
 
-  GetDashboardData copyWith({
-    String? monthName,
-    GeneralCounts? generalCounts,
-    SStats? rewardsStats,
-    SStats? loansStats,
-    AttendanceEarnings? attendanceEarnings,
-  }) =>
-      GetDashboardData(
-        monthName: monthName ?? this.monthName,
-        generalCounts: generalCounts ?? this.generalCounts,
-        rewardsStats: rewardsStats ?? this.rewardsStats,
-        loansStats: loansStats ?? this.loansStats,
-        attendanceEarnings: attendanceEarnings ?? this.attendanceEarnings,
-      );
-
   factory GetDashboardData.fromJson(Map<String, dynamic> json) => GetDashboardData(
     monthName: json["month_name"],
     generalCounts: json["general_counts"] == null ? null : GeneralCounts.fromJson(json["general_counts"]),
@@ -56,7 +37,7 @@ class GetDashboardData {
 }
 
 class AttendanceEarnings {
-  final int? totalEstimatedAmount;
+  final double? totalEstimatedAmount;
   final double? regularHours;
   final double? overtimeHours;
 
@@ -66,21 +47,10 @@ class AttendanceEarnings {
     this.overtimeHours,
   });
 
-  AttendanceEarnings copyWith({
-    int? totalEstimatedAmount,
-    double? regularHours,
-    double? overtimeHours,
-  }) =>
-      AttendanceEarnings(
-        totalEstimatedAmount: totalEstimatedAmount ?? this.totalEstimatedAmount,
-        regularHours: regularHours ?? this.regularHours,
-        overtimeHours: overtimeHours ?? this.overtimeHours,
-      );
-
   factory AttendanceEarnings.fromJson(Map<String, dynamic> json) => AttendanceEarnings(
-    totalEstimatedAmount: json["total_estimated_amount"],
-    regularHours: json["regular_hours"]?.toDouble(),
-    overtimeHours: json["overtime_hours"]?.toDouble(),
+    totalEstimatedAmount: (json["total_estimated_amount"] as num?)?.toDouble(),
+    regularHours: (json["regular_hours"] as num?)?.toDouble(),
+    overtimeHours: (json["overtime_hours"] as num?)?.toDouble(),
   );
 
   Map<String, dynamic> toJson() => {
@@ -99,15 +69,6 @@ class GeneralCounts {
     this.totalWorkshops,
   });
 
-  GeneralCounts copyWith({
-    int? totalEmployees,
-    int? totalWorkshops,
-  }) =>
-      GeneralCounts(
-        totalEmployees: totalEmployees ?? this.totalEmployees,
-        totalWorkshops: totalWorkshops ?? this.totalWorkshops,
-      );
-
   factory GeneralCounts.fromJson(Map<String, dynamic> json) => GeneralCounts(
     totalEmployees: json["total_employees"],
     totalWorkshops: json["total_workshops"],
@@ -121,25 +82,16 @@ class GeneralCounts {
 
 class SStats {
   final int? count;
-  final int? totalAmount;
+  final double? totalAmount;
 
   SStats({
     this.count,
     this.totalAmount,
   });
 
-  SStats copyWith({
-    int? count,
-    int? totalAmount,
-  }) =>
-      SStats(
-        count: count ?? this.count,
-        totalAmount: totalAmount ?? this.totalAmount,
-      );
-
   factory SStats.fromJson(Map<String, dynamic> json) => SStats(
     count: json["count"],
-    totalAmount: json["total_amount"],
+    totalAmount: (json["total_amount"] as num?)?.toDouble(),
   );
 
   Map<String, dynamic> toJson() => {
