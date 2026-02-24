@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:untitled8/common/helper/src/app_varibles.dart';
 import 'package:untitled8/common/helper/src/prefs_keys.dart';
 import 'package:untitled8/core/unified_api/base_api.dart';
 import '../../../core/di/injection.dart';
@@ -11,7 +12,9 @@ class HelperFunc {
   static bool isAuth() => _pref.containsKey(PrefsKeys.userInfo);
 
   static void logout() {
+   final String? fcmToken= AppVariables.fcmToken;
     _pref.clear();
+    AppVariables.fcmToken=fcmToken;
     sl<BaseApi>().resetHeader();
   }
 

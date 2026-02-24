@@ -34,8 +34,7 @@ class EmployeesBloc extends Bloc<EmployeesEvent, EmployeesState> {
   Future<void> _getAllEmployees(
     GetAllEmployeeEvent event,
     Emitter<EmployeesState> emit,
-  )
-  async {
+  ) async {
     emit(state.copyWith(employeesData: state.employeesData.setLoading()));
     final val = await getAllEmployeesUseCase();
 
@@ -62,8 +61,7 @@ class EmployeesBloc extends Bloc<EmployeesEvent, EmployeesState> {
   Future<void> _getAllArchivedEmployees(
     GetAllEmployeeArchivedEvent event,
     Emitter<EmployeesState> emit,
-  )
-  async {
+  ) async {
     emit(
       state.copyWith(
         employeesArchivedData: state.employeesArchivedData.setLoading(),
@@ -114,6 +112,7 @@ class EmployeesBloc extends Bloc<EmployeesEvent, EmployeesState> {
         emit(
           state.copyWith(addEmployeeData: state.addEmployeeData.setSuccess()),
         );
+        add(GetAllEmployeeEvent());
       },
     );
   }
@@ -121,8 +120,7 @@ class EmployeesBloc extends Bloc<EmployeesEvent, EmployeesState> {
   Future<void> _onToggleArchiveEmployee(
     ToggleArchiveEmployeeEvent event,
     Emitter<EmployeesState> emit,
-  )
-  async {
+  ) async {
     emit(
       state.copyWith(
         setEmployeeArchivedData: state.setEmployeeArchivedData.setLoading(),

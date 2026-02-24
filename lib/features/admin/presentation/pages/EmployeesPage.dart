@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_animate/flutter_animate.dart';
-import 'package:untitled8/features/admin/data/models/employee%20model/employee_model.dart';
 import '../../../../core/di/injection.dart';
 import '../../../../core/utils/app_strings.dart';
 import '../bloc/employees/employees_bloc.dart';
@@ -10,7 +9,6 @@ import '../bloc/employees/employees_event.dart';
 import '../bloc/employees/employees_state.dart';
 import '../widgets/employees_widget.dart';
 import 'AddEmployeePage.dart';
-import 'EmployeeDetailsPage.dart';
 
 class EmployeesPage extends StatefulWidget {
   const EmployeesPage({super.key});
@@ -21,14 +19,15 @@ class EmployeesPage extends StatefulWidget {
 
 class _EmployeesPageState extends State<EmployeesPage> {
   final TextEditingController _searchController = TextEditingController();
+  late final EmployeesBloc employeesBloc;
 
   @override
   void initState() {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<EmployeesBloc>()
-        ..add(GetAllEmployeeEvent())
-        ..add(GetAllEmployeeArchivedEvent());
-    });
+    employeesBloc =
+        sl<EmployeesBloc>()
+          ..add(GetAllEmployeeEvent())
+          ..add(GetAllEmployeeArchivedEvent());
+    ;
 
     // TODO: implement initState
     super.initState();
@@ -67,6 +66,7 @@ class _EmployeesPageState extends State<EmployeesPage> {
               theme,
             ).animate().fadeIn(duration: 600.ms).slideY(begin: -0.1, end: 0),
             BlocConsumer<EmployeesBloc, EmployeesState>(
+              bloc: employeesBloc,
               builder: (context, state) {
                 return state.employeesData.builder(
                   onSuccess: (result) {
@@ -94,6 +94,7 @@ class _EmployeesPageState extends State<EmployeesPage> {
                               ).animate().fadeIn(delay: 400.ms),
                               ...data.asMap().entries.map(
                                 (entry) => EmployeesWidget(
+                                  employeesBloc: employeesBloc,
                                       theme: theme,
                                       emp: entry.value,
                                       isFromArchived: false,
@@ -125,14 +126,19 @@ class _EmployeesPageState extends State<EmployeesPage> {
                 );
               },
               listener: (context, state) {
-                state.setEmployeeArchivedData.listenerFunction(onSuccess: (){});
+                state.setEmployeeArchivedData.listenerFunction(
+                  onSuccess: () {},
+                );
 
                 // TODO: implement listener
               },
-              listenWhen:(pre,cur)=>pre.setEmployeeArchivedData.status !=cur.setEmployeeArchivedData.status,
-
+              listenWhen:
+                  (pre, cur) =>
+                      pre.setEmployeeArchivedData.status !=
+                      cur.setEmployeeArchivedData.status,
             ),
             BlocConsumer<EmployeesBloc, EmployeesState>(
+              bloc: employeesBloc,
               builder: (context, state) {
                 return state.employeesArchivedData.builder(
                   onSuccess: (result) {
@@ -160,6 +166,7 @@ class _EmployeesPageState extends State<EmployeesPage> {
                               ).animate().fadeIn(delay: 400.ms),
                               ...data.asMap().entries.map(
                                 (entry) => EmployeesWidget(
+                                  employeesBloc: employeesBloc,
                                       theme: theme,
                                       emp: entry.value,
                                       isFromArchived: true,
@@ -191,12 +198,17 @@ class _EmployeesPageState extends State<EmployeesPage> {
                 );
               },
               listener: (context, state) {
-                state.restoreEmployeeArchivedData.listenerFunction(onSuccess: (){});
+                state.restoreEmployeeArchivedData.listenerFunction(
+                  onSuccess: () {},
+                );
                 // TODO: implement listener
               },
-              listenWhen:(pre,cur)=>pre.restoreEmployeeArchivedData.status !=cur.restoreEmployeeArchivedData.status,
-
+              listenWhen:
+                  (pre, cur) =>
+                      pre.restoreEmployeeArchivedData.status !=
+                      cur.restoreEmployeeArchivedData.status,
             ),
+            SizedBox(height: 50.h,)
           ],
         ),
       ),
@@ -206,7 +218,10 @@ class _EmployeesPageState extends State<EmployeesPage> {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (_) => const AddEmployeePage()),
+                  MaterialPageRoute(
+                    builder:
+                        (_) => AddEmployeePage(employeesBloc: employeesBloc),
+                  ),
                 );
               },
               backgroundColor: colorScheme.primary,
@@ -251,7 +266,7 @@ class _EmployeesPageState extends State<EmployeesPage> {
       child: TextField(
         controller: _searchController,
         onChanged: (val) {
-          context.read<EmployeesBloc>().add(SearchEmployeesEvent(val));
+          employeesBloc.add(SearchEmployeesEvent(val));
         },
         style: TextStyle(
           fontSize: 14.sp,

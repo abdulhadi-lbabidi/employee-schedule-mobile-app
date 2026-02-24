@@ -77,18 +77,18 @@ class _EmployeeDetailsPageState extends State<EmployeeDetailsPage> {
       ),
       centerTitle: true,
       actions: [
-        ValueListenableBuilder<bool>(
-          valueListenable: isArchivedNotifier,
-          builder: (context, isArchived, _) {
-            return IconButton(
-              icon: Icon(
-                isArchived ? Icons.unarchive_outlined : Icons.archive_outlined,
-                color: isArchived ? Colors.green : Colors.orange,
-              ),
-              onPressed: () => _showArchiveConfirmation(context, widget.employeeModel, isArchived),
-            );
-          },
-        ),
+        // ValueListenableBuilder<bool>(
+        //   valueListenable: isArchivedNotifier,
+        //   builder: (context, isArchived, _) {
+        //     return IconButton(
+        //       icon: Icon(
+        //         isArchived ? Icons.unarchive_outlined : Icons.archive_outlined,
+        //         color: isArchived ? Colors.green : Colors.orange,
+        //       ),
+        //       onPressed: () => _showArchiveConfirmation(context, widget.employeeModel, isArchived),
+        //     );
+        //   },
+        // ),
         IconButton(
           icon: const Icon(Icons.edit_note_rounded, color: Colors.blueAccent),
           onPressed: () => Navigator.push(

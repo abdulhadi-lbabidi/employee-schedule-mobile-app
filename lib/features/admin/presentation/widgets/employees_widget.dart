@@ -12,12 +12,14 @@ class EmployeesWidget extends StatefulWidget {
   final EmployeeModel emp;
   final ThemeData theme;
   final bool isFromArchived;
+  final EmployeesBloc employeesBloc;
 
   const EmployeesWidget({
     super.key,
     required this.emp,
     required this.theme,
     required this.isFromArchived,
+    required this.employeesBloc,
   });
 
   @override
@@ -55,14 +57,17 @@ class _EmployeesWidgetState extends State<EmployeesWidget> {
           ),
           child: ListTile(
             onTap: () async {
-              if(value==true){
-                return ;
+              if (value == true) {
+                return;
               }
               await Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder:
-                      (_) => EmployeeDetailsPage(employeeModel: widget.emp, isArchived: false,),
+                      (_) => EmployeeDetailsPage(
+                        employeeModel: widget.emp,
+                        isArchived: false,
+                      ),
                 ),
               );
             },
@@ -129,6 +134,7 @@ class _EmployeesWidgetState extends State<EmployeesWidget> {
                     context,
                     widget.emp,
                     isArchived.value,
+                    widget.employeesBloc,
                   ),
             ),
           ),
@@ -142,40 +148,41 @@ void _showArchiveConfirmation(
   BuildContext context,
   EmployeeModel employee,
   bool isArchived,
-)
-{
+  EmployeesBloc employeesBloc,
+) {
   final bool willArchive = !isArchived;
   showDialog(
     context: context,
-    builder: (d) => AlertDialog(
-            title: Text(willArchive ? 'أرشفة الموظف' : 'إلغاء الأرشفة'),
-            content: Text(
-              willArchive
-                  ? 'هل أنت متأكد من أرشفة الموظف ${employee.user?.fullName ?? 'المستخدم'}؟'
-                  : 'هل تريد إعادة تنشيط الموظف ${employee.user?.fullName ?? 'المستخدم'}؟',
+    builder:
+        (d) => AlertDialog(
+          title: Text(willArchive ? 'أرشفة الموظف' : 'إلغاء الأرشفة'),
+          content: Text(
+            willArchive
+                ? 'هل أنت متأكد من أرشفة الموظف ${employee.user?.fullName ?? 'المستخدم'}؟'
+                : 'هل تريد إعادة تنشيط الموظف ${employee.user?.fullName ?? 'المستخدم'}؟',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(d),
+              child: const Text("إلغاء"),
             ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(d),
-                child: const Text("إلغاء"),
-              ),
-              TextButton(
-                onPressed: () {
-                  context.read<EmployeesBloc>().add(
-                    isArchived
-                        ? RestoreArchiveEmployeeEvent(employee.id.toString())
-                        : ToggleArchiveEmployeeEvent(employee.id.toString()),
-                  );
-                  Navigator.pop(d);
-                },
-                child: Text(
-                  willArchive ? "أرشفة" : "تنشيط",
-                  style: TextStyle(
-                    color: willArchive ? Colors.orange : Colors.green,
-                  ),
+            TextButton(
+              onPressed: () {
+                employeesBloc.add(
+                  isArchived
+                      ? RestoreArchiveEmployeeEvent(employee.id.toString())
+                      : ToggleArchiveEmployeeEvent(employee.id.toString()),
+                );
+                Navigator.pop(d);
+              },
+              child: Text(
+                willArchive ? "أرشفة" : "تنشيط",
+                style: TextStyle(
+                  color: willArchive ? Colors.orange : Colors.green,
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
+        ),
   );
 }

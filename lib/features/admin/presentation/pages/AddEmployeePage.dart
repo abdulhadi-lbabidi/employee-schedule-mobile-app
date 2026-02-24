@@ -4,9 +4,12 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../../domain/usecases/add_employee.dart';
 import '../bloc/employees/employees_bloc.dart';
 import '../bloc/employees/employees_event.dart';
+import '../bloc/employees/employees_state.dart';
 
 class AddEmployeePage extends StatefulWidget {
-  const AddEmployeePage({super.key});
+  final EmployeesBloc employeesBloc;
+
+  const AddEmployeePage({super.key, required this.employeesBloc});
 
   @override
   State<AddEmployeePage> createState() => _AddEmployeePageState();
@@ -53,140 +56,163 @@ class _AddEmployeePageState extends State<AddEmployeePage> {
         ),
         centerTitle: true,
       ),
-      body: SingleChildScrollView(
-        padding: EdgeInsets.all(24.w),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildSectionTitle("المعلومات الأساسية", theme),
-              SizedBox(height: 15.h),
-              _buildTextField(
-                "الاسم الكامل",
-                nameController,
-                Icons.person_add_alt_1_rounded,
-                theme,
-              ),
-              _buildTextField(
-                "البريد الإلكتروني", // 🔹 جديد
-                emailController,
-                Icons.email_outlined,
-                theme,
-                keyboardType: TextInputType.emailAddress,
-              ),
-              Padding(
-                padding: EdgeInsets.only(bottom: 16.h),
-                child: TextFormField(
-                  controller: passwordController,
-                  obscureText: _obscurePassword,
-                  style: TextStyle(
-                    fontSize: 14.sp,
-                    color: theme.textTheme.bodyLarge?.color,
+      body: BlocListener<EmployeesBloc, EmployeesState>(
+        bloc: widget.employeesBloc,
+        listener: (context, state) {
+          state.addEmployeeData.listenerFunction(
+            onSuccess: () {
+              Navigator.pop(context);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    "تمت إضافة الموظف بنجاح ✓",
+                    style: TextStyle(fontSize: 13.sp),
                   ),
-                  decoration: InputDecoration(
-                    labelText: "كلمة المرور",
-                    labelStyle: TextStyle(
-                      fontSize: 12.sp,
-                      color: theme.disabledColor,
+                  backgroundColor: Colors.green,
+                ),
+              );
+            },
+          );
+          // TODO: implement listener
+        },
+        listenWhen:
+            (pre, cur) =>
+                pre.addEmployeeData.status != cur.addEmployeeData.status,
+        child: SingleChildScrollView(
+          padding: EdgeInsets.all(24.w),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildSectionTitle("المعلومات الأساسية", theme),
+                SizedBox(height: 15.h),
+                _buildTextField(
+                  "الاسم الكامل",
+                  nameController,
+                  Icons.person_add_alt_1_rounded,
+                  theme,
+                ),
+                _buildTextField(
+                  "البريد الإلكتروني", // 🔹 جديد
+                  emailController,
+                  Icons.email_outlined,
+                  theme,
+                  keyboardType: TextInputType.emailAddress,
+                ),
+                Padding(
+                  padding: EdgeInsets.only(bottom: 16.h),
+                  child: TextFormField(
+                    controller: passwordController,
+                    obscureText: _obscurePassword,
+                    style: TextStyle(
+                      fontSize: 14.sp,
+                      color: theme.textTheme.bodyLarge?.color,
                     ),
-                    prefixIcon: Icon(
-                      Icons.lock_outline_rounded,
-                      color: theme.primaryColor,
-                      size: 20.sp,
-                    ),
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        _obscurePassword
-                            ? Icons.visibility_off
-                            : Icons.visibility,
-                        size: 18.sp,
+                    decoration: InputDecoration(
+                      labelText: "كلمة المرور",
+                      labelStyle: TextStyle(
+                        fontSize: 12.sp,
                         color: theme.disabledColor,
                       ),
-                      onPressed:
-                          () => setState(
-                            () => _obscurePassword = !_obscurePassword,
-                          ),
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(15.r),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(15.r),
-                      borderSide: BorderSide(
-                        color: theme.dividerColor.withOpacity(0.2),
+                      prefixIcon: Icon(
+                        Icons.lock_outline_rounded,
+                        color: theme.primaryColor,
+                        size: 20.sp,
+                      ),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _obscurePassword
+                              ? Icons.visibility_off
+                              : Icons.visibility,
+                          size: 18.sp,
+                          color: theme.disabledColor,
+                        ),
+                        onPressed:
+                            () => setState(
+                              () => _obscurePassword = !_obscurePassword,
+                            ),
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(15.r),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(15.r),
+                        borderSide: BorderSide(
+                          color: theme.dividerColor.withOpacity(0.2),
+                        ),
+                      ),
+                      filled: true,
+                      fillColor: theme.cardColor,
+                      contentPadding: EdgeInsets.symmetric(
+                        vertical: 12.h,
+                        horizontal: 15.w,
                       ),
                     ),
-                    filled: true,
-                    fillColor: theme.cardColor,
-                    contentPadding: EdgeInsets.symmetric(
-                      vertical: 12.h,
-                      horizontal: 15.w,
-                    ),
+                    validator:
+                        (value) =>
+                            (value == null || value.length < 6)
+                                ? "يجب أن تكون كلمة المرور 6 أحرف على الأقل"
+                                : null,
                   ),
-                  validator:
-                      (value) =>
-                          (value == null || value.length < 6)
-                              ? "يجب أن تكون كلمة المرور 6 أحرف على الأقل"
-                              : null,
                 ),
-              ),
-              _buildTextField(
-                "رقم الهاتف",
-                phoneController,
-                Icons.phone_android_rounded,
-                theme,
-                isPhone: true,
-              ),
-              _buildTextField(
-                "المسمى الوظيفي", // 🔹 جديد
-                positionController,
-                Icons.work_outline,
-                theme,
-              ),
-              _buildTextField(
-                "القسم", // 🔹 جديد
-                departmentController,
-                Icons.business_center_outlined,
-                theme,
-              ),
-              _buildTextField(
-                "الموقع الحالي", // 🔹 جديد
-                currentLocationController,
-                Icons.location_on_outlined,
-                theme,
-              ),
+                _buildTextField(
+                  "رقم الهاتف",
+                  phoneController,
+                  Icons.phone_android_rounded,
+                  theme,
+                  isPhone: true,
+                ),
+                _buildTextField(
+                  "المسمى الوظيفي", // 🔹 جديد
+                  positionController,
+                  Icons.work_outline,
+                  theme,
+                ),
+                _buildTextField(
+                  "القسم", // 🔹 جديد
+                  departmentController,
+                  Icons.business_center_outlined,
+                  theme,
+                ),
+                _buildTextField(
+                  "الموقع الحالي", // 🔹 جديد
+                  currentLocationController,
+                  Icons.location_on_outlined,
+                  theme,
+                ),
 
-              SizedBox(height: 25.h),
-              _buildSectionTitle("الإعدادات المالية (\$)", theme),
-              SizedBox(height: 15.h),
-              Row(
-                children: [
-                  Expanded(
-                    child: _buildTextField(
-                      "راتب الساعة",
-                      hourlyRateController,
-                      Icons.monetization_on_rounded,
-                      theme,
-                      isNumber: true,
+                SizedBox(height: 25.h),
+                _buildSectionTitle("الإعدادات المالية (\$)", theme),
+                SizedBox(height: 15.h),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildTextField(
+                        "راتب الساعة",
+                        hourlyRateController,
+                        Icons.monetization_on_rounded,
+                        theme,
+                        isNumber: true,
+                      ),
                     ),
-                  ),
-                  SizedBox(width: 15.w),
-                  Expanded(
-                    child: _buildTextField(
-                      "راتب الإضافي",
-                      overtimeRateController,
-                      Icons.more_time_rounded,
-                      theme,
-                      isNumber: true,
+                    SizedBox(width: 15.w),
+                    Expanded(
+                      child: _buildTextField(
+                        "راتب الإضافي",
+                        overtimeRateController,
+                        Icons.more_time_rounded,
+                        theme,
+                        isNumber: true,
+                      ),
                     ),
-                  ),
-                ],
-              ),
+                  ],
+                ),
 
-              SizedBox(height: 40.h),
-              _buildSubmitButton(context, theme),
-            ],
+                SizedBox(height: 40.h),
+                _buildSubmitButton(context, theme),
+              ],
+            ),
           ),
         ),
       ),
@@ -221,7 +247,11 @@ class _AddEmployeePageState extends State<AddEmployeePage> {
           fontSize: 14.sp,
           color: theme.textTheme.bodyLarge?.color,
         ),
-        keyboardType: keyboardType == TextInputType.text && (isNumber || isPhone) ? TextInputType.number : keyboardType, // 🔹 استخدام keyboardType الجديد
+        keyboardType:
+            keyboardType == TextInputType.text && (isNumber || isPhone)
+                ? TextInputType.number
+                : keyboardType,
+        // 🔹 استخدام keyboardType الجديد
         decoration: InputDecoration(
           labelText: label,
           labelStyle: TextStyle(fontSize: 12.sp, color: theme.disabledColor),
@@ -280,24 +310,17 @@ class _AddEmployeePageState extends State<AddEmployeePage> {
         phone_number: phoneController.text,
         email: emailController.text,
         password: passwordController.text,
-        position: positionController.text, // جديد
-        department: departmentController.text, //  جديد
-        current_location: currentLocationController.text, //  جديد
+        position: positionController.text,
+        // جديد
+        department: departmentController.text,
+        //  جديد
+        current_location: currentLocationController.text,
+        //  جديد
         hourly_rate: hourlyRate,
         overtime_rate: overtimeRate,
       );
 
-      context.read<EmployeesBloc>().add(AddEmployeeEvent(newEmployee));
-      Navigator.pop(context);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            "تمت إضافة الموظف بنجاح ✓",
-            style: TextStyle(fontSize: 13.sp),
-          ),
-          backgroundColor: Colors.green,
-        ),
-      );
+      widget.employeesBloc.add(AddEmployeeEvent(newEmployee));
     }
   }
 
