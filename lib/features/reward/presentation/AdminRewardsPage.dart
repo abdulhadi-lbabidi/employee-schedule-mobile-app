@@ -135,9 +135,18 @@ class _AdminRewardsPageState extends State<AdminRewardsPage> {
             const Divider(),
             Align(
               alignment: Alignment.centerLeft,
-              child: Text(
-                "بواسطة: ${item.adminName ?? 'غير محدد'}",
-                style: TextStyle(fontSize: 11.sp, color: theme.primaryColor, fontWeight: FontWeight.bold),
+              child: Row(
+                children: [
+                  Text(
+                    " ${item.emplyeeName ?? 'غير محدد'}",
+                    style: TextStyle(fontSize: 11.sp, color: theme.primaryColor, fontWeight: FontWeight.bold),
+                  ),
+                  const Spacer(),
+                  Text(
+                    "بواسطة: ${item.adminName ?? 'غير محدد'}",
+                    style: TextStyle(fontSize: 11.sp, color: theme.primaryColor, fontWeight: FontWeight.bold),
+                  ),
+                ],
               ),
             ),
           ],

@@ -37,6 +37,7 @@ class Rewards {
   final String? reason;
   final DateTime? dateIssued;
   final dynamic adminName;
+  final dynamic emplyeeName;
   final DateTime? createdAt;
 
   Rewards({
@@ -45,6 +46,7 @@ class Rewards {
     this.reason,
     this.dateIssued,
     this.adminName,
+    this.emplyeeName,
     this.createdAt,
   });
 
@@ -54,6 +56,7 @@ class Rewards {
     String? reason,
     DateTime? dateIssued,
     dynamic adminName,
+    dynamic emplyeeName,
     DateTime? createdAt,
   }) =>
       Rewards(
@@ -62,6 +65,7 @@ class Rewards {
         reason: reason ?? this.reason,
         dateIssued: dateIssued ?? this.dateIssued,
         adminName: adminName ?? this.adminName,
+        emplyeeName: adminName ?? this.emplyeeName,
         createdAt: createdAt ?? this.createdAt,
       );
 
@@ -71,6 +75,7 @@ class Rewards {
     reason: json["reason"],
     dateIssued: json["date_issued"] == null ? null : DateTime.parse(json["date_issued"]),
     adminName: json["admin_name"],
+    emplyeeName: json["employee_name"],
     createdAt: json["created_at"] == null ? null : DateTime.parse(json["created_at"]),
   );
 
@@ -80,6 +85,7 @@ class Rewards {
     "reason": reason,
     "date_issued": "${dateIssued!.year.toString().padLeft(4, '0')}-${dateIssued!.month.toString().padLeft(2, '0')}-${dateIssued!.day.toString().padLeft(2, '0')}",
     "admin_name": adminName,
+    "employee_name": emplyeeName,
     "created_at": "${createdAt!.year.toString().padLeft(4, '0')}-${createdAt!.month.toString().padLeft(2, '0')}-${createdAt!.day.toString().padLeft(2, '0')}",
   };
 }
