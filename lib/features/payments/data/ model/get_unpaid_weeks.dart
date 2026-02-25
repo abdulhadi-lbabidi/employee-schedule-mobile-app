@@ -16,13 +16,16 @@ class UnpaidWeeks {
   final int? daysCount;
   final List<int>? ids;
 
+  final String? status;
+
+
   UnpaidWeeks({
     this.weekRange,
     this.totalRegularHours,
     this.totalOvertimeHours,
     this.estimatedAmount,
     this.daysCount,
-    this.ids,
+    this.ids, this.status,
   });
 
   UnpaidWeeks copyWith({
@@ -32,6 +35,7 @@ class UnpaidWeeks {
     double? estimatedAmount,
     int? daysCount,
     List<int>? ids,
+    String? status,
   }) =>
       UnpaidWeeks(
         weekRange: weekRange ?? this.weekRange,
@@ -40,6 +44,7 @@ class UnpaidWeeks {
         estimatedAmount: estimatedAmount ?? this.estimatedAmount,
         daysCount: daysCount ?? this.daysCount,
         ids: ids ?? this.ids,
+        status: status ?? this.status,
       );
 
   factory UnpaidWeeks.fromJson(Map<String, dynamic> json) => UnpaidWeeks(
@@ -49,6 +54,7 @@ class UnpaidWeeks {
     estimatedAmount: json["estimated_amount"]?.toDouble(),
     daysCount: json["days_count"],
     ids: json["ids"] == null ? [] : List<int>.from(json["ids"]!.map((x) => x)),
+    status: json["payment_status"],
   );
 
   Map<String, dynamic> toJson() => {
@@ -58,5 +64,6 @@ class UnpaidWeeks {
     "estimated_amount": estimatedAmount,
     "days_count": daysCount,
     "ids": ids == null ? [] : List<dynamic>.from(ids!.map((x) => x)),
+    "payment_status": status,
   };
 }

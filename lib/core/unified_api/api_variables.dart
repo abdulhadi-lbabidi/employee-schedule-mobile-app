@@ -53,7 +53,7 @@ class ApiVariables {
 
   static Uri employeeDetails(String id) => _mainUri('/api/employees/$id');
   static Uri employeeDetailsHours(String id) => _mainUri('/api/employees/$id/hours-by-workshop');
-  static Uri employeeDelete(String id) => _mainUri('/api/employees/$id');
+  static Uri employeeDelete(String id) => _mainUri('/api/employees/$id/force-delete');
 
   static Uri archiveGetEmployees() => _mainUri('/api/employees-archived');
 
@@ -135,7 +135,7 @@ class ApiVariables {
       '/api/rewards');
 
   static Uri employeeRewards(int empId) =>
-      _mainUri('/api/rewards/$empId');
+      _mainUri('/api/rewards/employee/$empId');
 
   static Uri issueReward() => _mainUri(
       '/api/rewards');

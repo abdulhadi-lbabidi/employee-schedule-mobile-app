@@ -42,6 +42,8 @@ class _LoginPageState extends State<LoginPage> {
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Scaffold(
+
+       backgroundColor: Colors.white12,
         body: Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
@@ -49,7 +51,7 @@ class _LoginPageState extends State<LoginPage> {
               end: Alignment.bottomCenter,
               colors: isDark
                   ? [const Color(0xFF121212), const Color(0xFF1E1E1E)]
-                  : [theme.primaryColor, theme.primaryColor.withOpacity(0.8)],
+                  : [const Color(0xFF121212), const Color(0xE0646363)],
             ),
           ),
           child: SafeArea(

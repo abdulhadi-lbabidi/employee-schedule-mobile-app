@@ -54,16 +54,14 @@ class _EmployeeDetailsPageState extends State<EmployeeDetailsPagePayments> {
                       children: [
                         Text("الساعات الاساسية: ${week.totalRegularHours}"),
                         Text("الساعات الاضافية : ${week.totalOvertimeHours}"),
-                        SizedBox(height: 2,),
-                        Text("المبلغ المقدر: ${week.estimatedAmount}\$"),
-
-
-
+                        const SizedBox(height: 2),
+                        Text(
+                          "المبلغ المستحق المتبقي: ${week.estimatedAmount}\$",
+                        ),
                       ],
                     ),
                     trailing: ElevatedButton(
                       onPressed: () {
-                        // هنا نفتح Dialog لعملية الدفع باستخدام PostPayRecordsUseCase
                         _showPaymentDialog(context, week);
                       },
                       child: const Text("دفع"),
@@ -99,7 +97,6 @@ class _EmployeeDetailsPageState extends State<EmployeeDetailsPagePayments> {
                   ),
                 );
                 Navigator.pop(dialogContext); // إغلاق الـ Dialog
-                // تحديث القائمة بعد الدفع
                 context.read<UnpaidWeeksBloc>().add(
                   LoadUnpaidWeeks(widget.employeeId),
                 );
@@ -119,12 +116,19 @@ class _EmployeeDetailsPageState extends State<EmployeeDetailsPagePayments> {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text("سيتم دفع مستحقات الفترة: ${week.weekRange}"),
+                  const SizedBox(height: 10),
+                  Text(
+                    "الحد الأقصى المسموح به: ${week.estimatedAmount}\$",
+                    style: const TextStyle(color: Colors.grey, fontSize: 12),
+                  ),
                   TextField(
                     controller: amountController,
                     decoration: const InputDecoration(
                       labelText: "المبلغ المدفوع",
                     ),
-                    keyboardType: TextInputType.number,
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
                   ),
                 ],
               ),
@@ -135,54 +139,68 @@ class _EmployeeDetailsPageState extends State<EmployeeDetailsPagePayments> {
                 ),
                 BlocBuilder<PaymentActionBloc, PaymentActionState>(
                   builder: (context, state) {
-                    if (state is PaymentActionLoading)
+                    if (state is PaymentActionLoading) {
                       return const CircularProgressIndicator();
-                    return // ... داخل الـ AlertDialog في قسم actions
-                      ElevatedButton(
-                        onPressed: () {
-                          final double totalEstimated = week.estimatedAmount ?? 0;
-                          final double amountEntered = double.tryParse(amountController.text) ?? 0;
+                    }
+                    return ElevatedButton(
+                      onPressed: () {
+                        final double totalEstimated = week.estimatedAmount ?? 0;
+                        final double amountEntered =
+                            double.tryParse(amountController.text) ?? 0;
 
-                          if (amountEntered <= 0) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text("يرجى إدخال مبلغ صحيح")),
-                            );
-                            return;
-                          }
+                        if (amountEntered <= 0) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text("يرجى إدخال مبلغ صحيح"),
+                            ),
+                          );
+                          return;
+                        }
 
-                          // المنطق البرمجي لاختيار العملية المناسبة
-                          if (amountEntered < totalEstimated) {
-                            // 1. حالة المبلغ الجزئي (تقسيط): نستخدم Update
-                            // ملاحظة: تأكد أن الـ API يدعم التعديل دون وجود معرف دفع مسبق أو قم بتمرير المعرف المناسب
-                            context.read<PaymentActionBloc>().add(
-                              ExecuteUpdatePayment(
-                                widget.employeeId, // أو المعرف المطلوب للـ API
-                                UpdatePaymentParams(
-                                  paymentId: widget.employeeId,
-                                 // totalAmount: totalEstimated,
-                                  attendanceIds: week.ids ?? [],
-                                  amountPaid: amountEntered,
-                                  paymentDate:DateFormat('yyyy-MM-dd').format(DateTime.now()),
-                                ),
+                        // 🔹 منع الدفع بمبلغ أكبر من المستحق
+                        if (amountEntered > totalEstimated + 0.01) {
+                          // سماحية بسيطة للفواصل العشرية
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                "المبلغ المدفوع لا يمكن أن يتجاوز المستحق ($totalEstimated\$)",
                               ),
-                            );
-                          } else {
-                            // 2. حالة المبلغ الكامل (أو أكثر): نستخدم Post
-                            context.read<PaymentActionBloc>().add(
-                              ExecutePostPayment(
-                                PostPayRecordsParams(
-                                  employeeId: int.parse(widget.employeeId),
-                                  attendanceIds: week.ids ?? [],
-                                 // totalAmount: totalEstimated,
-                                  amountPaid: amountEntered,
-                                  paymentDate:DateFormat('yyyy-MM-dd').format(DateTime.now()),
-                                ),
+                            ),
+                          );
+                          return;
+                        }
+
+                        if (week.status == 'partially_paid') {
+                          context.read<PaymentActionBloc>().add(
+                            ExecuteUpdatePayment(
+                              widget.employeeId,
+                              UpdatePaymentParams(
+                                paymentId: widget.employeeId,
+                                amountPaid: amountEntered,
+                                paymentDate: DateFormat(
+                                  'yyyy-MM-dd',
+                                ).format(DateTime.now()),
+
                               ),
-                            );
-                          }
-                        },
-                        child: const Text("تأكيد"),
-                      );
+                            ),
+                          );
+                        } else {
+                          context.read<PaymentActionBloc>().add(
+                            ExecutePostPayment(
+                              PostPayRecordsParams(
+                                employeeId: int.parse(widget.employeeId),
+                                attendanceIds: week.ids ?? [],
+                                amountPaid: amountEntered,
+                                paymentDate: DateFormat(
+                                  'yyyy-MM-dd',
+                                ).format(DateTime.now()),
+                              ),
+                            ),
+                          );
+                        }
+                      },
+                      child: const Text("تأكيد"),
+                    );
                   },
                 ),
               ],

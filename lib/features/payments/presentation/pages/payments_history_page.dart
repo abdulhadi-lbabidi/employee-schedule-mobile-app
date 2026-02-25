@@ -1,4 +1,5 @@
-import 'package:flutter/material.dart';import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../bloc/All-Payments/all_payments_bloc.dart';
@@ -129,7 +130,9 @@ class _PaymentsHistoryPageState extends State<PaymentsHistoryPage> {
   }
 
   Widget _buildPaymentCard(dynamic payment, ThemeData theme) {
-    bool isPaid = payment.status.toString().contains("PAID");
+    // 🔹 تعديل منطق التحقق: نعتبرها مكتملة إذا كان النص يحتوي على PAID أو إذا كان المتبقي 0
+    final double remaining = double.tryParse(payment.remainingAmount.toString()) ?? 0.0;
+    bool isPaid = payment.status.toString().toUpperCase().contains("PAID") || remaining <= 0;
 
     return Card(
       margin: EdgeInsets.only(bottom: 12.h),
@@ -152,7 +155,7 @@ class _PaymentsHistoryPageState extends State<PaymentsHistoryPage> {
                     borderRadius: BorderRadius.circular(10.r),
                   ),
                   child: Text(
-                    isPaid ? "مكتمل" : "معلق",
+                    isPaid ? "مكتملة" : "غير مكتملة",
                     style: TextStyle(color: isPaid ? Colors.green : Colors.orange, fontSize: 12.sp),
                   ),
                 ),
@@ -161,7 +164,7 @@ class _PaymentsHistoryPageState extends State<PaymentsHistoryPage> {
             const Divider(),
             _rowInfo("إجمالي المبلغ:", "${payment.totalAmount}\$"),
             _rowInfo("المبلغ المدفوع:", "${payment.amountPaid}\$", color: Colors.green),
-            _rowInfo("المتبقي:", "${payment.remainingAmount} \$", color: Colors.red),
+            _rowInfo("المتبقي:", "${payment.remainingAmount} \$", color: isPaid ? Colors.green : Colors.red), // تغيير اللون للأخضر إذا كان 0
             SizedBox(height: 10.h),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
