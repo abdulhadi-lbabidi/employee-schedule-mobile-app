@@ -45,7 +45,8 @@ class LoanBloc extends Bloc<LoanEvent, LoanState> {
   FutureOr<void> _getAllLoan(
       GetAllLoansEvent event,
       Emitter<LoanState> emit,
-      ) async {
+      )
+  async {
     emit(
       state.copyWith(
         getAllLoansData: state.getAllLoansData.setLoading(),

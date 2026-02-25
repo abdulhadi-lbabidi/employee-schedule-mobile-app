@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:untitled8/features/admin/data/models/employee%20model/employee_model.dart';
 import '../../../../core/di/injection.dart';
+import '../../../../core/toast.dart';
 import '../../../../core/utils/app_strings.dart';
 import '../../../Notification/domain/usecases/send_notification_use_case.dart';
 import '../../../Notification/presentation/bloc/notification_bloc.dart';
@@ -51,12 +52,15 @@ class _EmployeeDetailsPageState extends State<EmployeeDetailsPage> {
 
     return MultiBlocProvider(
       providers: [
-        BlocProvider.value(
-          value: sl<EmployeesBloc>(),
-        ),
+        BlocProvider.value(value: sl<EmployeesBloc>()),
         BlocProvider(
-          create: (_) => sl<EmployeeDetailsBloc>()
-            ..add(LoadEmployeeDetailsHoursEvent(widget.employeeModel.id.toString())),
+          create:
+              (_) =>
+                  sl<EmployeeDetailsBloc>()..add(
+                    LoadEmployeeDetailsHoursEvent(
+                      widget.employeeModel.id.toString(),
+                    ),
+                  ),
         ),
       ],
       child: Scaffold(
@@ -73,7 +77,11 @@ class _EmployeeDetailsPageState extends State<EmployeeDetailsPage> {
       elevation: 0,
       title: Text(
         AppStrings.employeeDetailsTitle,
-        style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold, color: theme.primaryColor),
+        style: TextStyle(
+          fontSize: 18.sp,
+          fontWeight: FontWeight.bold,
+          color: theme.primaryColor,
+        ),
       ),
       centerTitle: true,
       actions: [
@@ -91,77 +99,84 @@ class _EmployeeDetailsPageState extends State<EmployeeDetailsPage> {
         // ),
         IconButton(
           icon: const Icon(Icons.edit_note_rounded, color: Colors.blueAccent),
-          onPressed: () => Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => EditEmployeePage(employee: widget.employeeModel)),
-          ),
+          onPressed:
+              () => Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder:
+                      (_) => EditEmployeePage(employee: widget.employeeModel),
+                ),
+              ),
         ),
         IconButton(
           icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
-          onPressed: () => _showDeleteConfirmation(context, widget.employeeModel.id!.toString()),
+          onPressed:
+              () => _showDeleteConfirmation(
+                context,
+                widget.employeeModel.id!.toString(),
+              ),
         ),
       ],
     );
   }
 
   Widget _buildBody(BuildContext context, ThemeData theme) {
-    return BlocListener<EmployeesBloc, EmployeesState>(
-      listener: (context, state) {
-        state.setEmployeeArchivedData.listenerFunction(
-          onSuccess: () {
-            // تحديث القوائم والعودة للخلف
-            context.read<EmployeesBloc>().add(GetAllEmployeeEvent());
-            context.read<EmployeesBloc>().add(GetAllEmployeeArchivedEvent());
-            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تمت أرشفة الموظف بنجاح'), backgroundColor: Colors.green));
-            Navigator.of(context).pop();
-          },
-          onFailed: () {
-            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(state.setEmployeeArchivedData.errorMessage), backgroundColor: Colors.red));
-          },
-        );
-
-        state.restoreEmployeeArchivedData.listenerFunction(
-          onSuccess: () {
-            // تحديث القوائم والعودة للخلف
-            context.read<EmployeesBloc>().add(GetAllEmployeeEvent());
-            context.read<EmployeesBloc>().add(GetAllEmployeeArchivedEvent());
-            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('تمت استعادة الموظف بنجاح'), backgroundColor: Colors.green));
-            Navigator.of(context).pop();
-          },
-          onFailed: () {
-            ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(state.restoreEmployeeArchivedData.errorMessage), backgroundColor: Colors.red));
-          },
-        );
+    return BlocConsumer<EmployeeDetailsBloc, EmployeeDetailsState>(
+      builder: (context, state) {
+        if (state is EmployeeDetailsLoading) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (state is EmployeeDetailsHoursLoaded) {
+          return SingleChildScrollView(
+            padding: EdgeInsets.all(16.w),
+            child: Column(
+              children: [
+                ValueListenableBuilder<bool>(
+                  valueListenable: isArchivedNotifier,
+                  builder:
+                      (context, isArchived, _) =>
+                          isArchived
+                              ? _buildArchivedBanner(theme)
+                              : const SizedBox.shrink(),
+                ),
+                _EmployeeHeader(widget.employeeModel, theme),
+                SizedBox(height: 24.h),
+                TotalsWidget(theme: theme, totals: state.employee.grandTotals!),
+                SizedBox(height: 30.h),
+                EmployeeBuildDateSelector(
+                  theme: theme,
+                  selectedWeek: selectedWeek,
+                  weeks: state.employee.weeks!,
+                ),
+                SizedBox(height: 30.h),
+                WeekDetailsWidget(
+                  employee: widget.employeeModel,
+                  theme: theme,
+                  selectedWeek: selectedWeek,
+                ),
+                SizedBox(height: 40.h),
+              ],
+            ),
+          );
+        }
+        return const Center(child: Text("لا توجد بيانات"));
       },
-      child: BlocBuilder<EmployeeDetailsBloc, EmployeeDetailsState>(
-        builder: (context, state) {
-          if (state is EmployeeDetailsLoading) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (state is EmployeeDetailsHoursLoaded) {
-            return SingleChildScrollView(
-              padding: EdgeInsets.all(16.w),
-              child: Column(
-                children: [
-                  ValueListenableBuilder<bool>(
-                    valueListenable: isArchivedNotifier,
-                    builder: (context, isArchived, _) => isArchived ? _buildArchivedBanner(theme) : const SizedBox.shrink(),
-                  ),
-                  _EmployeeHeader(widget.employeeModel, theme),
-                  SizedBox(height: 24.h),
-                  TotalsWidget(theme: theme, totals: state.employee.grandTotals!),
-                  SizedBox(height: 30.h),
-                  EmployeeBuildDateSelector(theme: theme, selectedWeek: selectedWeek, weeks: state.employee.weeks!),
-                  SizedBox(height: 30.h),
-                  WeekDetailsWidget(employee: widget.employeeModel, theme: theme, selectedWeek: selectedWeek),
-                   SizedBox(height: 40.h),
-                ],
-              ),
-            );
-          }
-          return const Center(child: Text("لا توجد بيانات"));
-        },
-      ),
+      listener: (context, state) {
+        if (state is EmployeeDeleted) {
+          Navigator.pop(context);
+        }
+        if (state is EmployeeDetailsError) {
+          Toaster.showText(text: state.message);
+        }
+        //
+        // if (state is EmployeeDetailsLoading) {
+        //   Toaster.showLoading();
+        // }
+      },
+      listenWhen:
+          (pre, cur) =>
+              (pre is EmployeeDetailsLoading || cur is EmployeeDetailsError)
+              || (pre is EmployeeDetailsLoading || cur is EmployeeDeleted)
     );
   }
 
@@ -178,7 +193,11 @@ class _EmployeeDetailsPageState extends State<EmployeeDetailsPage> {
       child: Center(
         child: Text(
           "هذا الموظف مؤرشف حالياً",
-          style: TextStyle(color: Colors.orange.shade900, fontWeight: FontWeight.bold, fontSize: 13.sp),
+          style: TextStyle(
+            color: Colors.orange.shade900,
+            fontWeight: FontWeight.bold,
+            fontSize: 13.sp,
+          ),
         ),
       ),
     );
@@ -187,43 +206,68 @@ class _EmployeeDetailsPageState extends State<EmployeeDetailsPage> {
   void _showDeleteConfirmation(BuildContext context, String id) {
     showDialog(
       context: context,
-      builder: (d) => AlertDialog(
-        title: const Text('حذف الموظف'),
-        content: const Text('هل أنت متأكد من حذف الموظف نهائياً؟'),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(d), child: const Text("إلغاء")),
-          TextButton(
-            onPressed: () {
-              context.read<EmployeeDetailsBloc>().add(DeleteEmployeeEvent(id));
-              Navigator.pop(context);
-            },
-            child: const Text("حذف", style: TextStyle(color: Colors.red)),
+      builder:
+          (d) => AlertDialog(
+            title: const Text('حذف الموظف'),
+            content: const Text('هل أنت متأكد من حذف الموظف نهائياً؟'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(d),
+                child: const Text("إلغاء"),
+              ),
+              TextButton(
+                onPressed: () {
+                  context.read<EmployeeDetailsBloc>().add(
+                    DeleteEmployeeEvent(id),
+                  );
+                  Navigator.pop(context);
+                },
+                child: const Text("حذف", style: TextStyle(color: Colors.red)),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 
-  void _showArchiveConfirmation(BuildContext context, EmployeeModel employee, bool isArchived) {
+  void _showArchiveConfirmation(
+    BuildContext context,
+    EmployeeModel employee,
+    bool isArchived,
+  ) {
     final bool willArchive = !isArchived;
     showDialog(
       context: context,
-      builder: (d) => AlertDialog(
-        title: Text(willArchive ? 'أرشفة الموظف' : 'إلغاء الأرشفة'),
-        content: Text(willArchive ? 'هل أنت متأكد من أرشفة الموظف ${employee.user?.fullName ?? 'المستخدم'}؟' : 'هل تريد إعادة تنشيط الموظف ${employee.user?.fullName ?? 'المستخدم'}؟'),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(d), child: const Text("إلغاء")),
-          TextButton(
-            onPressed: () {
-               context.read<EmployeesBloc>().add(
-                 isArchived ? RestoreArchiveEmployeeEvent(employee.id.toString()) : ToggleArchiveEmployeeEvent(employee.id.toString()),
-               );
-               Navigator.pop(d);
-            },
-            child: Text(willArchive ? "أرشفة" : "تنشيط", style: TextStyle(color: willArchive ? Colors.orange : Colors.green)),
+      builder:
+          (d) => AlertDialog(
+            title: Text(willArchive ? 'أرشفة الموظف' : 'إلغاء الأرشفة'),
+            content: Text(
+              willArchive
+                  ? 'هل أنت متأكد من أرشفة الموظف ${employee.user?.fullName ?? 'المستخدم'}؟'
+                  : 'هل تريد إعادة تنشيط الموظف ${employee.user?.fullName ?? 'المستخدم'}؟',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(d),
+                child: const Text("إلغاء"),
+              ),
+              TextButton(
+                onPressed: () {
+                  context.read<EmployeesBloc>().add(
+                    isArchived
+                        ? RestoreArchiveEmployeeEvent(employee.id.toString())
+                        : ToggleArchiveEmployeeEvent(employee.id.toString()),
+                  );
+                  Navigator.pop(d);
+                },
+                child: Text(
+                  willArchive ? "أرشفة" : "تنشيط",
+                  style: TextStyle(
+                    color: willArchive ? Colors.orange : Colors.green,
+                  ),
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 }
@@ -460,11 +504,10 @@ class _WeeklyWorkSection extends StatelessWidget {
       );
       context.read<NotificationBloc>().add(
         SendNotificationsEvent(
-
           params: SendNotificationParams(
             body: "تم صرف ${amount.toInt()} \$ للأسبوع $weekNumber",
             title: "دفع مالي",
-            targetEmployeeId:emp.user!.id
+            targetEmployeeId: emp.user!.id,
           ),
         ),
       );

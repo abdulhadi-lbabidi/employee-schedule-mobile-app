@@ -114,4 +114,61 @@ class AppVariables {
       _pref.setString(PrefsKeys.userInfo, jsonEncode(value.toJson()));
     }
   }
+
+/////
+  static List<AttendanceModel>? get unSyncAttendanceList {
+    final jsonString =
+    _pref.getString(PrefsKeys.unSyncAttendanceList);
+
+    if (jsonString == null) return [];
+
+    final List decoded = jsonDecode(jsonString);
+
+    return decoded
+        .map((e) => AttendanceModel.fromJson(e))
+        .toList();
+  }
+
+  static set unSyncAttendanceList(
+      List<AttendanceModel>? value)
+  {
+    if (value == null || value.isEmpty) {
+      _pref.remove(PrefsKeys.unSyncAttendanceList);
+    } else {
+      final encoded =
+      jsonEncode(value.map((e) => e.toJson()).toList());
+      _pref.setString(
+          PrefsKeys.unSyncAttendanceList, encoded);
+    }
+  }
+  static void addUnSyncAttendance(
+      AttendanceModel attendance)
+  {
+    final list = unSyncAttendanceList ?? [];
+
+    final index =
+    list.indexWhere((e) => e.id == attendance.id);
+
+    if (index != -1) {
+      list[index] = attendance; // استبدال
+    } else {
+      list.add(attendance); // إضافة
+    }
+
+    unSyncAttendanceList = list;
+  }
+
+  static void replaceUnSyncAttendance(
+      AttendanceModel attendance)
+  {
+    final list = unSyncAttendanceList ?? [];
+
+    final index =
+    list.indexWhere((e) => e.id == attendance.id);
+
+    if (index != -1) {
+      list[index] = attendance;
+      unSyncAttendanceList = list;
+    }
+  }
 }

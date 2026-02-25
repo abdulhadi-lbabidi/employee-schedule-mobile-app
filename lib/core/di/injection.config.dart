@@ -140,6 +140,8 @@ import '../../features/loan/domain/usecases/reject_loan_usecase.dart' as _i579;
 import '../../features/loan/domain/usecases/update_loan_status_usecase.dart'
     as _i226;
 import '../../features/loan/presentation/bloc/loan_bloc.dart' as _i408;
+import '../../features/Notification/data/datasources/notification_locale_data_sources.dart'
+    as _i914;
 import '../../features/Notification/data/datasources/notification_remote_data_source.dart'
     as _i306;
 import '../../features/Notification/data/repositories/notification_repository_impl.dart'
@@ -282,6 +284,9 @@ _i174.GetIt $initGetIt(
   gh.lazySingleton<_i241.AttendanceLocaleDataSource>(() =>
       _i241.AttendanceLocaleDataSource(
           sharedPreferences: gh<_i460.SharedPreferences>()));
+  gh.lazySingleton<_i914.NotificationLocaleDataSources>(() =>
+      _i914.NotificationLocaleDataSources(
+          sharedPreferences: gh<_i460.SharedPreferences>()));
   gh.lazySingleton<_i921.EmployeeSummaryRemoteDataSource>(
       () => _i921.EmployeeSummaryRemoteDataSource(gh<_i893.BaseApi>()));
   gh.lazySingleton<_i138.UpdatePasswordRemoteDataSource>(
@@ -345,6 +350,11 @@ _i174.GetIt $initGetIt(
       () => _i679.IssueRewardUseCase(gh<_i180.RewardRepository>()));
   gh.lazySingleton<_i1050.GetEmployeeRewardsUseCase>(
       () => _i1050.GetEmployeeRewardsUseCase(gh<_i180.RewardRepository>()));
+  gh.lazySingleton<_i697.NotificationRepository>(
+      () => _i558.NotificationRepositoryImpl(
+            remoteDataSource: gh<_i306.NotificationRemoteDataSourceImpl>(),
+            localeDataSources: gh<_i914.NotificationLocaleDataSources>(),
+          ));
   gh.lazySingleton<_i538.GetEmployeeAttendanceUseCase>(() =>
       _i538.GetEmployeeAttendanceUseCase(
           authRepositories: gh<_i240.AttendanceRepositories>()));
@@ -354,11 +364,6 @@ _i174.GetIt $initGetIt(
       ));
   gh.lazySingleton<_i88.PaymenysRepository>(() =>
       _i565.PaymentsRepositoryImpl(remote: gh<_i65.PaymentsDataSourcesImpl>()));
-  gh.lazySingleton<_i697.NotificationRepository>(
-      () => _i558.NotificationRepositoryImpl(
-            hiveService: gh<_i351.HiveService>(),
-            remoteDataSource: gh<_i306.NotificationRemoteDataSourceImpl>(),
-          ));
   gh.lazySingleton<_i0.SyncAttendanceUseCase>(() => _i0.SyncAttendanceUseCase(
       repositories: gh<_i240.AttendanceRepositories>()));
   gh.factory<_i467.RewardEmployeeBloc>(() => _i467.RewardEmployeeBloc(

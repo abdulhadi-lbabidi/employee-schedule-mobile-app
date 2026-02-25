@@ -1,10 +1,8 @@
-import 'dart:math';
-
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:untitled8/features/Notification/domain/usecases/check_in_use_case.dart';
 import 'package:untitled8/features/Notification/domain/usecases/check_out_use_case.dart';
-
-import '../../domain/repositories/notification_repository.dart';
+import '../../../../core/di/injection.dart';
+import '../../data/datasources/notification_locale_data_sources.dart';
 import '../../domain/usecases/get_notifications.dart';
 import '../../domain/usecases/send_notification_use_case.dart';
 import 'notification_event.dart';
@@ -131,13 +129,16 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
           ),
         ),
       ),
-      (r) => emit(
-        state.copyWith(
-          getNotificationsData: state.getNotificationsData.setSuccess(
-            data: r.data,
+      (r) {
+        sl<NotificationLocaleDataSources>().setLocaleNotifications(r.data??[]);
+        emit(
+          state.copyWith(
+            getNotificationsData: state.getNotificationsData.setSuccess(
+              data: r.data,
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 

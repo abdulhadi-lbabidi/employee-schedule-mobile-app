@@ -23,7 +23,7 @@ class ButtonOnIn extends StatefulWidget {
 }
 
 class _ButtonOnInState extends State<ButtonOnIn> {
-  late final AttendanceModel attendanceModel;
+  late  AttendanceModel attendanceModel;
 
   @override
   Widget build(BuildContext context) {

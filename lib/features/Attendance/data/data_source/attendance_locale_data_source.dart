@@ -53,7 +53,8 @@ class AttendanceLocaleDataSource {
   /// ================== SET ==================
   Future<void> setLocaleAttendance(
       List<GetAttendanceResponse> responses,
-      ) async {
+      )
+  async {
     final jsonString = json.encode(
       responses.map((e) => e.toJson()).toList(),
     );
@@ -151,3 +152,4 @@ class AttendanceLocaleDataSource {
   }
 
 }
+

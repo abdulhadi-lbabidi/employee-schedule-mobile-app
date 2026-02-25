@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 import 'package:untitled8/features/admin/domain/usecases/get_employee_details_hours_use_case.dart';
+import '../../../../../core/toast.dart';
 import '../../../../admin/data/repositories/audit_log_repository.dart';
 import '../../../data/datasources/admin_remote_data_source_impl.dart';
 import '../../../data/models/employee model/employee_model.dart';
@@ -120,7 +121,8 @@ class EmployeeDetailsBloc
   Future<void> _onConfirmPayment(
     ConfirmPaymentEvent event,
     Emitter<EmployeeDetailsState> emit,
-  ) async {
+  )
+  async {
     try {
       final currentEmp = event.employee;
       emit(HourlyRateUpdating(currentEmp));
@@ -150,7 +152,8 @@ class EmployeeDetailsBloc
   Future<void> _onUpdateFullEmployee(
     UpdateEmployeeFullEvent event,
     Emitter<EmployeeDetailsState> emit,
-  ) async {
+  )
+  async {
     if (_employee == null) return;
 
     emit(EmployeeDetailsLoading());
@@ -205,12 +208,18 @@ class EmployeeDetailsBloc
   Future<void> _onDeleteEmployee(
     DeleteEmployeeEvent event,
     Emitter<EmployeeDetailsState> emit,
-  ) async {
+  )
+  async {
     emit(EmployeeDetailsLoading());
+    Toaster.showLoading();
     try {
+    print('deleteeeeeee');
+    print('deleteeeeeee');
       await deleteEmployeeUseCase(event.employeeId);
+    Toaster.closeAllLoading();
 
       if (_employee != null) {
+
         await auditLogRepository.logAction(
           actionType: "حذف موظف",
           targetName: _employee!.user!.fullName!,
@@ -220,6 +229,8 @@ class EmployeeDetailsBloc
 
       emit(EmployeeDeleted());
     } catch (e) {
+      Toaster.closeAllLoading();
+
       debugPrint('Error deleting employee: $e');
       emit(EmployeeDetailsError('فشل حذف الموظف: ${e.toString()}'));
     }
@@ -228,7 +239,8 @@ class EmployeeDetailsBloc
   Future<void> _onUpdateHourlyRate(
     UpdateHourlyRateEvent event,
     Emitter<EmployeeDetailsState> emit,
-  ) async {
+  )
+  async {
     if (_employee == null) return;
     try {
       emit(HourlyRateUpdating(_employee!));
@@ -285,7 +297,8 @@ class EmployeeDetailsBloc
   String _buildUpdateDetails(
     EmployeeModel oldEmployee,
     UpdateEmployeeFullEvent event,
-  ) {
+  )
+  {
     final changes = <String>[];
 
     if (oldEmployee.user!.fullName != event.name) {

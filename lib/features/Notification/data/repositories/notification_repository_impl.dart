@@ -6,6 +6,7 @@ import '../../../../core/hive_service.dart';
 
 // import '../../domain/entities/notification_entity.dart'; // No longer needed directly for getNotifications return type
 import '../../domain/repositories/notification_repository.dart';
+import '../datasources/notification_locale_data_sources.dart';
 import '../datasources/notification_remote_data_source.dart';
 import '../model/get_all_notifications_response.dart';
 import '../model/notification_model.dart';
@@ -15,14 +16,15 @@ import 'package:injectable/injectable.dart';
 class NotificationRepositoryImpl
     with HandlingException
     implements NotificationRepository {
-  final HiveService hiveService;
-  final NotificationRemoteDataSourceImpl
-  remoteDataSource; // Assuming this is correct
 
-  NotificationRepositoryImpl({
-    required this.hiveService,
-    required this.remoteDataSource,
-  });
+  final NotificationRemoteDataSourceImpl
+  _remoteDataSource;
+  final NotificationLocaleDataSources
+  _localeDataSources;
+
+  NotificationRepositoryImpl({required NotificationRemoteDataSourceImpl remoteDataSource, required NotificationLocaleDataSources localeDataSources}) : _remoteDataSource = remoteDataSource, _localeDataSources = localeDataSources; // Assuming this is correct
+
+
 
   // Future<Box<NotificationModel>> get _box async =>
   //     await hiveService.notificationBox;
@@ -31,16 +33,16 @@ class NotificationRepositoryImpl
   @override
   DataResponse<void> sendNotification(BodyMap params) async =>
       wrapHandlingException(
-        tryCall: () => remoteDataSource.sendNotification(params),
+        tryCall: () => _remoteDataSource.sendNotification(params),
       );
 
   @override
   DataResponse<void> checkInWorkshop(BodyMap params) async =>
-      wrapHandlingException(tryCall: () => remoteDataSource.checkIn(params));
+      wrapHandlingException(tryCall: () => _remoteDataSource.checkIn(params));
 
   @override
   DataResponse<void> checkOutWorkshop(BodyMap params) async =>
-      wrapHandlingException(tryCall: () => remoteDataSource.checkOut(params));
+      wrapHandlingException(tryCall: () => _remoteDataSource.checkOut(params));
 
   /// 🔹 جلب Box الإشعارات من HiveService
 
@@ -48,7 +50,8 @@ class NotificationRepositoryImpl
   @override
   DataResponse<GetAllNotificationsResponse> getNotifications()async =>
       wrapHandlingException(
-        tryCall: () => remoteDataSource.getAllNotifications(),
+        tryCall: () => _remoteDataSource.getAllNotifications(),
+        otherCall: ()=>_localeDataSources.getNotifications()
       );
   // /// 🔹 إضافة إشعار محلي في الـ Hive
   // @override

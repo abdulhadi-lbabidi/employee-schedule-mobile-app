@@ -11,10 +11,8 @@ class LocationChecker {
     required BuildContext context,
     required WorkshopModel workshop,
     VoidCallback? onWithinRange,
-  })
-  async {
-
-    if (workshop.location ==null) {
+  }) async {
+    if (workshop.location == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("ورشة العمل لا تحتوي على موقع")),
       );
@@ -26,8 +24,7 @@ class LocationChecker {
       Toaster.showLoading();
 
       final LocationData? userLocation =
-      await LocationServiceMain.getUserLocation()
-          .timeout(
+      await LocationServiceMain.getUserLocation().timeout(
         const Duration(seconds: 30),
         onTimeout: () {
           throw TimeoutException("انتهت مهلة جلب الموقع");
@@ -37,6 +34,7 @@ class LocationChecker {
       if (userLocation == null ||
           userLocation.latitude == null ||
           userLocation.longitude == null) {
+        Toaster.closeAllLoading(); // ✨ إغلاق اللودينغ عند الخطأ
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text("تعذر الحصول على موقعك."),
@@ -47,16 +45,17 @@ class LocationChecker {
       }
 
       final double distance = Geolocator.distanceBetween(
-        // userLocation.latitude!,
-        // userLocation.longitude!,
-         18.252900,
-         17.252100,
+        userLocation.latitude!,
+        userLocation.longitude!,
+        // 18.252900,
+        // 17.252100,
         workshop.latitude!,
         workshop.longitude!,
       );
 
       // ❌ خارج المجال
       if (distance > workshop.radiusInMeters!) {
+        Toaster.closeAllLoading(); // ✨ إغلاق اللودينغ عند الخطأ
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
@@ -68,12 +67,12 @@ class LocationChecker {
         return;
       }
 
-      // ✅ داخل المجال
+      // ✅ داخل المجال – لا يتم إغلاق اللودينغ هنا
       if (onWithinRange != null) {
         onWithinRange();
       }
-
     } on TimeoutException {
+      Toaster.closeAllLoading(); // ✨ إغلاق اللودينغ عند Timeout
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text("انتهت مهلة تحديد الموقع. حاول مرة أخرى."),
@@ -81,15 +80,13 @@ class LocationChecker {
         ),
       );
     } catch (e) {
+      Toaster.closeAllLoading(); // ✨ إغلاق اللودينغ عند أي خطأ
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text("حدث خطأ: $e"),
           backgroundColor: Colors.orange,
         ),
       );
-    } finally {
-      // ✅ يغلق دائماً سواء نجح أو فشل أو Timeout
-      Toaster.closeAllLoading();
     }
   }
 }
