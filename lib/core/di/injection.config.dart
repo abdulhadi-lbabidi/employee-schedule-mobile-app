@@ -187,6 +187,14 @@ import '../../features/payments/presentation/bloc/PaymentAction/payment_action_b
     as _i427;
 import '../../features/payments/presentation/bloc/UnpaidWeeks/unpaid_weeks_bloc.dart'
     as _i84;
+import '../../features/penalty/data/datasources/penalty_remote_data_source.dart'
+    as _i572;
+import '../../features/penalty/data/repositories/penalty_repository_impl.dart'
+    as _i206;
+import '../../features/penalty/domain/repositories/penalty_repository.dart'
+    as _i334;
+import '../../features/penalty/domain/usecases/penalty_usecases.dart' as _i605;
+import '../../features/penalty/presentation/bloc/penalty_bloc.dart' as _i90;
 import '../../features/profile/data/datasources/update_password_remote_data_source.dart'
     as _i138;
 import '../../features/profile/data/repositories/profile_repository_impl.dart'
@@ -292,6 +300,10 @@ _i174.GetIt $initGetIt(
       () => _i138.UpdatePasswordRemoteDataSource(gh<_i893.BaseApi>()));
   gh.lazySingleton<_i777.RewardRemoteDataSource>(
       () => _i777.RewardRemoteDataSource(gh<_i893.BaseApi>()));
+  gh.lazySingleton<_i572.PenaltyRemoteDataSource>(
+      () => _i572.PenaltyRemoteDataSource(gh<_i893.BaseApi>()));
+  gh.lazySingleton<_i334.PenaltyRepository>(
+      () => _i206.PenaltyRepositoryImpl(gh<_i572.PenaltyRemoteDataSource>()));
   gh.lazySingleton<_i482.EmployeeSummaryRepository>(() =>
       _i183.EmployeeSummaryRepositoryImpl(
           remoteDataSource: gh<_i921.EmployeeSummaryRemoteDataSource>()));
@@ -335,6 +347,12 @@ _i174.GetIt $initGetIt(
       _i443.GetEmployeeSummaryUseCase(gh<_i482.EmployeeSummaryRepository>()));
   gh.lazySingleton<_i894.ProfileRepository>(() =>
       _i334.ProfileRepositoryImpl(gh<_i138.UpdatePasswordRemoteDataSource>()));
+  gh.factory<_i605.GetAllPenaltiesUseCase>(
+      () => _i605.GetAllPenaltiesUseCase(gh<_i334.PenaltyRepository>()));
+  gh.factory<_i605.GetEmployeePenaltiesUseCase>(
+      () => _i605.GetEmployeePenaltiesUseCase(gh<_i334.PenaltyRepository>()));
+  gh.factory<_i605.IssuePenaltyUseCase>(
+      () => _i605.IssuePenaltyUseCase(gh<_i334.PenaltyRepository>()));
   gh.lazySingleton<_i240.AttendanceRepositories>(
       () => _i54.AttendanceRepositoryImpl(
             remote: gh<_i220.AttendanceRemoteData>(),
@@ -377,6 +395,11 @@ _i174.GetIt $initGetIt(
         gh<_i675.AuthRepository>(),
         gh<_i525.UpdatePasswordUseCase>(),
         gh<_i389.UpdateProfileInfoUseCase>(),
+      ));
+  gh.factory<_i90.PenaltyBloc>(() => _i90.PenaltyBloc(
+        gh<_i605.GetAllPenaltiesUseCase>(),
+        gh<_i605.GetEmployeePenaltiesUseCase>(),
+        gh<_i605.IssuePenaltyUseCase>(),
       ));
   gh.factory<_i516.CheckInUseCase>(
       () => _i516.CheckInUseCase(gh<_i697.NotificationRepository>()));

@@ -29,22 +29,18 @@ class PaymentsDataSourcesImpl with HandlingApiManager{
     return wrapHandlingApi(
       tryCall: () => _baseApi.get(ApiVariables.getPayments()),
       jsonConvert: (json) {
-        // إذا كان الـ json عبارة عن قائمة List مباشرة، نضعه داخل خريطة بمفتاح data
         if (json is List) {
           return GetAllPayments.fromJson({"data": json});
         }
-        // إذا كان خريطة Map أصلاً، نمرره كما هو
         return GetAllPayments.fromJson(json);
       },
     );
   }
 
-  Future<List<UnpaidWeeks>> getUnpaidWeeks(String id) async { // تغيير النوع المرتجع إلى List
+  Future<UnpaidWeeksResponse> getUnpaidWeeks(String id) async { // 🔹 تحديث نوع المرتجع هنا
     return wrapHandlingApi(
       tryCall: () => _baseApi.get(ApiVariables.getUnpaidWeeks(id)),
-      jsonConvert: (json) => (json as List)
-          .map((x) => UnpaidWeeks.fromJson(x))
-          .toList(),
+      jsonConvert: (json) => UnpaidWeeksResponse.fromJson(json), // 🔹 استخدام الاستجابة الكاملة
     );
   }
   Future<void> postPayRecords(
@@ -71,4 +67,3 @@ class PaymentsDataSourcesImpl with HandlingApiManager{
     );
   }
 }
-

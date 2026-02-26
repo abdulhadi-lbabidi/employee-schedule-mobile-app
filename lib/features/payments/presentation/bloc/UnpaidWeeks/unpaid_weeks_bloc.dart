@@ -18,7 +18,7 @@ class UnpaidWeeksBloc extends Bloc<UnpaidWeeksEvent, UnpaidWeeksState> {
       );
       result.fold(
             (failure) => emit(UnpaidWeeksError(failure.message)),
-            (weeks) => emit(UnpaidWeeksLoaded(weeks as List<UnpaidWeeks>)),
+            (response) => emit(UnpaidWeeksLoaded(response)), // 🔹 تمرير الاستجابة كاملة
       );
     });
   }

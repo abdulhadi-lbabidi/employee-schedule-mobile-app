@@ -10,10 +10,16 @@ abstract class UnpaidWeeksState extends Equatable {
 class UnpaidWeeksInitial extends UnpaidWeeksState {}
 class UnpaidWeeksLoading extends UnpaidWeeksState {}
 class UnpaidWeeksLoaded extends UnpaidWeeksState {
-  final List<UnpaidWeeks> weeks;
-  const UnpaidWeeksLoaded(this.weeks);
+  final UnpaidWeeksResponse response;
+  const UnpaidWeeksLoaded(this.response);
+
+  @override
+  List<Object?> get props => [response];
 }
 class UnpaidWeeksError extends UnpaidWeeksState {
   final String message;
   const UnpaidWeeksError(this.message);
+
+  @override
+  List<Object?> get props => [message];
 }

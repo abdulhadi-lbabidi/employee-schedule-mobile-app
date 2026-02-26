@@ -44,7 +44,7 @@ class PaymentsRepositoryImpl
   }
 
   @override
-  Future<Either<Failure, List<UnpaidWeeks>>> getUnpaidWeeks(String id) async {
+  Future<Either<Failure, UnpaidWeeksResponse>> getUnpaidWeeks(String id) async { // 🔹 تحديث النوع هنا
     return wrapHandlingException(
       tryCall: () => remote.getUnpaidWeeks(id),
     );

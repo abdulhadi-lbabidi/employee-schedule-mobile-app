@@ -4,10 +4,15 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
 import '../../../../core/di/injection.dart';
 import '../../../../core/theme/App theme/bloc/theme_bloc.dart';
+import '../../../loan/presentation/pages/admin_loan_page.dart';
+import '../../../penalty/presentation/pages/admin_penalties_page.dart';
+import '../../../reward/presentation/AdminRewardsPage.dart';
 import '../bloc/admin_dashboard/admin_dashboard_bloc.dart';
 import '../bloc/admin_dashboard/admin_dashboard_event.dart';
 import '../bloc/admin_dashboard/admin_dashboard_state.dart';
 import 'AdminProfilePage.dart';
+import 'EmployeesPage.dart';
+import 'WorkshopsPage.dart';
 
 class AdminDashboardPage extends StatelessWidget {
   const AdminDashboardPage({super.key});
@@ -43,7 +48,7 @@ class AdminDashboardPage extends StatelessWidget {
                       _buildWelcomeSection(data.monthName ?? '', theme),
                       SizedBox(height: 25.h),
 
-                      // شبكة الإحصائيات الأساسية
+                      // شبكة الإحصائيات الأساسية مع التنقل
                       GridView.count(
                         shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),
@@ -52,26 +57,32 @@ class AdminDashboardPage extends StatelessWidget {
                         mainAxisSpacing: 18.h,
                         childAspectRatio: 1.1,
                         children: [
-                          _buildModernKPICard(
-                            "الموظفين",
-                            "${data.generalCounts?.totalEmployees ?? 0}",
-                            "عدد الموظفين",
-                            Icons.people_alt_rounded,
-                            Colors.blueAccent,
+                          InkWell(
+                            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const EmployeesPage())),
+                            child: _buildModernKPICard(
+                              "الموظفين",
+                              "${data.generalCounts?.totalEmployees ?? 0}",
+                              "عدد الموظفين",
+                              Icons.people_alt_rounded,
+                              Colors.blueAccent,
+                            ),
                           ),
-                          _buildModernKPICard(
-                            "الورشات",
-                            "${data.generalCounts?.totalWorkshops ?? 0}",
-                            "عدد الورشات ",
-                            Icons.home_work_rounded,
-                            Colors.teal,
+                          InkWell(
+                            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const WorkshopsPage())),
+                            child: _buildModernKPICard(
+                              "الورشات",
+                              "${data.generalCounts?.totalWorkshops ?? 0}",
+                              "عدد الورشات ",
+                              Icons.home_work_rounded,
+                              Colors.teal,
+                            ),
                           ),
                         ],
                       ),
 
                       SizedBox(height: 15.h),
 
-                      // البطاقات المالية العريضة
+                      // البطاقات المالية العريضة مع التنقل
                       _buildFinancialRow(
                         label: "المكافآت",
                         amount: "${data.rewardsStats?.totalAmount ?? 0} \$",
@@ -79,6 +90,7 @@ class AdminDashboardPage extends StatelessWidget {
                         icon: Icons.stars_rounded,
                         color: Colors.purple,
                         theme: theme,
+                        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AdminRewardsPage())),
                       ),
 
                       _buildFinancialRow(
@@ -87,6 +99,17 @@ class AdminDashboardPage extends StatelessWidget {
                         count: "${data.loansStats?.count ?? 0}",
                         icon: Icons.account_balance_wallet_rounded,
                         color: Colors.orange.shade800,
+                        theme: theme,
+                        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AdminLoanPage())),
+                      ),
+                      
+                      _buildFinancialRow(
+                        label: "الخصومات المالية",
+                        amount: "عرض السجل",
+                        count: "إدارة",
+                        icon: Icons.gavel_rounded,
+                        color: Colors.red.shade700,
+                        onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AdminPenaltiesPage())),
                         theme: theme,
                       ),
 
@@ -143,7 +166,6 @@ class AdminDashboardPage extends StatelessWidget {
           padding: EdgeInsets.symmetric(horizontal: 10.w),
           child: InkWell(
             onTap: () {
-              // الانتقال إلى صفحة الملف الشخصي
               Navigator.push(
                 context,
                 MaterialPageRoute(
@@ -190,13 +212,7 @@ class AdminDashboardPage extends StatelessWidget {
     );
   }
 
-  Widget _buildModernKPICard(
-      String label,
-      String value,
-      String subLabel,
-      IconData icon,
-      Color color,
-      ) {
+  Widget _buildModernKPICard(String label, String value, String subLabel, IconData icon, Color color) {
     return Container(
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
@@ -211,52 +227,21 @@ class AdminDashboardPage extends StatelessWidget {
             children: [
               Container(
                 padding: EdgeInsets.all(8.w),
-                decoration: BoxDecoration(
-                  color: color.withOpacity(0.15),
-                  shape: BoxShape.circle,
-                ),
+                decoration: BoxDecoration(color: color.withOpacity(0.15), shape: BoxShape.circle),
                 child: Icon(icon, color: color, size: 22.sp),
               ),
               SizedBox(width: 7.w),
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: 14.sp,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+              Text(label, style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold)),
             ]
           ),
-
-
           SizedBox(height: 10.h),
-
-          /// 👇 هذا الجزء مهم
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                Text(
-                  value,
-                  style: TextStyle(
-                    fontSize: 24.sp,
-                    fontWeight: FontWeight.w900,
-                    color: color,
-                  ),
-                ),
-                Row(children: [
-
-                  Text(
-                    subLabel,
-                    style: TextStyle(
-                      fontSize: 12.sp,
-                      color: Colors.grey.shade600,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],)
+                Text(value, style: TextStyle(fontSize: 24.sp, fontWeight: FontWeight.w900, color: color)),
+                Text(subLabel, style: TextStyle(fontSize: 12.sp, color: Colors.grey.shade600), maxLines: 1, overflow: TextOverflow.ellipsis),
               ],
             ),
           ),
@@ -265,38 +250,42 @@ class AdminDashboardPage extends StatelessWidget {
     );
   }
 
-  Widget _buildFinancialRow({required String label, required String amount, required String count, required IconData icon, required Color color, required ThemeData theme}) {
-    return Container(
-      margin: EdgeInsets.only(bottom: 12.h),
-      padding: EdgeInsets.all(16.w),
-      decoration: BoxDecoration(
-        color: theme.cardColor,
-        borderRadius: BorderRadius.circular(20.r),
-        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 10, offset: const Offset(0, 4))],
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: EdgeInsets.all(12.w),
-            decoration: BoxDecoration(color: color.withOpacity(0.1), borderRadius: BorderRadius.circular(15.r)),
-            child: Icon(icon, color: color, size: 28.sp),
-          ),
-          SizedBox(width: 15.w),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(label, style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold, color: Colors.grey)),
-                Text(amount, style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w900)),
-              ],
+  Widget _buildFinancialRow({required String label, required String amount, required String count, required IconData icon, required Color color, required ThemeData theme, VoidCallback? onTap}) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(20.r),
+      child: Container(
+        margin: EdgeInsets.only(bottom: 12.h),
+        padding: EdgeInsets.all(16.w),
+        decoration: BoxDecoration(
+          color: theme.cardColor,
+          borderRadius: BorderRadius.circular(20.r),
+          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.03), blurRadius: 10, offset: const Offset(0, 4))],
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: EdgeInsets.all(12.w),
+              decoration: BoxDecoration(color: color.withOpacity(0.1), borderRadius: BorderRadius.circular(15.r)),
+              child: Icon(icon, color: color, size: 28.sp),
             ),
-          ),
-          Container(
-            padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
-            decoration: BoxDecoration(color: color.withOpacity(0.1), borderRadius: BorderRadius.circular(10.r)),
-            child: Text("$count عملية", style: TextStyle(color: color, fontWeight: FontWeight.bold, fontSize: 12.sp)),
-          ),
-        ],
+            SizedBox(width: 15.w),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(label, style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold, color: Colors.grey)),
+                  Text(amount, style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.w900)),
+                ],
+              ),
+            ),
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+              decoration: BoxDecoration(color: color.withOpacity(0.1), borderRadius: BorderRadius.circular(10.r)),
+              child: Text("$count", style: TextStyle(color: color, fontWeight: FontWeight.bold, fontSize: 12.sp)),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -315,10 +304,7 @@ class AdminDashboardPage extends StatelessWidget {
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text("ملخص الحضور والأجر", style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, color: Colors.white)),
-              const Icon(Icons.analytics_outlined, color: Colors.white70),
-            ],
+            children: [Text("ملخص الحضور والأجر", style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold, color: Colors.white)), const Icon(Icons.analytics_outlined, color: Colors.white70)],
           ),
           SizedBox(height: 20.h),
           Row(
@@ -345,13 +331,7 @@ class AdminDashboardPage extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Row(
-          children: [
-            Icon(icon, size: 14.sp, color: Colors.white70),
-            SizedBox(width: 5.w),
-            Text(label, style: TextStyle(color: Colors.white70, fontSize: 12.sp)),
-          ],
-        ),
+        Row(children: [Icon(icon, size: 14.sp, color: Colors.white70), SizedBox(width: 5.w), Text(label, style: TextStyle(color: Colors.white70, fontSize: 12.sp))]),
         Text(value, style: TextStyle(color: Colors.white, fontSize: 18.sp, fontWeight: FontWeight.bold)),
       ],
     );

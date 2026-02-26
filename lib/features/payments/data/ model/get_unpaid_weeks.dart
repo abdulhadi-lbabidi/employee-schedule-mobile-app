@@ -1,12 +1,21 @@
-// To parse this JSON data, do
-//
-//     final unpaidWeeks = unpaidWeeksFromJson(jsonString);
-
 import 'dart:convert';
 
-List<UnpaidWeeks> unpaidWeeksFromJson(String str) => List<UnpaidWeeks>.from(json.decode(str).map((x) => UnpaidWeeks.fromJson(x)));
+UnpaidWeeksResponse unpaidWeeksResponseFromJson(String str) => UnpaidWeeksResponse.fromJson(json.decode(str));
 
-String unpaidWeeksToJson(List<UnpaidWeeks> data) => json.encode(List<dynamic>.from(data.map((x) => x.toJson())));
+class UnpaidWeeksResponse {
+  final List<UnpaidWeeks> weeks;
+  final PaymentSummary? summary;
+
+  UnpaidWeeksResponse({
+    required this.weeks,
+    this.summary,
+  });
+
+  factory UnpaidWeeksResponse.fromJson(Map<String, dynamic> json) => UnpaidWeeksResponse(
+    weeks: json["weeks"] == null ? [] : List<UnpaidWeeks>.from(json["weeks"]!.map((x) => UnpaidWeeks.fromJson(x))),
+    summary: json["summary"] == null ? null : PaymentSummary.fromJson(json["summary"]),
+  );
+}
 
 class UnpaidWeeks {
   final String? weekRange;
@@ -15,9 +24,7 @@ class UnpaidWeeks {
   final double? estimatedAmount;
   final int? daysCount;
   final List<int>? ids;
-
   final String? status;
-
 
   UnpaidWeeks({
     this.weekRange,
@@ -25,45 +32,35 @@ class UnpaidWeeks {
     this.totalOvertimeHours,
     this.estimatedAmount,
     this.daysCount,
-    this.ids, this.status,
+    this.ids,
+    this.status,
   });
-
-  UnpaidWeeks copyWith({
-    String? weekRange,
-    double? totalRegularHours,
-    double? totalOvertimeHours,
-    double? estimatedAmount,
-    int? daysCount,
-    List<int>? ids,
-    String? status,
-  }) =>
-      UnpaidWeeks(
-        weekRange: weekRange ?? this.weekRange,
-        totalRegularHours: totalRegularHours ?? this.totalRegularHours,
-        totalOvertimeHours: totalOvertimeHours ?? this.totalOvertimeHours,
-        estimatedAmount: estimatedAmount ?? this.estimatedAmount,
-        daysCount: daysCount ?? this.daysCount,
-        ids: ids ?? this.ids,
-        status: status ?? this.status,
-      );
 
   factory UnpaidWeeks.fromJson(Map<String, dynamic> json) => UnpaidWeeks(
     weekRange: json["week_range"],
-    totalRegularHours: json["total_regular_hours"]?.toDouble(),
-    totalOvertimeHours: json["total_overtime_hours"]?.toDouble(),
-    estimatedAmount: json["estimated_amount"]?.toDouble(),
+    totalRegularHours: (json["total_regular_hours"] as num?)?.toDouble(),
+    totalOvertimeHours: (json["total_overtime_hours"] as num?)?.toDouble(),
+    estimatedAmount: (json["estimated_amount"] as num?)?.toDouble(),
     daysCount: json["days_count"],
     ids: json["ids"] == null ? [] : List<int>.from(json["ids"]!.map((x) => x)),
     status: json["payment_status"],
   );
+}
 
-  Map<String, dynamic> toJson() => {
-    "week_range": weekRange,
-    "total_regular_hours": totalRegularHours,
-    "total_overtime_hours": totalOvertimeHours,
-    "estimated_amount": estimatedAmount,
-    "days_count": daysCount,
-    "ids": ids == null ? [] : List<dynamic>.from(ids!.map((x) => x)),
-    "payment_status": status,
-  };
+class PaymentSummary {
+  final double? grossTotal;
+  final double? discounts;
+  final double? netTotal;
+
+  PaymentSummary({
+    this.grossTotal,
+    this.discounts,
+    this.netTotal,
+  });
+
+  factory PaymentSummary.fromJson(Map<String, dynamic> json) => PaymentSummary(
+    grossTotal: (json["gross_total"] as num?)?.toDouble(),
+    discounts: (json["discounts"] as num?)?.toDouble(),
+    netTotal: (json["net_total"] as num?)?.toDouble(),
+  );
 }

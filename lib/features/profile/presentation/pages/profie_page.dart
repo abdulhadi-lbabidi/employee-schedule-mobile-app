@@ -9,6 +9,7 @@ import 'package:untitled8/features/profile/presentation/pages/widgets/edit_profi
 import 'package:untitled8/features/profile/presentation/pages/widgets/widget_foCard.dart';
 import 'package:untitled8/features/SplashScreen/presentation/page/splashScareen.dart';
 import 'package:untitled8/features/employee/presentation/pages/EmployeeRewardsPage.dart';
+import 'package:untitled8/features/penalty/presentation/pages/employee_penalties_page.dart'; // 🔹 إضافة
 import '../../../../core/di/injection.dart';
 import '../../../auth/data/model/login_response.dart';
 import '../bloc/Profile/_profile_bloc.dart';
@@ -60,39 +61,21 @@ class _ProfilePageState extends State<ProfilePage> {
                   ),
                 ),
                 centerTitle: true,
-                // actions: [
-                //   IconButton(
-                //     icon: Icon(
-                //       Icons.edit_note_rounded,
-                //       size: 28.sp,
-                //       color: theme.primaryColor,
-                //     ),
-                //     onPressed: () => Navigator.push(
-                //       context,
-                //       MaterialPageRoute(
-                //         builder: (_) => BlocProvider.value(
-                //           value: profileBloc,
-                //           child: const EditProfilePage(),
-                //         ),
-                //       ),
-                //     ),
-                //   ),
-                //   SizedBox(width: 10.w),
-                // ],
               ),
               body: SingleChildScrollView(
                 padding: EdgeInsets.all(20.w),
                 child: Column(
                   children: [
                     _buildHeader(context, state.profile.data!, theme),
-                    // SizedBox(height: 30.h),
-                    // _buildStatsRow(state.profile, theme),
                     SizedBox(height: 25.h),
-                    _buildRewardShortcut(
-                      context,
-                      state.profile.data!.user?.id ?? 0,
-                      theme,
-                    ),
+                    
+                    // اختصار المكافآت
+                    _buildRewardShortcut(context, state.profile.data!.user?.userableId?? 0, theme),
+                    SizedBox(height: 12.h),
+                    
+                    // 🔹 اختصار العقوبات (جديد)
+                    _buildPenaltyShortcut(context, state.profile.data?.user?.userableId ?? 0, theme),
+                    
                     SizedBox(height: 35.h),
                     _buildSectionTitle("المعلومات الشخصية", theme),
                     SizedBox(height: 15.h),
@@ -106,8 +89,6 @@ class _ProfilePageState extends State<ProfilePage> {
                       label: 'البريد الإلكتروني',
                       value: state.profile.data!.user?.email ?? "---",
                     ),
-                    // SizedBox(height: 15.h),
-                    // _buildChangePasswordButton(context, theme),
                     SizedBox(height: 25.h),
                     _buildSectionTitle("تفاصيل العمل", theme),
                     SizedBox(height: 15.h),
@@ -161,43 +142,43 @@ class _ProfilePageState extends State<ProfilePage> {
               const SnackBar(content: Text('تم تحديث البيانات بنجاح'), backgroundColor: Colors.green),
             );
           },
-          onFailed: () {
-             // الرسالة تظهر تلقائياً من الـ DataStateModel
-          }
         );
       },
     );
   }
 
-  // Widget _buildChangePasswordButton(BuildContext context, ThemeData theme) {
-  //   return InkWell(
-  //     onTap: () => showChangePasswordDialog(context, profileBloc),
-  //     child: Container(
-  //       padding: EdgeInsets.symmetric(vertical: 12.h, horizontal: 16.w),
-  //       decoration: BoxDecoration(
-  //         color: theme.primaryColor.withOpacity(0.05),
-  //         borderRadius: BorderRadius.circular(15.r),
-  //         border: Border.all(color: theme.primaryColor.withOpacity(0.2)),
-  //       ),
-  //       child: Row(
-  //         children: [
-  //           Icon(Icons.lock_reset_rounded, color: theme.primaryColor, size: 22.sp),
-  //           SizedBox(width: 12.w),
-  //           Text(
-  //             "تغيير كلمة المرور",
-  //             style: TextStyle(
-  //               fontSize: 14.sp,
-  //               color: theme.primaryColor,
-  //               fontWeight: FontWeight.bold,
-  //             ),
-  //           ),
-  //           const Spacer(),
-  //           Icon(Icons.arrow_forward_ios_rounded, color: theme.primaryColor, size: 14.sp),
-  //         ],
-  //       ),
-  //     ),
-  //   ).animate().fadeIn(delay: 300.ms);
-  // }
+  Widget _buildPenaltyShortcut(BuildContext context, int employeeId, ThemeData theme) {
+    return GestureDetector(
+      onTap: () => Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => EmployeePenaltiesPage(employeeId: employeeId)),
+      ),
+      child: Container(
+        padding: EdgeInsets.all(16.w),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(colors: [Colors.red.shade700, Colors.deepOrange.shade900]),
+          borderRadius: BorderRadius.circular(20.r),
+          boxShadow: [BoxShadow(color: Colors.red.withOpacity(0.2), blurRadius: 10.r, offset: const Offset(0, 4))],
+        ),
+        child: Row(
+          children: [
+            Icon(Icons.gavel_rounded, color: Colors.white, size: 28.sp),
+            SizedBox(width: 15.w),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text("سجل خصم", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16.sp)),
+                  Text("عرض جميع المخالفات خصم المالية", style: TextStyle(color: Colors.white.withOpacity(0.9), fontSize: 11.sp, fontWeight: FontWeight.bold)),
+                ],
+              ),
+            ),
+            Icon(Icons.arrow_forward_ios_rounded, color: Colors.white, size: 16.sp),
+          ],
+        ),
+      ),
+    ).animate().scale(delay: 300.ms);
+  }
 
   Widget _buildRewardShortcut(
     BuildContext context,
@@ -281,9 +262,7 @@ class _ProfilePageState extends State<ProfilePage> {
               radius: 65.r,
               backgroundColor: theme.primaryColor.withOpacity(0.1),
               backgroundImage: (profileImg != null && profileImg.isNotEmpty)
-                  ? (profileImg.startsWith('http')
-                      ? NetworkImage(profileImg)
-                      : FileImage(File(profileImg)) as ImageProvider)
+                  ? NetworkImage(profileImg)
                   : null,
               child: (profileImg == null || profileImg.isEmpty)
                   ? Icon(
@@ -323,7 +302,7 @@ class _ProfilePageState extends State<ProfilePage> {
           ),
         ),
         Text(
-          "ID: ${user?.id ?? "---"}",
+          "ID: ${user?.userableId ?? "---"}",
           style: TextStyle(
             color: theme.disabledColor,
             fontSize: 13.sp,
@@ -331,82 +310,6 @@ class _ProfilePageState extends State<ProfilePage> {
           ),
         ),
       ],
-    );
-  }
-
-  // Widget _buildStatsRow(state, ThemeData theme) {
-  //   return Row(
-  //     children: [
-  //       _buildStatCard("ساعات العمل", '8', Icons.access_time_filled, [
-  //         const Color(0xFF1A237E),
-  //         const Color(0xFF3949AB),
-  //       ], theme),
-  //       SizedBox(width: 12.w),
-  //       _buildStatCard(
-  //         "أيام الدوام",
-  //         '6',
-  //         Icons.calendar_today_rounded,
-  //         [const Color(0xFF00695C), const Color(0xFF43A047)],
-  //         theme,
-  //       ),
-  //       SizedBox(width: 12.w),
-  //       _buildStatCard("آخر ورشة", 'أخر ورشة', Icons.warehouse_rounded, [
-  //         const Color(0xFF4527A0),
-  //         const Color(0xFF7B1FA2),
-  //       ], theme),
-  //     ],
-  //   ).animate().fadeIn(duration: 600.ms).slideY(begin: 0.2, end: 0);
-  // }
-
-  Widget _buildStatCard(
-    String title,
-    String value,
-    IconData icon,
-    List<Color> colors,
-    ThemeData theme,
-  ) {
-    return Expanded(
-      child: Container(
-        padding: EdgeInsets.symmetric(vertical: 16.h, horizontal: 8.w),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: colors,
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-          borderRadius: BorderRadius.circular(20.r),
-          boxShadow: [
-            BoxShadow(
-              color: colors.first.withOpacity(0.2),
-              blurRadius: 8.r,
-              offset: Offset(0, 4.h),
-            ),
-          ],
-        ),
-        child: Column(
-          children: [
-            Icon(icon, color: Colors.white.withOpacity(0.8), size: 20.sp),
-            SizedBox(height: 8.h),
-            Text(
-              value,
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 16.sp,
-                fontWeight: FontWeight.w900,
-              ),
-              overflow: TextOverflow.ellipsis,
-            ),
-            Text(
-              title,
-              style: TextStyle(
-                color: Colors.white.withOpacity(0.7),
-                fontSize: 9.sp,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 

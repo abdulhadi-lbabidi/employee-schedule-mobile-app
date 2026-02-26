@@ -29,6 +29,7 @@ import 'features/payments/presentation/bloc/All-Payments/all_payments_bloc.dart'
 import 'features/payments/presentation/bloc/PaymentAction/payment_action_bloc.dart';
 import 'features/payments/presentation/bloc/UnpaidWeeks/unpaid_weeks_bloc.dart';
 import 'features/payments/presentation/bloc/dues-report/dues_report_bloc.dart';
+import 'features/penalty/presentation/bloc/penalty_bloc.dart';
 import 'features/profile/presentation/bloc/Profile/_profile_bloc.dart';
 import 'features/admin/presentation/bloc/admin_dashboard/admin_dashboard_bloc.dart';
 import 'features/admin/presentation/bloc/admin_profile/admin_profile_bloc.dart';
@@ -76,6 +77,7 @@ class MyApp extends StatelessWidget {
             BlocProvider(create: (_) => sl<FinanceBloc>()),
             BlocProvider(create: (_) => sl<LoanBloc>()),
             BlocProvider(create: (_) => sl<RewardAdminBloc>()),
+            BlocProvider(create: (_) => sl<PenaltyBloc>()),
             BlocProvider(create: (_) => sl<UnpaidWeeksBloc>()),
             BlocProvider(create: (_) => sl<PaymentActionBloc>()),
             BlocProvider(create: (_) => sl<AllPaymentsBloc>())

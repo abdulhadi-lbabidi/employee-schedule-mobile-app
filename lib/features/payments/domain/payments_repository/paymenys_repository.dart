@@ -14,8 +14,7 @@ abstract class PaymenysRepository {
   Future<Either<Failure, void>> potsPayRecords(
       PostPayRecordsParams params,
       );
-  Future<Either<Failure, List<UnpaidWeeks>>> getUnpaidWeeks(String id);
+  Future<Either<Failure, UnpaidWeeksResponse>> getUnpaidWeeks(String id); // 🔹 تغيير نوع المرتجع
   Future<Either<Failure, UpdatePayments>> putUpdatePayments(String id,
       UpdatePaymentParams params,);
 }
-

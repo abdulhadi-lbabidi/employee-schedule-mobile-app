@@ -140,6 +140,14 @@ class ApiVariables {
   static Uri issueReward() => _mainUri(
       '/api/rewards');
 
+  // --- Penalties ---
+  static Uri adminPenalties() => _mainUri('/api/discounts');
+
+  static Uri employeePenalties(int empId) =>
+      _mainUri('/api/discounts/employee/$empId');
+
+  static Uri issuePenalty() => _mainUri('/api/discounts');
+
   // --- Notifications ---
   static Uri notifications() => _mainUri('/api/notifications');
 
