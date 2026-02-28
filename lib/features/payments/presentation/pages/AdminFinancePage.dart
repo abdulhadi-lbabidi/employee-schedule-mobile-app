@@ -16,7 +16,7 @@ class _FinancialDashboardState extends State<FinancialDashboard> {
   @override
   void initState() {
     super.initState();
-    // استدعاء التحميل من الـ Bloc الموجود مسبقاً في الـ main
+    // جلب البيانات عند أول دخول
     context.read<DuesReportBloc>().add(LoadDuesReport());
   }
 
@@ -39,6 +39,7 @@ class _FinancialDashboardState extends State<FinancialDashboard> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text("خطأ: ${state.message}"),
+                  const SizedBox(height: 10),
                   ElevatedButton(
                     onPressed: () => context.read<DuesReportBloc>().add(LoadDuesReport()),
                     child: const Text("إعادة المحاولة"),
@@ -50,50 +51,61 @@ class _FinancialDashboardState extends State<FinancialDashboard> {
 
           if (state is DuesReportLoaded) {
             final report = state.report;
-            return Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                children: [
-                  _buildStatisticsCard(
-                    report.summary.totalEmployeesCount,
-                    report.summary.grandTotalDebt,
-                  ),
-                  const SizedBox(height: 20),
-                  const Align(
-                    alignment: Alignment.centerRight,
-                    child: Text(
-                      "قائمة الموظفين",
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            return RefreshIndicator(
+              onRefresh: () async {
+                context.read<DuesReportBloc>().add(LoadDuesReport());
+              },
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  children: [
+                    _buildStatisticsCard(
+                      report.summary.totalEmployeesCount,
+                      report.summary.grandTotalDebt,
                     ),
-                  ),
-                  const SizedBox(height: 10),
-                  Expanded(
-                    child: ListView.builder(
-                      itemCount: report.data.employees.length,
-                      itemBuilder: (context, index) {
-                        final emp = report.data.employees[index];
-                        return Card(
-                          child: ListTile(
-                            leading: CircleAvatar(child: Text(emp.id.toString())),
-                            title: Text(emp.fullName),
-                            subtitle: Text("المستحقات: ${emp.remainingDue.toDouble()}\$"),
-                            trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => EmployeeDetailsPagePayments(
-                                    employeeId: emp.id.toString(),
+                    const SizedBox(height: 20),
+                    const Align(
+                      alignment: Alignment.centerRight,
+                      child: Text(
+                        "قائمة الموظفين",
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Expanded(
+                      child: ListView.builder(
+                        physics: const AlwaysScrollableScrollPhysics(), // ضروري لعمل RefreshIndicator مع ListView
+                        itemCount: report.data.employees.length,
+                        itemBuilder: (context, index) {
+                          final emp = report.data.employees[index];
+                          return Card(
+                            child: ListTile(
+                              leading: CircleAvatar(child: Text(emp.id.toString())),
+                              title: Text(emp.fullName),
+                              subtitle: Text("المستحقات: ${emp.remainingDue.toDouble()}\$"),
+                              trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                              onTap: () async {
+                                // الانتظار حتى العودة من صفحة التفاصيل
+                                await Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => EmployeeDetailsPagePayments(
+                                      employeeId: emp.id.toString(),
+                                    ),
                                   ),
-                                ),
-                              );
-                            },
-                          ),
-                        );
-                      },
-                    ),
-                  )
-                ],
+                                );
+                                // تحديث البيانات فور العودة
+                                if (context.mounted) {
+                                  context.read<DuesReportBloc>().add(LoadDuesReport());
+                                }
+                              },
+                            ),
+                          );
+                        },
+                      ),
+                    )
+                  ],
+                ),
               ),
             );
           }

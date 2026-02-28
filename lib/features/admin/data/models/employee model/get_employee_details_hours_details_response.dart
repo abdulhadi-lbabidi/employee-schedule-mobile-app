@@ -5,8 +5,8 @@ GetEmployeeDetailsHoursResponse getEmployeeDetailsHoursResponseFromJson( str) =>
 class GetEmployeeDetailsHoursResponse {
   final int? employeeId;
   final String? fullName;
-  final int? hourlyRate;
-  final int? overtimeRate;
+  final double? hourlyRate;
+  final double? overtimeRate;
   final List<Week>? weeks;
   final Totals? grandTotals;
 
@@ -22,8 +22,8 @@ class GetEmployeeDetailsHoursResponse {
   GetEmployeeDetailsHoursResponse copyWith({
     int? employeeId,
     String? fullName,
-    int? hourlyRate,
-    int? overtimeRate,
+    double? hourlyRate,
+    double? overtimeRate,
     List<Week>? weeks,
     Totals? grandTotals,
   }) =>
@@ -39,8 +39,8 @@ class GetEmployeeDetailsHoursResponse {
   factory GetEmployeeDetailsHoursResponse.fromJson(Map<String, dynamic> json) => GetEmployeeDetailsHoursResponse(
     employeeId: json["employee_id"],
     fullName: json["full_name"],
-    hourlyRate: json["hourly_rate"],
-    overtimeRate: json["overtime_rate"],
+    hourlyRate: (json["hourly_rate"] as num?)?.toDouble(),
+    overtimeRate: (json["overtime_rate"] as num?)?.toDouble(),
     weeks: json["weeks"] == null ? [] : List<Week>.from(json["weeks"]!.map((x) => Week.fromJson(x))),
     grandTotals: json["grand_totals"] == null ? null : Totals.fromJson(json["grand_totals"]),
   );

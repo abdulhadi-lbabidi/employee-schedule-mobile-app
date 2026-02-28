@@ -75,7 +75,8 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
   Future<void> _checkIn(
     CheckInEvent event,
     Emitter<NotificationState> emit,
-  ) async {
+  ) async
+  {
     emit(state.copyWith(checkInData: state.checkInData.setLoading()));
 
     final result = await checkInUseCase(event.params);
@@ -94,7 +95,8 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
   Future<void> _checkOut(
     CheckOutEvent event,
     Emitter<NotificationState> emit,
-  ) async {
+  ) async
+  {
     emit(state.copyWith(checkOutData: state.checkOutData.setLoading()));
 
     final result = await checkOutUseCase(event.params);
@@ -112,7 +114,8 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
   Future<void> _onLoad(
     LoadNotifications event,
     Emitter<NotificationState> emit,
-  ) async {
+  ) async
+  {
     emit(
       state.copyWith(
         getNotificationsData: state.getNotificationsData.setLoading(),
@@ -145,7 +148,8 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
   Future<void> _onAddLocal(
     AddLocalNotificationEvent event,
     Emitter<NotificationState> emit,
-  ) async {
+  ) async
+  {
     try {
       // await addLocalNotificationUseCase(event.notification);
       add(LoadNotifications());

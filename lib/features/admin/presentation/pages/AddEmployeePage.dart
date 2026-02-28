@@ -17,24 +17,40 @@ class AddEmployeePage extends StatefulWidget {
 
 class _AddEmployeePageState extends State<AddEmployeePage> {
   final _formKey = GlobalKey<FormState>();
+
   final nameController = TextEditingController();
   final emailController = TextEditingController();
   final phoneController = TextEditingController();
   final passwordController = TextEditingController();
-  final positionController = TextEditingController(); // 🔹 جديد
-  final departmentController = TextEditingController(); // 🔹 جديد
-  final currentLocationController = TextEditingController(); // 🔹 جديد
-  final hourlyRateController = TextEditingController(text: "6");
+
+  final positionController = TextEditingController();
+  final departmentController = TextEditingController();
+  final currentLocationController = TextEditingController();
+
+  /// راتب 8 ساعات
+  final salary8HoursController = TextEditingController(text: "48");
+
+  /// راتب الساعة (محسوب تلقائياً)
+  final salaryPerHourController = TextEditingController();
+
   final overtimeRateController = TextEditingController(text: "1");
+
   bool _obscurePassword = true;
 
   @override
   void initState() {
     super.initState();
-    //  تهيئة الـ Controllers الجديدة بقيم افتراضية (فارغة)
-    positionController.text = "";
-    departmentController.text = "";
-    currentLocationController.text = "";
+
+    salary8HoursController.addListener(_calculateSalaryPerHour);
+    _calculateSalaryPerHour();
+  }
+
+  void _calculateSalaryPerHour() {
+    final total = double.tryParse(salary8HoursController.text) ?? 0;
+    final perHour = total / 8;
+
+    salaryPerHourController.text =
+    perHour == 0 ? "0" : perHour.toStringAsFixed(2);
   }
 
   @override
@@ -63,21 +79,17 @@ class _AddEmployeePageState extends State<AddEmployeePage> {
             onSuccess: () {
               Navigator.pop(context);
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(
-                    "تمت إضافة الموظف بنجاح ✓",
-                    style: TextStyle(fontSize: 13.sp),
-                  ),
+                const SnackBar(
+                  content: Text("تمت إضافة الموظف بنجاح ✓"),
                   backgroundColor: Colors.green,
                 ),
               );
             },
           );
-          // TODO: implement listener
         },
         listenWhen:
             (pre, cur) =>
-                pre.addEmployeeData.status != cur.addEmployeeData.status,
+        pre.addEmployeeData.status != cur.addEmployeeData.status,
         child: SingleChildScrollView(
           padding: EdgeInsets.all(24.w),
           child: Form(
@@ -85,132 +97,64 @@ class _AddEmployeePageState extends State<AddEmployeePage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildSectionTitle("المعلومات الأساسية", theme),
-                SizedBox(height: 15.h),
-                _buildTextField(
-                  "الاسم الكامل",
-                  nameController,
-                  Icons.person_add_alt_1_rounded,
-                  theme,
-                ),
-                _buildTextField(
-                  "البريد الإلكتروني", // 🔹 جديد
+                _sectionTitle("المعلومات الأساسية", theme),
+                _textField("الاسم الكامل", nameController, Icons.person, theme),
+                _textField(
+                  "البريد الإلكتروني",
                   emailController,
-                  Icons.email_outlined,
+                  Icons.email,
                   theme,
                   keyboardType: TextInputType.emailAddress,
                 ),
-                Padding(
-                  padding: EdgeInsets.only(bottom: 16.h),
-                  child: TextFormField(
-                    controller: passwordController,
-                    obscureText: _obscurePassword,
-                    style: TextStyle(
-                      fontSize: 14.sp,
-                      color: theme.textTheme.bodyLarge?.color,
-                    ),
-                    decoration: InputDecoration(
-                      labelText: "كلمة المرور",
-                      labelStyle: TextStyle(
-                        fontSize: 12.sp,
-                        color: theme.disabledColor,
-                      ),
-                      prefixIcon: Icon(
-                        Icons.lock_outline_rounded,
-                        color: theme.primaryColor,
-                        size: 20.sp,
-                      ),
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          _obscurePassword
-                              ? Icons.visibility_off
-                              : Icons.visibility,
-                          size: 18.sp,
-                          color: theme.disabledColor,
-                        ),
-                        onPressed:
-                            () => setState(
-                              () => _obscurePassword = !_obscurePassword,
-                            ),
-                      ),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(15.r),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(15.r),
-                        borderSide: BorderSide(
-                          color: theme.dividerColor.withOpacity(0.2),
-                        ),
-                      ),
-                      filled: true,
-                      fillColor: theme.cardColor,
-                      contentPadding: EdgeInsets.symmetric(
-                        vertical: 12.h,
-                        horizontal: 15.w,
-                      ),
-                    ),
-                    validator:
-                        (value) =>
-                            (value == null || value.length < 6)
-                                ? "يجب أن تكون كلمة المرور 6 أحرف على الأقل"
-                                : null,
-                  ),
-                ),
-                _buildTextField(
+                _passwordField(theme),
+                _textField(
                   "رقم الهاتف",
                   phoneController,
-                  Icons.phone_android_rounded,
+                  Icons.phone,
                   theme,
-                  isPhone: true,
+                  keyboardType: TextInputType.phone,
                 ),
-                _buildTextField(
-                  "المسمى الوظيفي", // 🔹 جديد
+                _textField(
+                  "المسمى الوظيفي",
                   positionController,
                   Icons.work_outline,
                   theme,
                 ),
-                _buildTextField(
-                  "القسم", // 🔹 جديد
+                _textField(
+                  "القسم",
                   departmentController,
-                  Icons.business_center_outlined,
+                  Icons.business_center,
                   theme,
                 ),
-                _buildTextField(
-                  "الموقع الحالي", // 🔹 جديد
+                _textField(
+                  "الموقع الحالي",
                   currentLocationController,
                   Icons.location_on_outlined,
                   theme,
                 ),
-
                 SizedBox(height: 25.h),
-                _buildSectionTitle("الإعدادات المالية (\$)", theme),
-                SizedBox(height: 15.h),
-                Row(
-                  children: [
-                    Expanded(
-                      child: _buildTextField(
-                        "راتب الساعة",
-                        hourlyRateController,
-                        Icons.monetization_on_rounded,
-                        theme,
-                        isNumber: true,
-                      ),
-                    ),
-                    SizedBox(width: 15.w),
-                    Expanded(
-                      child: _buildTextField(
-                        "راتب الإضافي",
-                        overtimeRateController,
-                        Icons.more_time_rounded,
-                        theme,
-                        isNumber: true,
-                      ),
-                    ),
-                  ],
+                _sectionTitle("الإعدادات المالية", theme),
+                _textField(
+                  "راتب خلال فترة 8 ساعات",
+                  salary8HoursController,
+                  Icons.monetization_on,
+                  theme,
+                  isNumber: true,
                 ),
-
+                _readOnlyField(
+                  "راتب الساعة الواحدة خلال 8 ساعات",
+                  salaryPerHourController,
+                  theme,
+                ),
+                _textField(
+                  "راتب الساعة الإضافية",
+                  overtimeRateController,
+                  Icons.more_time,
+                  theme,
+                  isNumber: true,
+                ),
                 SizedBox(height: 40.h),
-                _buildSubmitButton(context, theme),
+                _submitButton(context, theme),
               ],
             ),
           ),
@@ -219,117 +163,126 @@ class _AddEmployeePageState extends State<AddEmployeePage> {
     );
   }
 
-  Widget _buildSectionTitle(String title, ThemeData theme) {
-    return Text(
+  Widget _sectionTitle(String title, ThemeData theme) => Padding(
+    padding: EdgeInsets.only(bottom: 12.h),
+    child: Text(
       title,
       style: TextStyle(
         color: theme.primaryColor,
         fontSize: 15.sp,
         fontWeight: FontWeight.bold,
       ),
-    );
-  }
+    ),
+  );
 
-  Widget _buildTextField(
-    String label,
-    TextEditingController controller,
-    IconData icon,
-    ThemeData theme, {
-    bool isNumber = false,
-    bool isPhone = false,
-    TextInputType keyboardType = TextInputType.text, // 🔹 جديد
-  }) {
+  Widget _textField(
+      String label,
+      TextEditingController controller,
+      IconData icon,
+      ThemeData theme, {
+        bool isNumber = false,
+        TextInputType keyboardType = TextInputType.text,
+      }) {
     return Padding(
       padding: EdgeInsets.only(bottom: 16.h),
       child: TextFormField(
         controller: controller,
-        style: TextStyle(
-          fontSize: 14.sp,
-          color: theme.textTheme.bodyLarge?.color,
-        ),
-        keyboardType:
-            keyboardType == TextInputType.text && (isNumber || isPhone)
-                ? TextInputType.number
-                : keyboardType,
-        // 🔹 استخدام keyboardType الجديد
+        keyboardType: isNumber ? TextInputType.number : keyboardType,
         decoration: InputDecoration(
           labelText: label,
-          labelStyle: TextStyle(fontSize: 12.sp, color: theme.disabledColor),
-          prefixIcon: Icon(icon, color: theme.primaryColor, size: 20.sp),
-          border: OutlineInputBorder(borderRadius: BorderRadius.circular(15.r)),
-          enabledBorder: OutlineInputBorder(
+          prefixIcon: Icon(icon),
+          border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(15.r),
-            borderSide: BorderSide(color: theme.dividerColor.withOpacity(0.2)),
-          ),
-          filled: true,
-          fillColor: theme.cardColor,
-          contentPadding: EdgeInsets.symmetric(
-            vertical: 12.h,
-            horizontal: 15.w,
           ),
         ),
         validator:
             (value) =>
-                value == null || value.isEmpty ? "هذا الحقل مطلوب" : null,
+        value == null || value.isEmpty ? "هذا الحقل مطلوب" : null,
       ),
     );
   }
 
-  Widget _buildSubmitButton(BuildContext context, ThemeData theme) {
+  Widget _readOnlyField(
+      String label,
+      TextEditingController controller,
+      ThemeData theme,
+      ) {
+    return Padding(
+      padding: EdgeInsets.only(bottom: 16.h),
+      child: TextFormField(
+        controller: controller,
+        readOnly: true,
+        decoration: InputDecoration(
+          labelText: label,
+          prefixIcon: const Icon(Icons.calculate),
+          filled: true,
+          fillColor: theme.cardColor.withOpacity(0.6),
+          suffixText: "\$ / ساعة",
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(15.r),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _passwordField(ThemeData theme) {
+    return Padding(
+      padding: EdgeInsets.only(bottom: 16.h),
+      child: TextFormField(
+        controller: passwordController,
+        obscureText: _obscurePassword,
+        decoration: InputDecoration(
+          labelText: "كلمة المرور",
+          prefixIcon: const Icon(Icons.lock_outline),
+          suffixIcon: IconButton(
+            icon: Icon(
+              _obscurePassword ? Icons.visibility_off : Icons.visibility,
+            ),
+            onPressed: () {
+              setState(() => _obscurePassword = !_obscurePassword);
+            },
+          ),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(15.r),
+          ),
+        ),
+        validator:
+            (value) =>
+        value != null && value.length < 6
+            ? "كلمة المرور 6 أحرف على الأقل"
+            : null,
+      ),
+    );
+  }
+
+  Widget _submitButton(BuildContext context, ThemeData theme) {
     return SizedBox(
       width: double.infinity,
       height: 55.h,
       child: ElevatedButton(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: theme.primaryColor,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(15.r),
-          ),
-          elevation: 4,
-        ),
-        onPressed: () => _handleSubmit(context),
-        child: Text(
-          "إتمام عملية الإضافة",
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 16.sp,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
+        onPressed: _submit,
+        child: const Text("إتمام عملية الإضافة"),
       ),
     );
   }
 
-  void _handleSubmit(BuildContext context) {
-    if (_formKey.currentState!.validate()) {
-      final hourlyRate = _safeParseDouble(hourlyRateController.text);
-      final overtimeRate = _safeParseDouble(overtimeRateController.text);
+  void _submit() {
+    if (!_formKey.currentState!.validate()) return;
 
-      final newEmployee = AddEmployeeParams(
-        fullName: nameController.text,
-        phone_number: phoneController.text,
-        email: emailController.text,
-        password: passwordController.text,
-        position: positionController.text,
-        // جديد
-        department: departmentController.text,
-        //  جديد
-        current_location: currentLocationController.text,
-        //  جديد
-        hourly_rate: hourlyRate,
-        overtime_rate: overtimeRate,
-      );
+    final params = AddEmployeeParams(
+      fullName: nameController.text,
+      email: emailController.text,
+      phone_number: phoneController.text,
+      password: passwordController.text,
+      position: positionController.text,
+      department: departmentController.text,
+      current_location: currentLocationController.text,
+      hourly_rate: double.tryParse(salary8HoursController.text) ?? 0,
+      overtime_rate: double.tryParse(overtimeRateController.text) ?? 0,
+    );
 
-      widget.employeesBloc.add(AddEmployeeEvent(newEmployee));
-    }
-  }
-
-  double _safeParseDouble(String text) {
-    try {
-      return double.parse(text.trim());
-    } catch (e) {
-      return 0.0;
-    }
+    widget.employeesBloc.add(AddEmployeeEvent(params));
   }
 
   @override
@@ -338,10 +291,11 @@ class _AddEmployeePageState extends State<AddEmployeePage> {
     emailController.dispose();
     phoneController.dispose();
     passwordController.dispose();
-    positionController.dispose(); // 🔹 جديد
-    departmentController.dispose(); // 🔹 جديد
-    currentLocationController.dispose(); // 🔹 جديد
-    hourlyRateController.dispose();
+    positionController.dispose();
+    departmentController.dispose();
+    currentLocationController.dispose();
+    salary8HoursController.dispose();
+    salaryPerHourController.dispose();
     overtimeRateController.dispose();
     super.dispose();
   }

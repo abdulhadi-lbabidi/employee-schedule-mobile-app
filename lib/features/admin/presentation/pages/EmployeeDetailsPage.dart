@@ -141,7 +141,11 @@ class _EmployeeDetailsPageState extends State<EmployeeDetailsPage> {
                 ),
                 _EmployeeHeader(widget.employeeModel, theme),
                 SizedBox(height: 24.h),
-                TotalsWidget(theme: theme, totals: state.employee.grandTotals!),
+                TotalsWidget(
+                  theme: theme,
+                  totals: state.employee.grandTotals!,
+                  userId:state.employee.employeeId!,
+                ),
                 SizedBox(height: 30.h),
                 EmployeeBuildDateSelector(
                   theme: theme,
@@ -175,8 +179,8 @@ class _EmployeeDetailsPageState extends State<EmployeeDetailsPage> {
       },
       listenWhen:
           (pre, cur) =>
-              (pre is EmployeeDetailsLoading || cur is EmployeeDetailsError)
-              || (pre is EmployeeDetailsLoading || cur is EmployeeDeleted)
+              (pre is EmployeeDetailsLoading || cur is EmployeeDetailsError) ||
+              (pre is EmployeeDetailsLoading || cur is EmployeeDeleted),
     );
   }
 
