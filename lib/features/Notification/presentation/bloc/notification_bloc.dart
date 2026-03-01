@@ -5,7 +5,7 @@ import '../../../../core/di/injection.dart';
 import '../../data/datasources/notification_locale_data_sources.dart';
 import '../../domain/usecases/get_notifications.dart';
 import '../../domain/usecases/send_notification_use_case.dart';
-import 'notification_event.dart';
+import 'notification_event.dart' hide NotificationError;
 import 'notification_state.dart';
 import 'package:injectable/injectable.dart';
 
@@ -19,24 +19,23 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
   final CheckInUseCase checkInUseCase;
   final CheckOutUseCase checkOutUseCase;
 
-  // final DeleteNotificationUseCase deleteNotificationUseCase;
-  // final DeleteAllNotificationsUseCase deleteAllNotificationsUseCase;
+  final DeleteNotificationUseCase deleteNotificationUseCase;
+  final DeleteAllNotificationsUseCase deleteAllNotificationsUseCase;
   // final MarkNotificationAsReadUseCase markAsReadUseCase;
 
   NotificationBloc(
     this.getNotificationsUseCase,
     //  this.addLocalNotificationUseCase,
     // // required this.syncNotificationsUseCase,
-    //  this.deleteNotificationUseCase,
-    //  this.deleteAllNotificationsUseCase,
+     this.deleteNotificationUseCase,
+     this.deleteAllNotificationsUseCase,
     //  this.markAsReadUseCase,
     this.sendNotificationUseCase,
     this.checkInUseCase,
     this.checkOutUseCase,
   ) : super(NotificationState()) {
     on<LoadNotifications>(_onLoad);
-    on<MarkNotificationAsRead>(_onMarkRead);
-    // on<SyncNotificationsEvent>(_onSync);
+
     on<DeleteNotificationEvent>(_onDelete);
     on<DeleteAllNotificationsEvent>(_onDeleteAll);
     on<AddLocalNotificationEvent>(_onAddLocal);
@@ -158,52 +157,31 @@ class NotificationBloc extends Bloc<NotificationEvent, NotificationState> {
     }
   }
 
-  // Future<void> _onSync(
-  //   SyncNotificationsEvent event,
-  //   Emitter<NotificationState> emit,
-  // ) async {
-  //   try {
-  //     await syncNotificationsUseCase();
-  //     add(LoadNotifications());
-  //   } catch (e) {
-  //     emit(NotificationError('فشل مزامنة التنبيهات'));
-  //   }
-  // }
+
 
   Future<void> _onDelete(
     DeleteNotificationEvent event,
     Emitter<NotificationState> emit,
   ) async {
-    // try {
-    //   await deleteNotificationUseCase(event.id);
-    //   add(LoadNotifications());
-    // } catch (e) {
-    //   emit(NotificationError('فشل حذف التنبيه'));
-    // }
+    try {
+      await deleteNotificationUseCase(event.id);
+      add(LoadNotifications());
+    } catch (e) {
+      emit(NotificationError('فشل حذف التنبيه'));
+    }
   }
 
   Future<void> _onDeleteAll(
     DeleteAllNotificationsEvent event,
     Emitter<NotificationState> emit,
   ) async {
-    // try {
-    //   await deleteAllNotificationsUseCase();
-    //   add(LoadNotifications());
-    // } catch (e) {
-    //   emit(NotificationError('فشل حذف جميع التنبيهات'));
-    // }
+    try {
+      await deleteAllNotificationsUseCase();
+      add(LoadNotifications());
+    } catch (e) {
+      emit(NotificationError('فشل حذف جميع التنبيهات'));
+    }
   }
 
-  Future<void> _onMarkRead(
-    MarkNotificationAsRead event,
-    Emitter<NotificationState> emit,
-  ) async {
-    //   try {
-    //     await markAsReadUseCase(event.id);
-    //     add(LoadNotifications());
-    //   } catch (e) {
-    //     emit(NotificationError('فشل وضع التنبيه كمقروء'));
-    //   }
-    // }
-  }
+
 }

@@ -54,13 +54,12 @@ class _EmployeeDetailsPageState extends State<EmployeeDetailsPage> {
       providers: [
         BlocProvider.value(value: sl<EmployeesBloc>()),
         BlocProvider(
-          create:
-              (_) =>
-                  sl<EmployeeDetailsBloc>()..add(
-                    LoadEmployeeDetailsHoursEvent(
-                      widget.employeeModel.id.toString(),
-                    ),
-                  ),
+          create: (_) =>
+          sl<EmployeeDetailsBloc>()..add(
+            LoadEmployeeDetailsHoursEvent(
+              widget.employeeModel.id.toString(),
+            ),
+          ),
         ),
       ],
       child: Scaffold(
@@ -85,36 +84,21 @@ class _EmployeeDetailsPageState extends State<EmployeeDetailsPage> {
       ),
       centerTitle: true,
       actions: [
-        // ValueListenableBuilder<bool>(
-        //   valueListenable: isArchivedNotifier,
-        //   builder: (context, isArchived, _) {
-        //     return IconButton(
-        //       icon: Icon(
-        //         isArchived ? Icons.unarchive_outlined : Icons.archive_outlined,
-        //         color: isArchived ? Colors.green : Colors.orange,
-        //       ),
-        //       onPressed: () => _showArchiveConfirmation(context, widget.employeeModel, isArchived),
-        //     );
-        //   },
-        // ),
         IconButton(
           icon: const Icon(Icons.edit_note_rounded, color: Colors.blueAccent),
-          onPressed:
-              () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder:
-                      (_) => EditEmployeePage(employee: widget.employeeModel),
-                ),
-              ),
+          onPressed: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => EditEmployeePage(employee: widget.employeeModel),
+            ),
+          ),
         ),
         IconButton(
           icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
-          onPressed:
-              () => _showDeleteConfirmation(
-                context,
-                widget.employeeModel.id!.toString(),
-              ),
+          onPressed: () => _showDeleteConfirmation(
+            context,
+            widget.employeeModel.id!.toString(),
+          ),
         ),
       ],
     );
@@ -133,18 +117,21 @@ class _EmployeeDetailsPageState extends State<EmployeeDetailsPage> {
               children: [
                 ValueListenableBuilder<bool>(
                   valueListenable: isArchivedNotifier,
-                  builder:
-                      (context, isArchived, _) =>
-                          isArchived
-                              ? _buildArchivedBanner(theme)
-                              : const SizedBox.shrink(),
+                  builder: (context, isArchived, _) =>
+                  isArchived
+                      ? _buildArchivedBanner(theme)
+                      : const SizedBox.shrink(),
                 ),
-                _EmployeeHeader(widget.employeeModel, theme),
+                _EmployeeHeader(
+                  widget.employeeModel,
+                  theme,
+                  fullNameOverride: state.employee.fullName,
+                ),
                 SizedBox(height: 24.h),
                 TotalsWidget(
                   theme: theme,
                   totals: state.employee.grandTotals!,
-                  userId:state.employee.employeeId!,
+                  userId: state.employee.employeeId!,
                 ),
                 SizedBox(height: 30.h),
                 EmployeeBuildDateSelector(
@@ -172,15 +159,10 @@ class _EmployeeDetailsPageState extends State<EmployeeDetailsPage> {
         if (state is EmployeeDetailsError) {
           Toaster.showText(text: state.message);
         }
-        //
-        // if (state is EmployeeDetailsLoading) {
-        //   Toaster.showLoading();
-        // }
       },
-      listenWhen:
-          (pre, cur) =>
-              (pre is EmployeeDetailsLoading || cur is EmployeeDetailsError) ||
-              (pre is EmployeeDetailsLoading || cur is EmployeeDeleted),
+      listenWhen: (pre, cur) =>
+      (pre is EmployeeDetailsLoading || cur is EmployeeDetailsError) ||
+          (pre is EmployeeDetailsLoading || cur is EmployeeDeleted),
     );
   }
 
@@ -210,68 +192,66 @@ class _EmployeeDetailsPageState extends State<EmployeeDetailsPage> {
   void _showDeleteConfirmation(BuildContext context, String id) {
     showDialog(
       context: context,
-      builder:
-          (d) => AlertDialog(
-            title: const Text('حذف الموظف'),
-            content: const Text('هل أنت متأكد من حذف الموظف نهائياً؟'),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(d),
-                child: const Text("إلغاء"),
-              ),
-              TextButton(
-                onPressed: () {
-                  context.read<EmployeeDetailsBloc>().add(
-                    DeleteEmployeeEvent(id),
-                  );
-                  Navigator.pop(context);
-                },
-                child: const Text("حذف", style: TextStyle(color: Colors.red)),
-              ),
-            ],
+      builder: (d) => AlertDialog(
+        title: const Text('حذف الموظف'),
+        content: const Text('هل أنت متأكد من حذف الموظف نهائياً؟'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(d),
+            child: const Text("إلغاء"),
           ),
+          TextButton(
+            onPressed: () {
+              context.read<EmployeeDetailsBloc>().add(
+                DeleteEmployeeEvent(id),
+              );
+              Navigator.pop(context);
+            },
+            child: const Text("حذف", style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
     );
   }
 
   void _showArchiveConfirmation(
-    BuildContext context,
-    EmployeeModel employee,
-    bool isArchived,
-  ) {
+      BuildContext context,
+      EmployeeModel employee,
+      bool isArchived,
+      ) {
     final bool willArchive = !isArchived;
     showDialog(
       context: context,
-      builder:
-          (d) => AlertDialog(
-            title: Text(willArchive ? 'أرشفة الموظف' : 'إلغاء الأرشفة'),
-            content: Text(
-              willArchive
-                  ? 'هل أنت متأكد من أرشفة الموظف ${employee.user?.fullName ?? 'المستخدم'}؟'
-                  : 'هل تريد إعادة تنشيط الموظف ${employee.user?.fullName ?? 'المستخدم'}؟',
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(d),
-                child: const Text("إلغاء"),
-              ),
-              TextButton(
-                onPressed: () {
-                  context.read<EmployeesBloc>().add(
-                    isArchived
-                        ? RestoreArchiveEmployeeEvent(employee.id.toString())
-                        : ToggleArchiveEmployeeEvent(employee.id.toString()),
-                  );
-                  Navigator.pop(d);
-                },
-                child: Text(
-                  willArchive ? "أرشفة" : "تنشيط",
-                  style: TextStyle(
-                    color: willArchive ? Colors.orange : Colors.green,
-                  ),
-                ),
-              ),
-            ],
+      builder: (d) => AlertDialog(
+        title: Text(willArchive ? 'أرشفة الموظف' : 'إلغاء الأرشفة'),
+        content: Text(
+          willArchive
+              ? 'هل أنت متأكد من أرشفة الموظف ${employee.user?.fullName ?? 'المستخدم'}؟'
+              : 'هل تريد إعادة تنشيط الموظف ${employee.user?.fullName ?? 'المستخدم'}؟',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(d),
+            child: const Text("إلغاء"),
           ),
+          TextButton(
+            onPressed: () {
+              context.read<EmployeesBloc>().add(
+                isArchived
+                    ? RestoreArchiveEmployeeEvent(employee.id.toString())
+                    : ToggleArchiveEmployeeEvent(employee.id.toString()),
+              );
+              Navigator.pop(d);
+            },
+            child: Text(
+              willArchive ? "أرشفة" : "تنشيط",
+              style: TextStyle(
+                color: willArchive ? Colors.orange : Colors.green,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -279,8 +259,13 @@ class _EmployeeDetailsPageState extends State<EmployeeDetailsPage> {
 class _EmployeeHeader extends StatelessWidget {
   final EmployeeModel employee;
   final ThemeData theme;
+  final String? fullNameOverride;
 
-  const _EmployeeHeader(this.employee, this.theme);
+  const _EmployeeHeader(
+      this.employee,
+      this.theme, {
+        this.fullNameOverride,
+      });
 
   @override
   Widget build(BuildContext context) {
@@ -293,7 +278,7 @@ class _EmployeeHeader extends StatelessWidget {
         ),
         SizedBox(height: 16.h),
         Text(
-          employee.user?.fullName ?? "",
+          fullNameOverride ?? employee.user?.fullName ?? "",
           style: TextStyle(
             fontSize: 22.sp,
             fontWeight: FontWeight.w900,
@@ -364,10 +349,9 @@ class _WeeklyWorkSection extends StatelessWidget {
               style: TextStyle(
                 fontSize: 13.sp,
                 fontWeight: isBold ? FontWeight.w900 : FontWeight.bold,
-                color:
-                    isBold
-                        ? theme.textTheme.bodyLarge?.color
-                        : Colors.grey.shade600,
+                color: isBold
+                    ? theme.textTheme.bodyLarge?.color
+                    : Colors.grey.shade600,
               ),
             ),
             Text(
@@ -407,94 +391,92 @@ class _WeeklyWorkSection extends StatelessWidget {
   );
 
   void _showPaymentOptions(
-    BuildContext context,
-    int weekNumber,
-    double remaining,
-  ) {
+      BuildContext context,
+      int weekNumber,
+      double remaining,
+      ) {
     showDialog(
       context: context,
-      builder:
-          (d) => AlertDialog(
-            title: const Text("خيارات الصرف"),
-            content: Text(
-              "المبلغ المتبقي للأسبوع $weekNumber هو ${remaining.toStringAsFixed(0)} \$",
+      builder: (d) => AlertDialog(
+        title: const Text("خيارات الصرف"),
+        content: Text(
+          "المبلغ المتبقي للأسبوع $weekNumber هو ${remaining.toStringAsFixed(0)} \$",
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(d);
+              _processPayment(context, weekNumber, remaining, isFull: true);
+            },
+            child: const Text(
+              "دفع كامل",
+              style: TextStyle(
+                color: Colors.green,
+                fontWeight: FontWeight.bold,
+              ),
             ),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(d);
-                  _processPayment(context, weekNumber, remaining, isFull: true);
-                },
-                child: const Text(
-                  "دفع كامل",
-                  style: TextStyle(
-                    color: Colors.green,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(d);
-                  _showPartialDialog(context, weekNumber, remaining);
-                },
-                child: const Text("دفع جزئي"),
-              ),
-            ],
           ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(d);
+              _showPartialDialog(context, weekNumber, remaining);
+            },
+            child: const Text("دفع جزئي"),
+          ),
+        ],
+      ),
     );
   }
 
   void _showPartialDialog(
-    BuildContext context,
-    int weekNumber,
-    double remaining,
-  ) {
+      BuildContext context,
+      int weekNumber,
+      double remaining,
+      ) {
     final c = TextEditingController();
     showDialog(
       context: context,
-      builder:
-          (d) => AlertDialog(
-            title: const Text("دفع جزئي"),
-            content: TextField(
-              controller: c,
-              keyboardType: TextInputType.number,
-              decoration: InputDecoration(
-                labelText: "المبلغ",
-                hintText: "بحد أقصى ${remaining.toInt()}",
-              ),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(d),
-                child: const Text("إلغاء"),
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  double a = double.tryParse(c.text) ?? 0;
-                  if (a > 0 && a <= remaining) {
-                    Navigator.pop(d);
-                    _processPayment(
-                      context,
-                      weekNumber,
-                      a,
-                      isFull: a == remaining,
-                    );
-                  }
-                },
-                child: const Text("تأكيد"),
-              ),
-            ],
+      builder: (d) => AlertDialog(
+        title: const Text("دفع جزئي"),
+        content: TextField(
+          controller: c,
+          keyboardType: TextInputType.number,
+          decoration: InputDecoration(
+            labelText: "المبلغ",
+            hintText: "بحد أقصى ${remaining.toInt()}",
           ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(d),
+            child: const Text("إلغاء"),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              double a = double.tryParse(c.text) ?? 0;
+              if (a > 0 && a <= remaining) {
+                Navigator.pop(d);
+                _processPayment(
+                  context,
+                  weekNumber,
+                  a,
+                  isFull: a == remaining,
+                );
+              }
+            },
+            child: const Text("تأكيد"),
+          ),
+        ],
+      ),
     );
   }
 
   void _processPayment(
-    BuildContext context,
-    int weekNumber,
-    double amount, {
-    required bool isFull,
-  }) {
+      BuildContext context,
+      int weekNumber,
+      double amount, {
+        required bool isFull,
+      }) {
     final state = context.read<EmployeeDetailsBloc>().state;
     if (state is EmployeeDetailsLoaded) {
       final emp = state.employee;

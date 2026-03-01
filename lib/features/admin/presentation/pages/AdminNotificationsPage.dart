@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
-import '../../../Notification/domain/usecases/send_notification_use_case.dart';
 import '../../../Notification/presentation/bloc/notification_bloc.dart';
 import '../../../Notification/presentation/bloc/notification_event.dart';
 import '../../../Notification/presentation/bloc/notification_state.dart';
@@ -25,6 +24,36 @@ class _AdminNotificationsPageState extends State<AdminNotificationsPage> {
     context.read<NotificationBloc>().add(LoadNotifications());
   }
 
+  void _showDeleteAllDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        final theme = Theme.of(context);
+        return AlertDialog(
+          backgroundColor: theme.cardColor,
+          title: const Text("مسح السجل بالكامل"),
+          content: const Text("هل أنت متأكد من رغبتك في حذف كافة التنبيهات المرسلة؟ لا يمكن التراجع عن هذا الإجراء."),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text("إلغاء"),
+            ),
+            TextButton(
+              onPressed: () {
+                context.read<NotificationBloc>().add(DeleteAllNotificationsEvent());
+                Navigator.of(context).pop();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('تم مسح السجل بالكامل'), backgroundColor: Colors.redAccent),
+                );
+              },
+              child: const Text("حذف الكل", style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -38,7 +67,7 @@ class _AdminNotificationsPageState extends State<AdminNotificationsPage> {
         backgroundColor: theme.scaffoldBackgroundColor,
         elevation: 0,
         title: Text(
-          "إدارة التنبيهات المرسلة",
+          "إدارة التنبيهات",
           style: TextStyle(
             fontSize: isSmallScreen ? 18.sp : 20.sp,
             fontWeight: FontWeight.bold,
@@ -48,9 +77,13 @@ class _AdminNotificationsPageState extends State<AdminNotificationsPage> {
         centerTitle: true,
         actions: [
           IconButton(
+            icon: const Icon(Icons.delete_sweep_rounded, color: Colors.redAccent),
+            onPressed: () => _showDeleteAllDialog(context),
+            tooltip: "مسح الكل",
+          ),
+          IconButton(
             icon: Icon(Icons.refresh_rounded, color: theme.primaryColor),
-            onPressed:
-                () => context.read<NotificationBloc>().add(LoadNotifications()),
+            onPressed: () => context.read<NotificationBloc>().add(LoadNotifications()),
           ),
         ],
       ),
@@ -58,146 +91,85 @@ class _AdminNotificationsPageState extends State<AdminNotificationsPage> {
         builder: (context, state) {
           return state.getNotificationsData.builder(
             onSuccess: (_) {
-              if (state.getNotificationsData.data!.isEmpty) {
+              final notifications = state.getNotificationsData.data!;
+              if (notifications.isEmpty) {
                 return const EmptyNotifications().animate().fadeIn();
               }
 
-              return ListView.builder(
-                physics: const BouncingScrollPhysics(),
-                padding: EdgeInsets.symmetric(
-                  horizontal: size.width * 0.04,
-                  vertical: 16.h,
-                ),
-                itemCount: state.getNotificationsData.data!.length,
-                itemBuilder: (context, index) {
-                  final notification = state.getNotificationsData.data![index];
-                  return Padding(
-                        padding: EdgeInsets.only(bottom: 15.h),
-                        child: Dismissible(
-                          key: Key(notification.id.toString()),
-                          direction: DismissDirection.startToEnd,
-                          confirmDismiss: (direction) async {
-                            return await showDialog(
-                              context: context,
-                              builder: (BuildContext context) {
-                                return AlertDialog(
-                                  backgroundColor: theme.cardColor,
-                                  title: Text(
-                                    "تأكيد الحذف",
-                                    style: TextStyle(color: colorScheme.error),
-                                  ),
-                                  content: Text(
-                                    "هل أنت متأكد من رغبتك في حذف هذا الإشعار نهائياً؟",
-                                    style: TextStyle(
-                                      color: theme.textTheme.bodyMedium?.color,
-                                    ),
-                                  ),
-                                  actions: <Widget>[
-                                    TextButton(
-                                      onPressed:
-                                          () =>
-                                              Navigator.of(context).pop(false),
-                                      child: const Text("إلغاء"),
-                                    ),
-                                    TextButton(
-                                      onPressed:
-                                          () => Navigator.of(context).pop(true),
-                                      child: Text(
-                                        "حذف",
-                                        style: TextStyle(
-                                          color: colorScheme.error,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                );
-                              },
-                            );
-                          },
-                          onDismissed: (_) {
-                            context.read<NotificationBloc>().add(
-                              DeleteNotificationEvent(notification.id.toString()),
-                            );
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('تم حذف التنبيه من السجلات'),
-                                duration: Duration(seconds: 1),
-                              ),
-                            );
-                          },
-                          background: Container(
-                            decoration: BoxDecoration(
-                              color: Colors.redAccent.withOpacity(0.1),
-                              borderRadius: BorderRadius.circular(15.r),
-                            ),
-                            alignment: Alignment.centerRight,
-                            padding: const EdgeInsets.only(right: 20),
-                            child: const Icon(
-                              Icons.delete_sweep_rounded,
-                              color: Colors.redAccent,
-                            ),
-                          ),
-                          child: NotificationItem(
-                            notification: notification,
-                            onTap: () {},
-                          ),
-                        ),
-                      )
-                      .animate()
-                      .fadeIn(
-                        delay: (200 + (index * 150)).ms,
-                        duration: 600.ms,
-                      ) // أبطأ وسلس
-                      .slideX(begin: 0.05, end: 0);
+              final sortedNotifications = List.from(notifications)
+                ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+
+              return RefreshIndicator(
+                onRefresh: () async {
+                  context.read<NotificationBloc>().add(LoadNotifications());
                 },
+                child: ListView.builder(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
+                  itemCount: sortedNotifications.length,
+                  itemBuilder: (context, index) {
+                    final notification = sortedNotifications[index];
+                    return Padding(
+                      padding: EdgeInsets.only(bottom: 15.h),
+                      child: Dismissible(
+                        key: Key(notification.id.toString()),
+                        direction: DismissDirection.endToStart,
+                        confirmDismiss: (direction) async {
+                          return await showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+                                backgroundColor: theme.cardColor,
+                                title: const Text("حذف التنبيه"),
+                                content: const Text("هل تريد حذف هذا التنبيه من السجلات؟"),
+                                actions: <Widget>[
+                                  TextButton(onPressed: () => Navigator.pop(context, false), child: const Text("إلغاء")),
+                                  TextButton(
+                                    onPressed: () => Navigator.pop(context, true),
+                                    child: const Text("حذف", style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+                        },
+                        onDismissed: (_) {
+                          context.read<NotificationBloc>().add(DeleteNotificationEvent(notification.id.toString()));
+                        },
+                        background: Container(
+                          decoration: BoxDecoration(color: Colors.redAccent.withOpacity(0.1), borderRadius: BorderRadius.circular(15.r)),
+                          alignment: Alignment.centerLeft,
+                          padding: const EdgeInsets.only(left: 20),
+                          child: const Icon(Icons.delete_outline, color: Colors.redAccent),
+                        ),
+                        child: NotificationItem(notification: notification, onTap: () {}),
+                      ),
+                    ).animate().fadeIn(delay: (index * 100).ms).slideX(begin: 0.05, end: 0);
+                  },
+                ),
               );
             },
             loadingWidget: const Center(child: CircularProgressIndicator()),
-            failedWidget: Center(
-              child: Text(
-                "حدث خطأ في تحميل السجلات",
-                style: TextStyle(color: theme.disabledColor),
-              ),
-            ),
+            failedWidget: Center(child: Text("فشل تحميل البيانات", style: TextStyle(color: theme.disabledColor))),
           );
         },
       ),
       floatingActionButton: FloatingActionButton.extended(
         backgroundColor: colorScheme.primary,
-        foregroundColor: colorScheme.onPrimary,
         onPressed: () => _showSendNotificationSheet(context, theme),
         icon: const Icon(Icons.send_rounded, color: Colors.white),
-        label: Text(
-          isSmallScreen ? "إرسال" : "إرسال تنبيه جديد",
-          style: const TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      ).animate().scale(
-        delay: 800.ms,
-        duration: 800.ms,
-        curve: Curves.elasticOut,
-      ),
+        label: Text(isSmallScreen ? "إرسال" : "إرسال تنبيه جديد", style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+      ).animate().scale(delay: 500.ms),
     );
   }
 
   void _showSendNotificationSheet(BuildContext context, ThemeData theme) {
-
-
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: theme.cardColor,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(25.r)),
-      ),
-      builder:
-          (_) => AddNotificationSheetWidget(
-            theme: theme,
-
-          ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25.r)),
+      builder: (_) => AddNotificationSheetWidget(theme: theme),
     );
   }
 }

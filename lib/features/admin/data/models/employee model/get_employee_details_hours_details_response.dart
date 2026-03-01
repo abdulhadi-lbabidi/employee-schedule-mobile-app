@@ -61,6 +61,7 @@ class Totals {
   final double? totalRegularPay;
   final double? totalOvertimePay;
   final double? grandTotalPay;
+  final List<WorkshopSummary>? workshopsSummary;
 
   Totals({
     this.totalRegularHours,
@@ -68,6 +69,7 @@ class Totals {
     this.totalRegularPay,
     this.totalOvertimePay,
     this.grandTotalPay,
+    this.workshopsSummary,
   });
 
   Totals copyWith({
@@ -76,6 +78,7 @@ class Totals {
     double? totalRegularPay,
     double? totalOvertimePay,
     double? grandTotalPay,
+    List<WorkshopSummary>? workshopsSummary,
   }) =>
       Totals(
         totalRegularHours: totalRegularHours ?? this.totalRegularHours,
@@ -83,6 +86,7 @@ class Totals {
         totalRegularPay: totalRegularPay ?? this.totalRegularPay,
         totalOvertimePay: totalOvertimePay ?? this.totalOvertimePay,
         grandTotalPay: grandTotalPay ?? this.grandTotalPay,
+        workshopsSummary: workshopsSummary ?? this.workshopsSummary,
       );
 
   factory Totals.fromJson(Map<String, dynamic> json) => Totals(
@@ -91,6 +95,10 @@ class Totals {
     totalRegularPay: json["total_regular_pay"]?.toDouble(),
     totalOvertimePay: json["total_overtime_pay"]?.toDouble(),
     grandTotalPay: json["grand_total_pay"]?.toDouble(),
+    workshopsSummary: json["workshops_summary"] == null
+        ? []
+        : List<WorkshopSummary>.from(
+        json["workshops_summary"]!.map((x) => WorkshopSummary.fromJson(x))),
   );
 
   Map<String, dynamic> toJson() => {
@@ -99,9 +107,98 @@ class Totals {
     "total_regular_pay": totalRegularPay,
     "total_overtime_pay": totalOvertimePay,
     "grand_total_pay": grandTotalPay,
+    "workshops_summary": workshopsSummary == null
+        ? []
+        : List<dynamic>.from(workshopsSummary!.map((x) => x.toJson())),
+  };
+}
+class WorkshopSummary {
+  final WorkshopInfo? workshop;
+  final double? totalRegularHours;
+  final double? totalOvertimeHours;
+  final double? totalRegularPay;
+  final double? totalOvertimePay;
+  final double? totalPay;
+
+  WorkshopSummary({
+    this.workshop,
+    this.totalRegularHours,
+    this.totalOvertimeHours,
+    this.totalRegularPay,
+    this.totalOvertimePay,
+    this.totalPay,
+  });
+
+  WorkshopSummary copyWith({
+    WorkshopInfo? workshop,
+    double? totalRegularHours,
+    double? totalOvertimeHours,
+    double? totalRegularPay,
+    double? totalOvertimePay,
+    double? totalPay,
+  }) =>
+      WorkshopSummary(
+        workshop: workshop ?? this.workshop,
+        totalRegularHours: totalRegularHours ?? this.totalRegularHours,
+        totalOvertimeHours: totalOvertimeHours ?? this.totalOvertimeHours,
+        totalRegularPay: totalRegularPay ?? this.totalRegularPay,
+        totalOvertimePay: totalOvertimePay ?? this.totalOvertimePay,
+        totalPay: totalPay ?? this.totalPay,
+      );
+
+  factory WorkshopSummary.fromJson(Map<String, dynamic> json) => WorkshopSummary(
+    workshop: json["workshop"] == null ? null : WorkshopInfo.fromJson(json["workshop"]),
+    totalRegularHours: json["total_regular_hours"]?.toDouble(),
+    totalOvertimeHours: json["total_overtime_hours"]?.toDouble(),
+    totalRegularPay: json["total_regular_pay"]?.toDouble(),
+    totalOvertimePay: json["total_overtime_pay"]?.toDouble(),
+    totalPay: json["total_pay"]?.toDouble(),
+  );
+
+  Map<String, dynamic> toJson() => {
+    "workshop": workshop?.toJson(),
+    "total_regular_hours": totalRegularHours,
+    "total_overtime_hours": totalOvertimeHours,
+    "total_regular_pay": totalRegularPay,
+    "total_overtime_pay": totalOvertimePay,
+    "total_pay": totalPay,
   };
 }
 
+class WorkshopInfo {
+  final int? id;
+  final String? name;
+  final String? location;
+
+  WorkshopInfo({
+    this.id,
+    this.name,
+    this.location,
+  });
+
+  WorkshopInfo copyWith({
+    int? id,
+    String? name,
+    String? location,
+  }) =>
+      WorkshopInfo(
+        id: id ?? this.id,
+        name: name ?? this.name,
+        location: location ?? this.location,
+      );
+
+  factory WorkshopInfo.fromJson(Map<String, dynamic> json) => WorkshopInfo(
+    id: json["id"],
+    name: json["name"],
+    location: json["location"],
+  );
+
+  Map<String, dynamic> toJson() => {
+    "id": id,
+    "name": name,
+    "location": location,
+  };
+}
 class Week {
   final String? weekRange;
   final List<WorkshopElement>? workshops;

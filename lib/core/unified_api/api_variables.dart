@@ -153,12 +153,16 @@ class ApiVariables {
 
   static Uri getNotification() => _mainUri('/api/notifications');
   static Uri sendNotification() => _mainUri('/api/notifications/send');
+  static Uri deleteAllNotification() => _mainUri('/api/notifications/mark-all-as-read');
+
+
+
   static Uri checkInNotification() => _mainUri('/api/notifications/user-check-in');
   static Uri checkOutNotification() => _mainUri('/api/notifications/user-check-out');
 
 
   static Uri deleteNotification(String id) =>
-      _mainUri('/api/notifications/$id');
+      _mainUri('/api/notifications/$id/mark-as-read');
   static Uri updateFCMToken() => _mainUri(
       '/api/update-fcm-token');
   static Uri deleteFCMToken() => _mainUri(

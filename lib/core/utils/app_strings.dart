@@ -17,7 +17,7 @@ class AppStrings {
 
   // Auth / Login
   static const String loginTitle = 'تسجيل الدخول';
-  static const String usernameLabel = 'اسم المستخدم';
+  static const String usernameLabel = 'البريد الاكتروني';
   static const String passwordLabel = 'كلمة المرور';
   static const String fillAllFields = 'الرجاء ملء جميع الحقول';
   static const String noAccount = 'ليس لديك حساب؟';

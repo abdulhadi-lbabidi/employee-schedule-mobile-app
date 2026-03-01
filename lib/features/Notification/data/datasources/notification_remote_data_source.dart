@@ -62,8 +62,22 @@ class NotificationRemoteDataSourceImpl with HandlingApiManager{
 
     return wrapHandlingApi(
       tryCall:
-          () => _baseApi.delete(
+          () => _baseApi.post(
               ApiVariables.deleteNotification(id),
+
+      ),
+      jsonConvert: (data){
+        return ;
+      },
+    );
+  }
+
+  Future<void> deleteAllNotification() async {
+
+    return wrapHandlingApi(
+      tryCall:
+          () => _baseApi.post(
+        ApiVariables.deleteAllNotification(),
 
       ),
       jsonConvert: (data){

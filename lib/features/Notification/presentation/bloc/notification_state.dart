@@ -44,7 +44,7 @@ class NotificationState {
 //   NotificationLoaded(this.notifications);
 // }
 //
-// class NotificationError extends NotificationState {
-//   final String message;
-//   NotificationError(this.message);
-// }
+class NotificationError extends NotificationState {
+  final String message;
+  NotificationError(this.message);
+}

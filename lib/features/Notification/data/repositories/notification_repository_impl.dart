@@ -4,7 +4,6 @@ import 'package:untitled8/common/helper/src/typedef.dart';
 import 'package:untitled8/core/unified_api/error_handler.dart';
 import '../../../../core/hive_service.dart';
 
-// import '../../domain/entities/notification_entity.dart'; // No longer needed directly for getNotifications return type
 import '../../domain/repositories/notification_repository.dart';
 import '../datasources/notification_locale_data_sources.dart';
 import '../datasources/notification_remote_data_source.dart';
@@ -16,20 +15,14 @@ import 'package:injectable/injectable.dart';
 class NotificationRepositoryImpl
     with HandlingException
     implements NotificationRepository {
+  final NotificationRemoteDataSourceImpl _remoteDataSource;
+  final NotificationLocaleDataSources _localeDataSources;
 
-  final NotificationRemoteDataSourceImpl
-  _remoteDataSource;
-  final NotificationLocaleDataSources
-  _localeDataSources;
-
-  NotificationRepositoryImpl({required NotificationRemoteDataSourceImpl remoteDataSource, required NotificationLocaleDataSources localeDataSources}) : _remoteDataSource = remoteDataSource, _localeDataSources = localeDataSources; // Assuming this is correct
-
-
-
-  // Future<Box<NotificationModel>> get _box async =>
-  //     await hiveService.notificationBox;
-
-  /// 🔹 إرسال إشعار للسيرفر وإضافة نسخة محلية
+  NotificationRepositoryImpl({
+    required NotificationRemoteDataSourceImpl remoteDataSource,
+    required NotificationLocaleDataSources localeDataSources,
+  }) : _remoteDataSource = remoteDataSource,
+       _localeDataSources = localeDataSources; // Assuming this is correct
   @override
   DataResponse<void> sendNotification(BodyMap params) async =>
       wrapHandlingException(
@@ -44,66 +37,24 @@ class NotificationRepositoryImpl
   DataResponse<void> checkOutWorkshop(BodyMap params) async =>
       wrapHandlingException(tryCall: () => _remoteDataSource.checkOut(params));
 
-  /// 🔹 جلب Box الإشعارات من HiveService
-
-  /// 🔹 جلب كل الإشعارات المخزنة محلياً (كـ Models)
   @override
-  DataResponse<GetAllNotificationsResponse> getNotifications()async =>
+  DataResponse<GetAllNotificationsResponse> getNotifications() async =>
       wrapHandlingException(
         tryCall: () => _remoteDataSource.getAllNotifications(),
-        otherCall: ()=>_localeDataSources.getNotifications()
+        otherCall: () => _localeDataSources.getNotifications(),
       );
-  // /// 🔹 إضافة إشعار محلي في الـ Hive
-  // @override
-  // Future<void> addLocalNotification(
-  //   NotificationModel notification,
-  // ) async {
-  //   final box = await _box;
-  //   await box.put(notification.id, notification);
-  // }
-  //
-  // /// 🔹 مزامنة الإشعارات مع السيرفر
-  // /// إذا كانت الإشعار موجودة محلياً، لا يتم إضافتها مرتين
-  // @override
-  // Future<void> syncNotifications() async {
-  //   try {
-  //     final remoteNotifications = await remoteDataSource.fetchNotifications();
-  //     final box = await _box;
-  //     for (var model in remoteNotifications) {
-  //       if (!box.containsKey(model.id)) {
-  //         await box.put(model.id, model);
-  //       }
-  //     }
-  //   } catch (e) {
-  //     debugPrint("Sync notifications failed: $e");
-  //   }
-  // }
-  //
-  //
-  // /// 🔹 حذف إشعار محدد محلياً
-  // @override
-  // Future<void> deleteNotification(String id) async {
-  //   final box = await _box;
-  //   await box.delete(id);
-  // }
-  //
-  // /// 🔹 حذف كل الإشعارات محلياً
-  // @override
-  // Future<void> deleteAllNotifications() async {
-  //   final box = await _box;
-  //   await box.clear();
-  // }
-  //
-  // /// 🔹 وضع إشعار كمقروء
-  // @override
-  // Future<void> markNotificationAsRead(String id) async {
-  //   // Corrected method name to match interface
-  //   final box = await _box;
-  //   final model = box.get(id);
-  //   if (model != null) {
-  //     model.isRead = true;
-  //     await model.save();
-  //   }
-  // }
 
+  @override
+  Future<void> deleteNotification(String id) async {
+    wrapHandlingException(
+      tryCall: () => _remoteDataSource.deleteNotification(id),
+    );
+  }
+
+  @override
+  Future<void> deleteAllNotifications() async {
+    wrapHandlingException(
+      tryCall: () => _remoteDataSource.deleteAllNotification(),
+    );
+  }
 }

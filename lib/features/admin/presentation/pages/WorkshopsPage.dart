@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_animate/flutter_animate.dart'; // 🔹 إضافة الانميشن
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:latlong2/latlong.dart' as latlong;
-import 'package:untitled8/features/admin/data/models/workshop_models/workshop_model.g.dart';
-import 'package:untitled8/features/admin/domain/usecases/add_workshop.dart';
+import '../../data/models/workshop_models/workshop_model.g.dart';
+import '../../domain/usecases/add_workshop.dart';
 import '../bloc/workshops/workshops_bloc.dart';
 import '../bloc/workshops/workshops_event.dart';
 import '../bloc/workshops/workshops_state.dart';
+import '../../data/models/workshop_models/get_all_workshop_response.dart';
+
 import '../widgets/map_picker_widget.dart';
 import 'WorkshopDetailsPage.dart';
 
@@ -21,12 +23,9 @@ class WorkshopsPage extends StatefulWidget {
 class _WorkshopsPageState extends State<WorkshopsPage> {
   @override
   void initState() {
-    context.read<WorkshopsBloc>()
-      ..add(GetAllWorkShopEvent())
-      ..add(GetAllArchivedWorkShopEvent());
-
-    // TODO: implement initState
     super.initState();
+    context.read<WorkshopsBloc>().add(GetAllWorkShopEvent());
+    context.read<WorkshopsBloc>().add(GetAllArchivedWorkShopEvent());
   }
 
   @override
@@ -36,46 +35,49 @@ class _WorkshopsPageState extends State<WorkshopsPage> {
     return Scaffold(
       backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: theme.scaffoldBackgroundColor,
-        elevation: 0,
         title: Text(
           "إدارة الورشات",
-          style: TextStyle(
-            fontSize: 18.sp,
-            fontWeight: FontWeight.bold,
-            color: theme.primaryColor,
-          ),
+          style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
         actions: [
           IconButton(
-            icon: Icon(Icons.refresh_rounded, color: theme.primaryColor),
-            onPressed:
-                () => context.read<WorkshopsBloc>().add(GetAllWorkShopEvent()),
+            onPressed: () {
+              context.read<WorkshopsBloc>().add(GetAllWorkShopEvent());
+              context.read<WorkshopsBloc>().add(GetAllArchivedWorkShopEvent());
+            },
+            icon: const Icon(Icons.refresh_rounded),
           ),
         ],
       ),
       body: BlocConsumer<WorkshopsBloc, WorkshopsState>(
         builder: (context, state) {
-          return Column(
-            mainAxisSize: MainAxisSize.max,
+          return ListView(
+            padding: EdgeInsets.symmetric(horizontal: 20.w),
             children: [
               state.getAllWorkshopData.builder(
-                onSuccess: (_) {
-                  final activeWorkshops = state.getAllWorkshopData.data!.data!;
-
-                  return ListView(
-                    padding: EdgeInsets.all(16.w),
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
+                onSuccess: (data) {
+                  final activeWorkShops = data?.data ?? [];
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      if (activeWorkshops.isNotEmpty) ...[
-                        _buildSectionTitle(
-                          "الورشات النشطة",
-                          Icons.storefront_rounded,
-                          theme,
-                        ).animate().fadeIn(delay: 200.ms),
-                        ...activeWorkshops.asMap().entries.map(
+                      _buildSectionTitle(
+                        "الورشات النشطة",
+                        Icons.storefront_rounded,
+                        theme,
+                      ).animate().fadeIn(),
+                      if (activeWorkShops.isEmpty)
+                        Center(
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(vertical: 20.h),
+                            child: Text(
+                              "لا توجد ورشات نشطة",
+                              style: TextStyle(color: theme.disabledColor),
+                            ),
+                          ),
+                        )
+                      else
+                        ...activeWorkShops.asMap().entries.map(
                           (entry) => _buildWorkshopCard(
                                 context,
                                 entry.value,
@@ -84,74 +86,50 @@ class _WorkshopsPageState extends State<WorkshopsPage> {
                               )
                               .animate()
                               .fadeIn(
-                                delay: (300 + (entry.key * 150)).ms,
-                                duration: 600.ms,
+                                delay: (entry.key * 100).ms,
+                                duration: 500.ms,
                               )
-                              .scale(
-                                begin: const Offset(0.95, 0.95),
-                                end: const Offset(1, 1),
-                              ),
+                              .slideX(begin: 0.1, end: 0),
                         ),
-                      ],
                     ],
                   );
                 },
-                loadingWidget: Expanded(
-                  child: Center(child: CircularProgressIndicator()),
-                ),
+                loadingWidget: const Center(child: CircularProgressIndicator()),
                 failedWidget: Center(
-                  child: Text(
-                    state.getAllWorkshopData.errorMessage,
-                    style: TextStyle(color: theme.disabledColor),
-                  ),
+                  child: Text(state.getAllWorkshopData.errorMessage),
                 ),
               ),
+              SizedBox(height: 20.h),
               state.getAllArchivedWorkshopData.builder(
-                onSuccess: (_) {
-                  final archivedWorkShops =
-                      state.getAllArchivedWorkshopData.data!.data!;
-
-                  return ListView(
-                    physics: const NeverScrollableScrollPhysics(),
-                    shrinkWrap: true,
-                    padding: EdgeInsets.all(16.w),
+                onSuccess: (data) {
+                  final archivedWorkShops = data?.data ?? [];
+                  if (archivedWorkShops.isEmpty) return const SizedBox.shrink();
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      if (archivedWorkShops.isNotEmpty) ...[
-                        _buildSectionTitle(
-                          "الورشات المؤرشفة",
-                          Icons.storefront_rounded,
-                          theme,
-                        ).animate().fadeIn(delay: 200.ms),
-                        ...archivedWorkShops.asMap().entries.map(
-                          (entry) => _buildWorkshopCard(
-                                context,
-                                entry.value,
-                                true,
-                                theme,
-                              )
-                              .animate()
-                              .fadeIn(
-                                delay: (300 + (entry.key * 150)).ms,
-                                duration: 600.ms,
-                              )
-                              .scale(
-                                begin: const Offset(0.95, 0.95),
-                                end: const Offset(1, 1),
-                              ),
-                        ),
-                      ],
+                      _buildSectionTitle(
+                        "الورشات المؤرشفة",
+                        Icons.archive_outlined,
+                        theme,
+                      ).animate().fadeIn(delay: 200.ms),
+                      ...archivedWorkShops.asMap().entries.map(
+                        (entry) => _buildWorkshopCard(
+                              context,
+                              entry.value,
+                              true,
+                              theme,
+                            )
+                            .animate()
+                            .fadeIn(
+                              delay: (300 + (entry.key * 150)).ms,
+                              duration: 600.ms,
+                            ),
+                      ),
                     ],
                   );
                 },
-                loadingWidget: Expanded(
-                  child: Center(child: CircularProgressIndicator()),
-                ),
-                failedWidget: Center(
-                  child: Text(
-                    state.getAllArchivedWorkshopData.errorMessage,
-                    style: TextStyle(color: theme.disabledColor),
-                  ),
-                ),
+                loadingWidget: const SizedBox.shrink(),
+                failedWidget: const SizedBox.shrink(),
               ),
             ],
           );
@@ -162,23 +140,14 @@ class _WorkshopsPageState extends State<WorkshopsPage> {
               context.read<WorkshopsBloc>().add(GetAllWorkShopEvent());
             },
           );
-
-          state.restoreArchiveData.listenerFunction(
-            onSuccess: () {
-            },
-          );
-          state.toggleWorkshopArchiveData.listenerFunction(
-            onSuccess: () {
-            },
-          );
+          state.restoreArchiveData.listenerFunction(onSuccess: () {});
+          state.toggleWorkshopArchiveData.listenerFunction(onSuccess: () {});
         },
-        listenWhen:
-            (pre, cur) =>
-                (pre.addWorkshopData.status != cur.addWorkshopData.status) ||
-                (pre.restoreArchiveData.status !=
-                    cur.restoreArchiveData.status) ||
-                (pre.toggleWorkshopArchiveData.status !=
-                    cur.toggleWorkshopArchiveData.status),
+        listenWhen: (pre, cur) =>
+            (pre.addWorkshopData.status != cur.addWorkshopData.status) ||
+            (pre.restoreArchiveData.status != cur.restoreArchiveData.status) ||
+            (pre.toggleWorkshopArchiveData.status !=
+                cur.toggleWorkshopArchiveData.status),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _showAddWorkshopDialog(context, theme),
@@ -214,8 +183,7 @@ class _WorkshopsPageState extends State<WorkshopsPage> {
     WorkshopModel workshop,
     bool isArchived,
     ThemeData theme,
-  )
-  {
+  ) {
     return Card(
       elevation: isArchived ? 0 : 1,
       margin: EdgeInsets.only(bottom: 12.h),
@@ -226,19 +194,17 @@ class _WorkshopsPageState extends State<WorkshopsPage> {
         side: BorderSide(color: theme.dividerColor.withOpacity(0.1)),
       ),
       child: ListTile(
-        onTap:
-            () => Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => WorkshopDetailsPage(workshop: workshop),
-              ),
-            ),
+        onTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => WorkshopDetailsPage(workshop: workshop),
+          ),
+        ),
         leading: CircleAvatar(
           radius: 22.r,
-          backgroundColor:
-              isArchived
-                  ? theme.disabledColor.withOpacity(0.2)
-                  : theme.primaryColor.withOpacity(0.1),
+          backgroundColor: isArchived
+              ? theme.disabledColor.withOpacity(0.2)
+              : theme.primaryColor.withOpacity(0.1),
           child: Icon(
             Icons.home_work_rounded,
             color: isArchived ? theme.disabledColor : theme.primaryColor,
@@ -251,10 +217,9 @@ class _WorkshopsPageState extends State<WorkshopsPage> {
             fontWeight: FontWeight.bold,
             fontSize: 15.sp,
             decoration: isArchived ? TextDecoration.lineThrough : null,
-            color:
-                isArchived
-                    ? theme.disabledColor
-                    : theme.textTheme.bodyLarge?.color,
+            color: isArchived
+                ? theme.disabledColor
+                : theme.textTheme.bodyLarge?.color,
           ),
         ),
         subtitle: Text(
@@ -270,14 +235,13 @@ class _WorkshopsPageState extends State<WorkshopsPage> {
             isArchived ? Icons.unarchive_outlined : Icons.archive_outlined,
             color: isArchived ? Colors.green : Colors.orange,
           ),
-          onPressed:
-              () => _showArchiveDialog(
-                context,
-                workshop.id!.toString(),
-                workshop.name!,
-                isArchived,
-                theme,
-              ),
+          onPressed: () => _showArchiveDialog(
+            context,
+            workshop.id!.toString(),
+            workshop.name!,
+            isArchived,
+            theme,
+          ),
         ),
       ),
     );
@@ -297,153 +261,115 @@ class _WorkshopsPageState extends State<WorkshopsPage> {
         final GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
         return StatefulBuilder(
-          builder:
-              (context, setDialogState) => AlertDialog(
-                backgroundColor: theme.cardColor,
-                title: Text(
-                  "إضافة ورشة جديدة",
-                  style: TextStyle(color: theme.textTheme.titleLarge?.color),
-                ),
-                content: Form(
-                  key: formKey,
-                  child: SingleChildScrollView(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        TextFormField(
-                          controller: nameController,
-                          style: TextStyle(
-                            color: theme.textTheme.bodyLarge?.color,
-                          ),
-                          validator: (text) {
-                            if (text == null || text.trim().length < 2) {
-                              return 'الاسم غير صالح';
-                            }
-                            return null;
-                          },
-                          decoration: const InputDecoration(
-                            labelText: "اسم الورشة",
-                            hintText: "مثلاً: ورشة النجارة",
-                          ),
-                        ),
-                        SizedBox(height: 20),
-                        TextFormField(
-                          controller: cityController,
-                          style: TextStyle(
-                            color: theme.textTheme.bodyLarge?.color,
-                          ),
-                          validator: (text) {
-                            if (text == null || text.trim().length < 2) {
-                              return 'الاسم غير صالح';
-                            }
-                            return null;
-                          },
-                          decoration: const InputDecoration(
-                            labelText: "اسم المدينة",
-                            hintText: "مثلاً: مدينة حلب",
-                          ),
-                        ),
-                        SizedBox(height: 20),
-                        TextFormField(
-                          controller: descriptionController,
-                          style: TextStyle(
-                            color: theme.textTheme.bodyLarge?.color,
-                          ),
-                          validator: (text) {
-                            if (text == null || text.trim().length < 2) {
-                              return 'الاسم غير صالح';
-                            }
-                            return null;
-                          },
-                          decoration: const InputDecoration(
-                            labelText: "الوصف",
-                            hintText: "مثلاً: شقة منزلية",
-                          ),
-                        ),
-                        SizedBox(height: 20),
-
-                        /// زر اختيار الموقع
-                        OutlinedButton.icon(
-                          onPressed: () async {
-                            final result =
-                                await Navigator.push<MapPickerResult>(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder:
-                                        (_) => MapPickerWidget(
-                                          initialLocation: selectedLocation,
-                                          initialRadius: selectedRadius,
-                                        ),
-                                  ),
-                                );
-
-                            if (result != null) {
-                              setDialogState(() {
-                                selectedLocation = result.location;
-                                selectedRadius = result.radius;
-                              });
-                            }
-                          },
-                          icon: Icon(
-                            Icons.map,
-                            color:
-                                selectedLocation != null
-                                    ? Colors.green
-                                    : theme.primaryColor,
-                          ),
-                          label: Text(
-                            selectedLocation != null
-                                ? "تم تحديد الموقع"
-                                : "تحديد الموقع على الخريطة",
-                            style: TextStyle(
-                              color:
-                                  selectedLocation != null
-                                      ? Colors.green
-                                      : theme.primaryColor,
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              scrollable: true,
+              backgroundColor: theme.cardColor,
+              insetPadding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 24.h),
+              title: Text(
+                "إضافة ورشة جديدة",
+                style: TextStyle(color: theme.textTheme.titleLarge?.color),
+              ),
+              content: Form(
+                key: formKey,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextFormField(
+                      controller: nameController,
+                      style: TextStyle(color: theme.textTheme.bodyLarge?.color),
+                      validator: (text) => (text == null || text.trim().length < 2) ? 'الاسم غير صالح' : null,
+                      decoration: const InputDecoration(
+                        labelText: "اسم الورشة",
+                        hintText: "مثلاً: ورشة النجارة",
+                      ),
+                    ),
+                    SizedBox(height: 15.h),
+                    TextFormField(
+                      controller: cityController,
+                      style: TextStyle(color: theme.textTheme.bodyLarge?.color),
+                      validator: (text) => (text == null || text.trim().length < 2) ? 'الاسم غير صالح' : null,
+                      decoration: const InputDecoration(
+                        labelText: "اسم المدينة",
+                        hintText: "مثلاً: مدينة حلب",
+                      ),
+                    ),
+                    SizedBox(height: 15.h),
+                    TextFormField(
+                      controller: descriptionController,
+                      style: TextStyle(color: theme.textTheme.bodyLarge?.color),
+                      validator: (text) => (text == null || text.trim().length < 2) ? 'الاسم غير صالح' : null,
+                      decoration: const InputDecoration(
+                        labelText: "الوصف",
+                        hintText: "مثلاً: شقة منزلية",
+                      ),
+                    ),
+                    SizedBox(height: 20.h),
+                    OutlinedButton.icon(
+                      onPressed: () async {
+                        final result = await Navigator.push<MapPickerResult>(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => MapPickerWidget(
+                              initialLocation: selectedLocation,
+                              initialRadius: selectedRadius,
                             ),
                           ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.pop(context),
-                    child: const Text("إلغاء"),
-                  ),
-                  ElevatedButton(
-                    onPressed: () {
-                      if (!(formKey.currentState?.validate() ?? false)) return;
-
-                      if (selectedLocation == null) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text("يرجى تحديد موقع الورشة"),
-                          ),
                         );
-                        return;
-                      }
-
-                      workshopsBloc.add(
-                        AddWorkshopEvent(
-                          params: AddWorkshopParams(
-                            name: nameController.text.trim(),
-                            latitude: selectedLocation!.latitude,
-                            longitude: selectedLocation!.longitude,
-                            radius: selectedRadius,
-                            city: cityController.text,
-                            description: descriptionController.text,
-                          ),
+                        if (result != null) {
+                          setDialogState(() {
+                            selectedLocation = result.location;
+                            selectedRadius = result.radius;
+                          });
+                        }
+                      },
+                      icon: Icon(
+                        Icons.map,
+                        color: selectedLocation != null ? Colors.green : theme.primaryColor,
+                      ),
+                      label: Text(
+                        selectedLocation != null ? "تم تحديد الموقع" : "تحديد الموقع على الخريطة",
+                        style: TextStyle(
+                          color: selectedLocation != null ? Colors.green : theme.primaryColor,
                         ),
-                      );
-
-                      Navigator.pop(context);
-                    },
-                    child: const Text("إضافة"),
-                  ),
-                ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text("إلغاء"),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    if (!(formKey.currentState?.validate() ?? false)) return;
+                    if (selectedLocation == null) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text("يرجى تحديد موقع الورشة")),
+                      );
+                      return;
+                    }
+                    workshopsBloc.add(
+                      AddWorkshopEvent(
+                        params: AddWorkshopParams(
+                          name: nameController.text.trim(),
+                          latitude: selectedLocation!.latitude,
+                          longitude: selectedLocation!.longitude,
+                          radius: selectedRadius,
+                          city: cityController.text,
+                          description: descriptionController.text,
+                        ),
+                      ),
+                    );
+                    Navigator.pop(context);
+                  },
+                  child: const Text("إضافة"),
+                ),
+              ],
+            );
+          },
         );
       },
     );
@@ -455,48 +381,42 @@ class _WorkshopsPageState extends State<WorkshopsPage> {
     String name,
     bool isArchived,
     ThemeData theme,
-  )
-  {
+  ) {
     final workshopsBloc = context.read<WorkshopsBloc>();
     showDialog(
       context: context,
-      builder:
-          (context) => AlertDialog(
-            backgroundColor: theme.cardColor,
-            title: Text(
-              isArchived ? "إلغاء الأرشفة" : "تأكيد الأرشفة",
-              style: TextStyle(color: theme.textTheme.titleLarge?.color),
-            ),
-            content: Text(
-              "هل أنت متأكد من ${isArchived ? 'إلغاء أرشفة' : 'أرشفة'} ورشة $name؟",
-              style: TextStyle(color: theme.textTheme.bodyMedium?.color),
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text("إلغاء"),
-              ),
-              TextButton(
-                onPressed: () {
-                  isArchived
-                      ? workshopsBloc.add(
-                        RestoreArchiveWorkshopEvent(id: workshopId),
-                      )
-                      : workshopsBloc.add(
-                        ToggleArchiveWorkshopEvent(id: workshopId),
-                      );
-                  Navigator.pop(context);
-                },
-                child: Text(
-                  isArchived ? "إعادة تنشيط" : "أرشفة",
-                  style: TextStyle(
-                    color: isArchived ? Colors.green : Colors.orange,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ],
+      builder: (context) => AlertDialog(
+        backgroundColor: theme.cardColor,
+        title: Text(
+          isArchived ? "إلغاء الأرشفة" : "تأكيد الأرشفة",
+          style: TextStyle(color: theme.textTheme.titleLarge?.color),
+        ),
+        content: Text(
+          "هل أنت متأكد من ${isArchived ? 'إلغاء أرشفة' : 'أرشفة'} ورشة $name؟",
+          style: TextStyle(color: theme.textTheme.bodyMedium?.color),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("إلغاء"),
           ),
+          TextButton(
+            onPressed: () {
+              isArchived
+                  ? workshopsBloc.add(RestoreArchiveWorkshopEvent(id: workshopId))
+                  : workshopsBloc.add(ToggleArchiveWorkshopEvent(id: workshopId));
+              Navigator.pop(context);
+            },
+            child: Text(
+              isArchived ? "إعادة تنشيط" : "أرشفة",
+              style: TextStyle(
+                color: isArchived ? Colors.green : Colors.orange,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

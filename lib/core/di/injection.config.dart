@@ -407,6 +407,10 @@ _i174.GetIt $initGetIt(
       () => _i351.CheckOutUseCase(gh<_i697.NotificationRepository>()));
   gh.factory<_i585.GetNotificationsUseCase>(
       () => _i585.GetNotificationsUseCase(gh<_i697.NotificationRepository>()));
+  gh.factory<_i585.DeleteNotificationUseCase>(() =>
+      _i585.DeleteNotificationUseCase(gh<_i697.NotificationRepository>()));
+  gh.factory<_i585.DeleteAllNotificationsUseCase>(() =>
+      _i585.DeleteAllNotificationsUseCase(gh<_i697.NotificationRepository>()));
   gh.factory<_i17.SendNotificationUseCase>(
       () => _i17.SendNotificationUseCase(gh<_i697.NotificationRepository>()));
   gh.lazySingleton<_i200.WorkshopRepository>(() => _i429.WorkshopRepositoryImpl(
@@ -487,13 +491,24 @@ _i174.GetIt $initGetIt(
         gh<_i19.RestoreWorkshopUseCase>(),
         gh<_i578.GetAllArchivedWorkshopUseCase>(),
       ));
-  gh.factory<_i424.LoginCubit>(
-      () => _i424.LoginCubit(repository: gh<_i675.AuthRepository>()));
   gh.factory<_i23.NotificationBloc>(() => _i23.NotificationBloc(
         gh<_i585.GetNotificationsUseCase>(),
+        gh<_i585.DeleteNotificationUseCase>(),
+        gh<_i585.DeleteAllNotificationsUseCase>(),
         gh<_i17.SendNotificationUseCase>(),
         gh<_i516.CheckInUseCase>(),
         gh<_i351.CheckOutUseCase>(),
+      ));
+  gh.factory<_i424.LoginCubit>(
+      () => _i424.LoginCubit(repository: gh<_i675.AuthRepository>()));
+  gh.factory<_i408.LoanBloc>(() => _i408.LoanBloc(
+        gh<_i150.GetAllLoansUseCase>(),
+        gh<_i363.GetEmployeeLoansUseCase>(),
+        gh<_i28.AddLoanUseCase>(),
+        gh<_i941.ApproveLoanUseCase>(),
+        gh<_i579.RejectLoanUseCase>(),
+        gh<_i560.PayLoanUseCase>(),
+        gh<_i23.NotificationBloc>(),
       ));
   gh.lazySingleton<_i5.GetAllPaymentsUescese>(
       () => _i5.GetAllPaymentsUescese(gh<_i88.PaymenysRepository>()));
@@ -522,15 +537,6 @@ _i174.GetIt $initGetIt(
       ));
   gh.factory<_i84.UnpaidWeeksBloc>(
       () => _i84.UnpaidWeeksBloc(gh<_i133.GetUnpaidWeeksUseCase>()));
-  gh.factory<_i408.LoanBloc>(() => _i408.LoanBloc(
-        gh<_i150.GetAllLoansUseCase>(),
-        gh<_i363.GetEmployeeLoansUseCase>(),
-        gh<_i28.AddLoanUseCase>(),
-        gh<_i941.ApproveLoanUseCase>(),
-        gh<_i579.RejectLoanUseCase>(),
-        gh<_i560.PayLoanUseCase>(),
-        gh<_i23.NotificationBloc>(),
-      ));
   gh.factory<_i705.AllPaymentsBloc>(
       () => _i705.AllPaymentsBloc(gh<_i5.GetAllPaymentsUescese>()));
   return getIt;

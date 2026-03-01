@@ -21,7 +21,7 @@ class _NotificationsPageState extends State<NotificationsPage> {
   void initState() {
     super.initState();
     context.read<NotificationBloc>().add(LoadNotifications());
-    // context.read<NotificationBloc>().add(SyncNotificationsEvent());
+
   }
 
   void _showDeleteAllDialog(BuildContext context) {
@@ -97,9 +97,9 @@ class _NotificationsPageState extends State<NotificationsPage> {
 
               return RefreshIndicator(
                 onRefresh: () async {
-                  // context.read<NotificationBloc>().add(
-                  //   SyncNotificationsEvent(),
-                  // );
+                  context.read<NotificationBloc>().add(
+                    LoadNotifications(),
+                  );
                 },
                 child: ListView.builder(
                   padding: EdgeInsets.symmetric(
@@ -129,14 +129,14 @@ class _NotificationsPageState extends State<NotificationsPage> {
                             ),
                             onDismissed: (direction) {
                               context.read<NotificationBloc>().add(
-                                DeleteNotificationEvent(notification.id),
+                                DeleteNotificationEvent(notification.id.toString()),
                               );
                             },
                             child: NotificationItem(
                               notification: notification,
                               onTap: () {
                                 context.read<NotificationBloc>().add(
-                                  MarkNotificationAsRead(notification.id),
+                                  MarkNotificationAsRead(notification.id.toString()),
                                 );
                               },
                             ),
@@ -168,10 +168,9 @@ class _NotificationsPageState extends State<NotificationsPage> {
                   ),
                   TextButton(
                     onPressed:
-                        // () => context.read<NotificationBloc>().add(
-                        //   SyncNotificationsEvent(),
-                    (){},
-
+                        () => context.read<NotificationBloc>().add(
+                          LoadNotifications(),
+                        ),
                     child: Text(
                       "إعادة المحاولة",
                       style: TextStyle(fontSize: 13.sp),

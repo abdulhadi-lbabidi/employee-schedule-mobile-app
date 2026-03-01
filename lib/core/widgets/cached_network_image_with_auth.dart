@@ -1,38 +1,60 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:untitled8/core/di/injection.dart';
+import 'package:untitled8/common/helper/src/app_varibles.dart';
 
 class CachedNetworkImageWithAuth extends StatelessWidget {
   final String imageUrl;
+  final double? width;
+  final double? height;
+  final BorderRadius? borderRadius;
+  final BoxFit fit;
 
-  const CachedNetworkImageWithAuth({Key? key, required this.imageUrl}) : super(key: key);
+  const CachedNetworkImageWithAuth({
+    Key? key,
+    required this.imageUrl,
+    this.width,
+    this.height,
+    this.borderRadius,
+    this.fit = BoxFit.cover,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<String?>(
-      future: _getToken(),
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return const CircularProgressIndicator();
-        }
+    final token = AppVariables.token;
+    final headers = <String, String>{};
+    if (token != null) {
+      headers['Authorization'] = 'Bearer $token';
+    }
 
-        final token = snapshot.data;
-        final headers = <String, String>{};
-        if (token != null) {
-          headers['Authorization'] = 'Bearer $token';
-        }
-
-        return Image(
-          image: NetworkImage(imageUrl, headers: headers),
-          fit: BoxFit.cover,
-          errorBuilder: (_, __, ___) => const Icon(Icons.error),
-        );
-      },
+    return ClipRRect(
+      borderRadius: borderRadius ?? BorderRadius.zero,
+      child: Image.network(
+        imageUrl,
+        headers: headers,
+        width: width,
+        height: height,
+        fit: fit,
+        loadingBuilder: (context, child, loadingProgress) {
+          if (loadingProgress == null) return child;
+          return Container(
+            width: width,
+            height: height,
+            color: Colors.grey.withOpacity(0.1),
+            child: const Center(
+              child: SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              ),
+            ),
+          );
+        },
+        errorBuilder: (context, error, stackTrace) => Container(
+          width: width,
+          height: height,
+          color: Colors.grey.withOpacity(0.1),
+          child: const Icon(Icons.person_rounded, color: Colors.grey),
+        ),
+      ),
     );
-  }
-
-  Future<String?> _getToken() async {
-    final storage = sl<FlutterSecureStorage>();
-    return await storage.read(key: 'auth_token');
   }
 }

@@ -80,7 +80,7 @@ class _EmployeesWidgetState extends State<EmployeesWidget> {
                         borderRadius: BorderRadius.circular(22.r),
                         child: Image.network(
                           widget.emp.user!.profileImageUrl!,
-                          fit: BoxFit.cover,
+                          fit: BoxFit.fill,
                           errorBuilder:
                               (_, __, ___) => Icon(
                                 Icons.person,

@@ -97,15 +97,20 @@ class _HomePageState extends State<MainPage> {
               child: CircleAvatar(
                 radius: 14.r,
                 backgroundColor: Colors.white.withOpacity(0.05),
-                // backgroundImage: NetworkImage(imageUrl),
-                child:
-                AppVariables.user!.profileImageUrl == null
-                    ? Icon(
-                  Icons.person_rounded,
-                  color: Colors.blueAccent,
-                  size: 22.sp,
-                )
-                    : CachedNetworkImageWithAuth(imageUrl: AppVariables.user!.profileImageUrl),
+                child: ClipOval( // 🔹 تأطير الصورة لتكون دائرية تماماً
+                  child: AppVariables.user!.profileImageUrl == null
+                      ? Icon(
+                    Icons.person_rounded,
+                    color: Colors.blueAccent,
+                    size: 22.sp,
+                  )
+                      : CachedNetworkImageWithAuth(
+                          imageUrl: AppVariables.user!.profileImageUrl,
+                          width: 28.r, // 🔹 مطابقة حجم الـ CircleAvatar
+                          height: 28.r,
+                          fit: BoxFit.cover,
+                        ),
+                ),
               ),
             ),
           ).animate().fadeIn(duration: 500.ms).scale(delay: 100.ms),

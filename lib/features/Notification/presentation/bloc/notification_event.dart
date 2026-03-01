@@ -47,3 +47,10 @@ class CheckOutEvent extends NotificationEvent{
   CheckOutEvent({required this.params});
 
 }
+class NotificationError extends NotificationEvent{
+   final String message;
+
+  NotificationError(this.message);
+
+}
+
