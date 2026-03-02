@@ -255,21 +255,21 @@ class _EditEmployeePageState extends State<EditEmployeePage> {
         onPressed: () {
           context.read<EmployeeDetailsBloc>().add(
             UpdateEmployeeFullEvent(
-              name: nameController.text.trim(),
-              phoneNumber: phoneController.text.trim(),
-              email: emailController.text.trim(),
+              name: nameController.text.toString(),
+              phoneNumber: phoneController.text.toString(),
+              email: emailController.text.toString(),
               password:
               passwordController.text.isEmpty
                   ? null
                   : passwordController.text,
-              position: positionController.text.trim(),
-              department: departmentController.text.trim(),
+              position: positionController.text.toString(),
+              department: departmentController.text.toString(),
               hourlyRate:
               double.tryParse(hourlyRateController.text) ?? 0,
               overtimeRate:
               double.tryParse(overtimeRateController.text) ?? 0,
               currentLocation:
-              currentLocationController.text.trim(),
+              currentLocationController.text.toString(),
             ),
           );
 

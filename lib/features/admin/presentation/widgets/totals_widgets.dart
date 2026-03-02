@@ -55,8 +55,19 @@ class _TotalsWidgetState extends State<TotalsWidget> {
             ),
           ),
           SizedBox(height: 8.h),
-          ...widget.totals.workshopsSummary!
-              .map((ws) => _buildWorkshopSummaryCard(ws)),
+          SizedBox(
+            height: 275.h, // ارتفاع الكرت
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              physics: const BouncingScrollPhysics(),
+              itemCount: widget.totals.workshopsSummary!.length,
+              separatorBuilder: (_, __) => SizedBox(width: 12.w),
+              itemBuilder: (context, index) {
+                final ws = widget.totals.workshopsSummary![index];
+                return _buildWorkshopSummaryCard(ws);
+              },
+            ),
+          ),
         ],
       ],
     );
@@ -137,6 +148,7 @@ class _TotalsWidgetState extends State<TotalsWidget> {
 
   Widget _buildWorkshopSummaryCard(WorkshopSummary ws) {
     return Container(
+      width: 280.w,
       margin: EdgeInsets.only(bottom: 12.h),
       padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
@@ -147,31 +159,43 @@ class _TotalsWidgetState extends State<TotalsWidget> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          /// اسم الورشة والموقع
+          /// اسم الورشة
           Row(
             children: [
-              Icon(Icons.store_rounded, size: 18.sp, color: widget.theme.primaryColor),
+              Icon(Icons.store_rounded,
+                  size: 18.sp, color: widget.theme.primaryColor),
               SizedBox(width: 6.w),
-              Text(
-                ws.workshop?.name ?? '',
-                style: TextStyle(
-                  fontSize: 14.sp,
-                  fontWeight: FontWeight.bold,
-                  color: widget.theme.primaryColor,
+              Expanded(
+                child: Text(
+                  ws.workshop?.name ?? '',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.bold,
+                    color: widget.theme.primaryColor,
+                  ),
                 ),
               ),
             ],
           ),
+
           if (ws.workshop?.location != null) ...[
             SizedBox(height: 4.h),
             Row(
               children: [
-                Icon(Icons.location_on_outlined, size: 14.sp, color: Colors.grey),
+                Icon(Icons.location_on_outlined,
+                    size: 14.sp, color: Colors.grey),
                 SizedBox(width: 4.w),
                 Expanded(
                   child: Text(
                     ws.workshop!.location!,
-                    style: TextStyle(fontSize: 11.sp, color: Colors.grey.shade600),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 11.sp,
+                      color: Colors.grey.shade600,
+                    ),
                   ),
                 ),
               ],
@@ -179,27 +203,28 @@ class _TotalsWidgetState extends State<TotalsWidget> {
           ],
 
           SizedBox(height: 12.h),
-          Container(height: 1.h, color: widget.theme.dividerColor.withOpacity(0.2)),
-          SizedBox(height: 12.h),
+          Divider(),
 
           /// الساعات
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               _statCol(
-                "ساعات أساسية",
-                '${ws.totalRegularHours?.toStringAsFixed(0) ?? 0} ساعة',
+                "أساسية",
+                '${ws.totalRegularHours?.toStringAsFixed(0) ?? 0}',
                 widget.theme,
               ),
               _divider(),
               _statCol(
-                "ساعات إضافية",
-                '${ws.totalOvertimeHours?.toStringAsFixed(0) ?? 0} ساعة',
+                "إضافية",
+                '${ws.totalOvertimeHours?.toStringAsFixed(0) ?? 0}',
                 widget.theme,
               ),
             ],
           ),
-          SizedBox(height: 10.h),
+
+          SizedBox(height: 8.h),
+          Divider(),
 
           /// الأجور
           Row(
@@ -218,21 +243,15 @@ class _TotalsWidgetState extends State<TotalsWidget> {
               ),
             ],
           ),
-          SizedBox(height: 10.h),
-          Container(height: 1.h, color: widget.theme.dividerColor.withOpacity(0.2)),
-          SizedBox(height: 10.h),
 
-          /// الإجمالي
-          Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              _statCol(
-                "إجمالي الورشة",
-                '${ws.totalPay?.toStringAsFixed(1) ?? 0} \$',
-                widget.theme,
-                color: widget.theme.primaryColor,
-              ),
-            ],
+          SizedBox(height: 8.h),
+          Divider(),
+
+          _statCol(
+            "إجمالي",
+            '${ws.totalPay?.toStringAsFixed(1) ?? 0} \$',
+            widget.theme,
+            color: widget.theme.primaryColor,
           ),
         ],
       ),

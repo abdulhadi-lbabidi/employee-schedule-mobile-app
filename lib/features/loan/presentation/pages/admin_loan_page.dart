@@ -205,16 +205,16 @@ class _AdminLoanPageState extends State<AdminLoanPage> {
     );
   }
 
-  /// SUMMARY CARD
+  /// SUMMARY CARD (MOUFIED)
   Widget _buildSummaryCard(
       BuildContext context,
       ThemeData theme,
       List<Loane> accepted,
       ) {
-    final total = accepted.fold<double>(
-      0,
-          (sum, l) => sum + (l.amount ?? 0),
-    );
+    // حساب المبالغ
+    final double grossTotal = accepted.fold<double>(0, (sum, l) => sum + (l.amount ?? 0));
+    final double totalPaid = accepted.fold<double>(0, (sum, l) => sum + (l.paidAmount ?? 0));
+    final double remaining = grossTotal - totalPaid;
 
     return GestureDetector(
       onTap: () => Navigator.push(
@@ -225,52 +225,87 @@ class _AdminLoanPageState extends State<AdminLoanPage> {
       ),
       child: Container(
         width: double.infinity,
-        padding: EdgeInsets.all(24.w),
+        padding: EdgeInsets.all(22.w),
         decoration: BoxDecoration(
           gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
             colors: [
               theme.primaryColor,
-              theme.primaryColor.withOpacity(0.85),
+              theme.primaryColor.withOpacity(0.8),
             ],
           ),
-          borderRadius: BorderRadius.circular(26.r),
+          borderRadius: BorderRadius.circular(28.r),
           boxShadow: [
             BoxShadow(
-              color: theme.primaryColor.withOpacity(0.35),
-              blurRadius: 18,
-              offset: const Offset(0, 8),
+              color: theme.primaryColor.withOpacity(0.3),
+              blurRadius: 20,
+              offset: const Offset(0, 10),
             ),
           ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              "إجمالي السلف المقبولة",
-              style: TextStyle(
-                color: Colors.white70,
-                fontWeight: FontWeight.w600,
-              ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  "إجمالي السلف المعتمدة",
+                  style: TextStyle(color: Colors.white70, fontWeight: FontWeight.bold),
+                ),
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(10.r),
+                  ),
+                  child: Text(
+                    "${accepted.length} سلفة",
+                    style: TextStyle(color: Colors.white, fontSize: 10.sp, fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ],
             ),
             SizedBox(height: 12.h),
             Text(
-              "${NumberFormat.decimalPattern().format(total)} \$",
+              "${NumberFormat.decimalPattern().format(grossTotal)} \$",
               style: TextStyle(
                 color: Colors.white,
-                fontSize: 28.sp,
+                fontSize: 26.sp,
                 fontWeight: FontWeight.w900,
               ),
             ),
-            SizedBox(height: 14.h),
-            Divider(color: Colors.white24),
-            SizedBox(height: 8.h),
-            Text(
-              "عرض الكل (${accepted.length})",
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 12.sp,
-                fontWeight: FontWeight.bold,
-              ),
+            SizedBox(height: 20.h),
+            Divider(color: Colors.white.withOpacity(0.2), height: 1),
+            SizedBox(height: 15.h),
+            Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text("المبلغ المسدد", style: TextStyle(color: Colors.white60, fontSize: 11, fontWeight: FontWeight.bold)),
+                      SizedBox(height: 4.h),
+                      Text("${NumberFormat.decimalPattern().format(totalPaid)} \$", 
+                        style: const TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w900)),
+                    ],
+                  ),
+                ),
+                Container(width: 1, height: 30.h, color: Colors.white.withOpacity(0.2)),
+                SizedBox(width: 20.w),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text("المبلغ المتبقي", style: TextStyle(color: Colors.white60, fontSize: 11, fontWeight: FontWeight.bold)),
+                      SizedBox(height: 4.h),
+                      Text("${NumberFormat.decimalPattern().format(remaining)} \$", 
+                        style: const TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w900)),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ],
         ),

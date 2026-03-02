@@ -94,7 +94,7 @@ class AdminDashboardPage extends StatelessWidget {
                       ),
 
                       _buildFinancialRow(
-                        label: "القروض",
+                        label: "السلف",
                         amount: "${data.loansStats?.totalAmount ?? 0} \$",
                         count: "${data.loansStats?.count ?? 0}",
                         icon: Icons.account_balance_wallet_rounded,
@@ -199,7 +199,7 @@ class AdminDashboardPage extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          "إحصائيات شهر $month",
+          "إحصائيات",
           style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold, color: theme.primaryColor),
         ),
         Container(

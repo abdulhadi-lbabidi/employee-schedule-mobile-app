@@ -74,25 +74,16 @@ class _EmployeesWidgetState extends State<EmployeesWidget> {
             leading: CircleAvatar(
               radius: 22.r,
               backgroundColor: widget.theme.primaryColor.withOpacity(0.1),
-              child:
-                  widget.emp.user?.profileImageUrl != null
-                      ? ClipRRect(
-                        borderRadius: BorderRadius.circular(22.r),
-                        child: Image.network(
-                          widget.emp.user!.profileImageUrl!,
-                          fit: BoxFit.fill,
-                          errorBuilder:
-                              (_, __, ___) => Icon(
-                                Icons.person,
-                                color: widget.theme.primaryColor,
-                              ),
-                        ),
-                      )
-                      : Icon(
-                        Icons.person,
-                        color: widget.theme.primaryColor,
-                        size: 24.sp,
-                      ),
+              backgroundImage: widget.emp.user?.profileImageUrl != null
+                  ? NetworkImage(widget.emp.user!.profileImageUrl!)
+                  : null,
+              child: widget.emp.user?.profileImageUrl == null
+                  ? Icon(
+                Icons.person,
+                color: widget.theme.primaryColor,
+                size: 24.sp,
+              )
+                  : null,
             ),
 
             title: Text(

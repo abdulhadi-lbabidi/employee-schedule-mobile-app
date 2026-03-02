@@ -384,14 +384,34 @@ class _WorkshopDetailsPageState extends State<WorkshopDetailsPage> {
                     ),
               ),
             ),
+        // CircleAvatar(
+        //   radius: 42.r,
+        //   backgroundColor: theme.primaryColor.withOpacity(0.1),
+        //   backgroundImage: employee.user?.profileImageUrl != null
+        //       ? NetworkImage(employee.user!.profileImageUrl!)
+        //       : null,
+        //   child: employee.user?.profileImageUrl == null
+        //       ? Icon(
+        //     Icons.person,
+        //     color: theme.primaryColor,
+        //     size: 32.sp,
+        //   )
+        //       : null,
+        // ),
         leading: CircleAvatar(
-          backgroundColor: theme.disabledColor.withOpacity(0.1),
-          child:
-              emp.employee?.user?.profileImageUrl == null
-                  ? Icon(Icons.person_rounded, color: theme.disabledColor)
-                  : CachedNetworkImageWithAuth(
-                    imageUrl: emp.employee!.user!.profileImageUrl!,
-                  ),
+          radius: 20.r,
+          backgroundColor: theme.primaryColor.withOpacity(0.1),
+            backgroundImage:  emp.employee?.user?.profileImageUrl != null
+                ? NetworkImage( emp.employee?.user!.profileImageUrl!)
+                : null,
+          // child:
+          //     emp.employee?.user?.profileImageUrl == null
+          //         ? Icon(Icons.person_rounded, color: theme.disabledColor)
+          //         : CachedNetworkImageWithAuth(
+          //           imageUrl: emp.employee!.user!.profileImageUrl!,
+          //       borderRadius: BorderRadius.all(Radius.circular(50)),
+          //       fit: BoxFit.fill,
+          //         ),
         ),
         title: Text(
           emp.employee?.user?.fullName ?? '',

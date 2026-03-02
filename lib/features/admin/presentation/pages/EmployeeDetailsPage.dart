@@ -272,9 +272,18 @@ class _EmployeeHeader extends StatelessWidget {
     return Column(
       children: [
         CircleAvatar(
-          radius: 55.r,
+          radius: 42.r,
           backgroundColor: theme.primaryColor.withOpacity(0.1),
-          child: Icon(Icons.person, size: 60.sp, color: theme.primaryColor),
+          backgroundImage: employee.user?.profileImageUrl != null
+              ? NetworkImage(employee.user!.profileImageUrl!)
+              : null,
+          child: employee.user?.profileImageUrl == null
+              ? Icon(
+            Icons.person,
+            color: theme.primaryColor,
+            size: 32.sp,
+          )
+              : null,
         ),
         SizedBox(height: 16.h),
         Text(

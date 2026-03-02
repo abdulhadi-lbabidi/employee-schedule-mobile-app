@@ -170,7 +170,6 @@ class EmployeeDetailsBloc
         password: event.password,
         position: event.position,
         department: event.department,
-
         hourlyRate: event.hourlyRate,
         overtimeRate: event.overtimeRate,
         currentLocation: event.currentLocation,
