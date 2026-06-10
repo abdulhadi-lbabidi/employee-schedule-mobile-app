@@ -24,7 +24,7 @@ class AppStrings {
   static const String signUp = 'إنشاء حساب';
 
   // Admin Dashboard
-  static const String dashboardTitle = 'Dashboard';
+  static const String dashboardTitle = 'لوحة التحكم';
   static const String onlineEmployees = 'الموظفون المتصلون';
   static const String offlineEmployees = 'الموظفون غير المتصلون';
 

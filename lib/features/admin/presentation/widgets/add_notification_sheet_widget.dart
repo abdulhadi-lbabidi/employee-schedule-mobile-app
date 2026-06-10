@@ -150,6 +150,7 @@ class _AddNotificationSheetWidgetState
                     items: const [
                       "موظف معين",
                       "موظفين ضمن نفس الورشة"
+                      "كل الموظفين"
                     ],
                     onChanged: (val) {
                       selected.value = val;
